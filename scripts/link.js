@@ -22,7 +22,8 @@ class Link extends Graph {
   }
 
   redraw() {
-    this.update(this.startAnchor.locate(), this.endAnchor.locate());
+    this.update(this.startAnchor.locate(), this.endAnchor.locate(),
+        this.startAnchor.side, this.endAnchor.side);
   }
 };
 
