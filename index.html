@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>PinBoard</title>
+
+    <link rel="stylesheet" href="styles/variables.css">
+    <link rel="stylesheet" href="styles/styles.css">
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script type="text/javascript" src="scripts/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="scripts/renderer.js"></script>
+    <script type="text/javascript" src="scripts/utils.js"></script>
+
+    <script>if (window.module) module = window.module;</script>
+  </head>
+  <body>
+    <svg class="layer graphs">
+      <!-- <path d="M 100 350 q 150 -300 300 0" class="graph" /> -->
+      <path class="graph" id="template-graph" d="M 0 0 L 100 100" style="display: none" />
+    </svg>
+    <div class="layer nodes">
+      <div class="node" id="template-node" style="display: none">
+        <div class="head">
+          <input type="text" class="label" placeholder="Title..." readonly>
+        </div>
+        <div class="body">
+          <textarea class="details" placeholder="Details..." readonly></textarea>
+        </div>
+        <div class="anchor top"></div>
+        <div class="anchor right"></div>
+        <div class="anchor bottom"></div>
+        <div class="anchor left"></div>
+      </div>
+    </div>
+  </body>
+</html>

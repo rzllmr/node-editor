@@ -1,0 +1,24 @@
+{
+  "name": "pin-board",
+  "version": "0.1.0",
+  "description": "Plan with nodes and links",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "rzllmr",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^4.0.5",
+    "electron-builder": "^20.38.5",
+    "eslint": "^5.14.1",
+    "eslint-config-google": "^0.12.0"
+  },
+  "build": {
+    "win": {
+      "target": "portable"
+    }
+  }
+}

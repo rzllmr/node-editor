@@ -1,0 +1,15 @@
+
+:root {
+    --font-sans: Tahoma, Geneva, sans-serif;
+    --font-serif: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    --font-monospaced: "Lucida Console", Monaco, monospace;
+
+    --color-text: #b9bcba;
+    --color-text-faded: #757d7c;
+    --color-text-highlight: #d38223;
+
+    --color-background: #1e1e1d;
+
+    --color-node: #0e0e14;
+    --color-node-highlight: #d38223;
+}
