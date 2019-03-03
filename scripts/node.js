@@ -72,19 +72,27 @@ class Node extends Proxy {
       }
     });
 
-    this.element.find('input,textarea').on({
-      click: (event) => {
-        console.log('clicked', event.currentTarget);
+    this.makeEditableOnDblClick(this.element.find('.label'), 'readonly', false);
+    this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true);
+  }
+
+  makeEditableOnDblClick(element, property, editable) {
+    element.on({
+      mousedown: (event) => {
+        let propertyValue = $(event.target).prop(property);
+        if (typeof propertyValue == 'string') propertyValue = propertyValue === 'true';
+        if (propertyValue === editable) {
+          event.stopPropagation();
+        } else {
+          event.preventDefault();
+        }
       },
       dblclick: (event) => {
-        console.log('dblclicked', event.currentTarget);
-        $(event.target).attr('readonly', false);
-        $(event.target).trigger('blur', ['custom']);
+        $(event.target).prop(property, editable);
         $(event.target).focus();
       },
       blur: (event, param) => {
-        console.log('blur', param);
-        $(event.target).attr('readonly', true);
+        $(event.target).prop(property, !editable);
       }
     });
   }

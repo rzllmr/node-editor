@@ -43,24 +43,44 @@ body {
   border-radius: 0 0 10px 10px;
 }
 
-.node input, .node textarea {
+.node .label, .node .details {
   font: inherit;
   color: inherit;
+  height: 100%;
   width: 100%;
   background: none;
-  border: none;
+}
+.node .label[readonly], .node .details[contentEditable=false] {
   cursor: default;
   user-select: none;
 }
 
 .node .label {
   font-weight: bold;
+  border: none;
+}
+.node .label::placeholder {
+  color: var(--color-text-faded);
+  opacity: 1;
 }
 
 .node .details {
-  height: calc(100% - 4px);
-  width: calc(100% - 4px);
-  resize: none;
+  overflow-y: auto;
+}
+.node .details:empty:before{
+  content: attr(data-text);
+  color: var(--color-text-faded);
+}
+
+.node .details::-webkit-scrollbar {
+  width: 5px;
+}
+.node .details::-webkit-scrollbar-track {
+  background: none;
+}
+.node .details::-webkit-scrollbar-thumb {
+  background: var(--color-node-faded);
+  border-radius: 10px;
 }
 
 .node .anchor {
