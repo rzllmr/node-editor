@@ -6,7 +6,7 @@ const Graph = require('./graph.js');
  */
 class Link extends Graph {
   constructor(startAnchor, endAnchor) {
-    const id = `#${startAnchor.identifier}-${endAnchor.identifier}`;
+    const id = `#${startAnchor.id}-${endAnchor.id}`;
     super(id);
 
     this.startAnchor = startAnchor;

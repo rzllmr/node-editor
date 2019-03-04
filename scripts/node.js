@@ -26,10 +26,10 @@ class Node extends Proxy {
     this.cursorPosRel = {x: 0, y: 0};
 
     this.anchors = {
-      top: new Anchor(`#${id} .anchor.top`),
-      right: new Anchor(`#${id} .anchor.right`),
-      bottom: new Anchor(`#${id} .anchor.bottom`),
-      left: new Anchor(`#${id} .anchor.left`)
+      top: [],
+      right: [],
+      bottom: [],
+      left: []
     };
   }
 
@@ -50,30 +50,65 @@ class Node extends Proxy {
   registerElement() {
     this.element.on({
       mousedown: (event) => {
-        this.cursorPosRel.x = event.offsetX;
-        this.cursorPosRel.y = event.offsetY;
+        if (event.button == 0) { // left click
+          this.cursorPosRel.x = event.pageX - this.element[0].offsetLeft;
+          this.cursorPosRel.y = event.pageY - this.element[0].offsetTop;
 
-        $(window).on({
-          mousemove: (event) => {
-            this.element.offset({
-              left: event.pageX - this.cursorPosRel.x,
-              top: event.pageY - this.cursorPosRel.y
-            });
-            for (const side in this.anchors) {
-              this.anchors[side].links.forEach((link) => {
-                link.redraw();
+          $(window).on({
+            mousemove: (event) => {
+              this.element.offset({
+                left: event.pageX - this.cursorPosRel.x,
+                top: event.pageY - this.cursorPosRel.y
               });
+              for (const side in this.anchors) {
+                for (const i in this.anchors[side]) {
+                  this.anchors[side][i].links.forEach((link) => {
+                    link.redraw();
+                  });
+                }
+              }
+            },
+            mouseup: () => {
+              $(window).off('mousemove mouseup');
             }
-          },
-          mouseup: () => {
-            $(window).off('mousemove mouseup');
-          }
-        });
+          });
+        } else if (event.button == 2) { // right click
+          this.element.one('mouseleave', (event) => {
+            const offset = {
+              x: event.offsetX + event.target.offsetLeft,
+              y: event.offsetY + event.target.offsetTop
+            };
+            this.addAnchor(offset, true);
+          });
+        }
       }
     });
 
     this.makeEditableOnDblClick(this.element.find('.label'), 'readonly', false);
     this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true);
+  }
+
+  addAnchor(offset, drag) {
+    const limit = {
+      x: this.element[0].offsetWidth,
+      y: this.element[0].offsetHeight
+    };
+    const sides = ['left', 'top', 'right', 'bottom'];
+    const distances = [offset.x, offset.y, limit.x - offset.x, limit.y - offset.y];
+    const side = sides[distances.indexOf(Math.min(...distances))];
+
+    if (this.anchors[side].length == 0) {
+      this.anchors[side].push(new Anchor(this, side, drag));
+    }
+
+    return this.anchors[side][this.anchors[side].length - 1];
+  }
+
+  removeAnchor(side, anchor) {
+    const index = this.anchors[side].indexOf(anchor);
+    if (index > -1) {
+      this.anchors[side].splice(index, 1);
+    }
   }
 
   makeEditableOnDblClick(element, property, editable) {
@@ -95,6 +130,19 @@ class Node extends Proxy {
         $(event.target).prop(property, !editable);
       }
     });
+  }
+
+  positionAnchor(anchor, side) {
+    switch (side) {
+      case 'top':
+        anchor[0].style.left = '50%'; break;
+      case 'right':
+        anchor[0].style.top = '50%'; break;
+      case 'bottom':
+        anchor[0].style.left = '50%'; break;
+      case 'left':
+        anchor[0].style.top = '50%'; break;
+    }
   }
 
   select() {

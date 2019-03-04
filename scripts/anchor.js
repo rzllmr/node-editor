@@ -10,16 +10,23 @@ const Link = require('./link.js');
  * .anchor representative to handle links
  */
 class Anchor extends Proxy {
-  constructor(id = null, position = {x: 0, y: 0}) {
+  constructor(node, side, drag = false) {
+    const id = node.id + side.charAt(0) + node.anchors[side].length;
     super(id);
 
-    this.element = $(this.id);
-    this.side = id.split('.').pop();
-    this.links = [];
+    this.node = node;
+    this.side = side;
 
-    this.element.on({
-      mousedown: this.dragNewLink.bind(this)
-    });
+    this.element = $('#template-anchor').clone();
+    this.element.attr('id', this.id);
+    this.element.addClass(side);
+    this.element.appendTo(this.node.element);
+    node.positionAnchor(this.element, side);
+    this.element.show();
+
+    this.links = [];
+    this.graph;
+    if (drag) this.dragNewLink();
   }
 
   destroy() {
@@ -44,9 +51,6 @@ class Anchor extends Proxy {
   // add link and update anchor status
   addLink(link) {
     this.links.push(link);
-    if (this.links.length === 1) {
-      this.show(true);
-    }
   }
 
   // cut link and update anchor status
@@ -54,9 +58,6 @@ class Anchor extends Proxy {
     const index = this.links.indexOf(link);
     if (index > -1) {
       this.links.splice(index, 1);
-    }
-    if (this.links.length === 0) {
-      this.show(false);
     }
   }
 
@@ -96,41 +97,65 @@ class Anchor extends Proxy {
   }
 
   // drag Graph to establish new Link
-  dragNewLink(event) {
+  dragNewLink() {
     // add Graph as link to emulate behaviour of one sided link
-    const token = this.side.charAt(0);
     const anchorPos = this.locate();
-    const graph = new Graph(this.identifier + token + '-', {x: anchorPos.x, y: anchorPos.y});
-    this.addLink(graph);
+    this.graph = new Graph(this.id + '-', {x: anchorPos.x, y: anchorPos.y});
+
+    const otherNodes = `.node:not(#${this.node.id})`;
 
     // drag end point of graph
-    $(window).on('mousemove', {graph: graph}, (event) => {
-      const graph = event.data.graph;
-      graph.update(null, {x: event.pageX, y: event.pageY});
+    $('.layer.nodes').on('mousemove', (event) => {
+      this.graph.update(null, {x: event.pageX, y: event.pageY});
+    });
+
+    $(otherNodes).on({
+      mouseenter: (event) => {
+        $(event.currentTarget).addClass('selected');
+        this.graph.element.hide();
+
+        // create and connect link
+        const offset = {
+          x: event.offsetX + event.target.offsetLeft,
+          y: event.offsetY + event.target.offsetTop
+        };
+        const targetNode = this.resolve(event.currentTarget.id);
+        const endAnchor = targetNode.addAnchor(offset);
+
+        const link = new Link(this, endAnchor);
+        this.addLink(link);
+        endAnchor.addLink(link);
+      },
+      mouseleave: (event) => {
+        $(event.currentTarget).removeClass('selected');
+        this.graph.element.show();
+
+        const tempLink = this.links[this.links.length - 1];
+        const endAnchor = tempLink.endAnchor;
+        endAnchor.removeLink(tempLink);
+        if (endAnchor.links.length == 0) {
+          endAnchor.node.removeAnchor(endAnchor.side, endAnchor);
+          endAnchor.destroy();
+        }
+      }
     });
 
     // check for hit on anchor of another node
-    $(window).on('mouseup', {graph: graph, anchor: this}, (event) => {
-      const graph = event.data.graph;
-      const startAnchor = event.data.anchor;
+    $('.layer.nodes,' + otherNodes).one('mouseup', (event) => {
+      $(event.currentTarget).removeClass('selected');
 
-      const endAnchor = startAnchor.from(event.target);
+      this.graph.destroy();
+      this.graph = undefined;
 
-      // delete graph to replace with link or nothing if no anchor was hit
-      this.cutLink(graph);
-      graph.destroy();
-
-      if (endAnchor !== undefined &&
-          endAnchor.element.parent()[0] !== startAnchor.element.parent()[0]) {
-        // create and connect link
-        const link = new Link(startAnchor, endAnchor);
-        startAnchor.addLink(link);
-        endAnchor.addLink(link);
+      if (this.links.length === 0) {
+        this.node.removeAnchor(this.side, this);
+        this.destroy();
       }
-      $(window).off('mousemove mouseup');
+      $(otherNodes).off('mouseenter mouseleave mouseup');
+      $('.layer.nodes').off('mousemove mouseup');
     });
 
-    event.stopPropagation();
+    // event.stopPropagation();
   }
 };
 

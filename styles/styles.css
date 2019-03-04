@@ -19,12 +19,12 @@ body {
   position: absolute;
   width: 180px;
   height: 120px;
-  border-spacing: 0;
-  display: table;
+  border-radius: 10px;
 }
 
 .node.selected {
   border: 2px solid var(--color-node-highlight);
+  transform: translate(-2px, -2px);
 }
 
 .node .head {
@@ -85,17 +85,17 @@ body {
 
 .node .anchor {
   position: absolute;
-  width: 8px;
-  height: 8px;
   border-radius: 50%;
-  transition: border 0.3s;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--color-text);
 }
 
 .node .anchor:hover {
-  border: 2px dashed var(--color-text);
-}
-.node .anchor.linked {
-  background-color: var(--color-text);
+  color: var(--color-text-highlight);
 }
 
 .node .anchor.top {
