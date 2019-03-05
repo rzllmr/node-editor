@@ -99,6 +99,8 @@ class Node extends Proxy {
 
     if (this.anchors[side].length == 0) {
       this.anchors[side].push(new Anchor(this, side, drag));
+    } else if (drag) {
+      this.anchors[side][this.anchors[side].length - 1].dragNewLink();
     }
 
     return this.anchors[side][this.anchors[side].length - 1];

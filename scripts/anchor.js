@@ -42,30 +42,43 @@ class Anchor extends Proxy {
     super.destroy();
   }
 
-  // highlight .anchor element
-  show(bool) {
-    if (bool) this.element.addClass('linked');
-    else this.element.removeClass('linked');
-  }
-
-  // add link and update anchor status
-  addLink(link) {
+  // create and connect link
+  link(toAnchor) {
+    const link = new Link(this, toAnchor);
     this.links.push(link);
+    toAnchor.links.push(link);
   }
 
-  // cut link and update anchor status
-  cutLink(link) {
+  // cut and delete link
+  cut(link) {
+    link.startAnchor.removeLink(link);
+    link.endAnchor.removeLink(link);
+    link.destroy();
+  }
+
+  removeLink(link) {
     const index = this.links.indexOf(link);
     if (index > -1) {
       this.links.splice(index, 1);
     }
+    if (this.links.length == 0 && this.graph == undefined) {
+      this.node.removeAnchor(this.side, this);
+      this.destroy();
+    }
   }
 
-  // remove link on both ends
-  removeLink(link) {
-    link.startAnchor.cutLink(link);
-    link.endAnchor.cutLink(link);
-    link.destroy();
+  createGraph() {
+    const anchorPos = this.locate();
+    this.graph = new Graph(this.id + '-', {x: anchorPos.x, y: anchorPos.y});
+  }
+
+  removeGraph() {
+    this.graph.destroy();
+    this.graph = undefined;
+    if (this.links.length == 0 && this.graph == undefined) {
+      this.node.removeAnchor(this.side, this);
+      this.destroy();
+    }
   }
 
   // get coordinates for center of .anchor element
@@ -82,25 +95,10 @@ class Anchor extends Proxy {
     return position;
   }
 
-  // short identifier for link id
-  get identifier() {
-    const parts = this.id.split(' ');
-    const identifier = parts[0].slice(1) + parts[1].split('.').pop().charAt(0);
-    return identifier;
-  }
-
-  // get Anchor object for DOM element
-  from(anchor) {
-    const nodeId = anchor.parentNode.id;
-    const anchorClass = anchor.className.replace(' ', '.');
-    return this.resolve(`#${nodeId} .${anchorClass}`);
-  }
-
   // drag Graph to establish new Link
   dragNewLink() {
-    // add Graph as link to emulate behaviour of one sided link
-    const anchorPos = this.locate();
-    this.graph = new Graph(this.id + '-', {x: anchorPos.x, y: anchorPos.y});
+    // graph for feedback of drawing connection
+    this.createGraph();
 
     const otherNodes = `.node:not(#${this.node.id})`;
 
@@ -109,34 +107,29 @@ class Anchor extends Proxy {
       this.graph.update(null, {x: event.pageX, y: event.pageY});
     });
 
+    // create and remove links when
+    // entering and leaving nodes
     $(otherNodes).on({
       mouseenter: (event) => {
         $(event.currentTarget).addClass('selected');
         this.graph.element.hide();
 
-        // create and connect link
+        // create link
         const offset = {
           x: event.offsetX + event.target.offsetLeft,
           y: event.offsetY + event.target.offsetTop
         };
         const targetNode = this.resolve(event.currentTarget.id);
         const endAnchor = targetNode.addAnchor(offset);
-
-        const link = new Link(this, endAnchor);
-        this.addLink(link);
-        endAnchor.addLink(link);
+        this.link(endAnchor);
       },
       mouseleave: (event) => {
         $(event.currentTarget).removeClass('selected');
         this.graph.element.show();
 
+        // remove link
         const tempLink = this.links[this.links.length - 1];
-        const endAnchor = tempLink.endAnchor;
-        endAnchor.removeLink(tempLink);
-        if (endAnchor.links.length == 0) {
-          endAnchor.node.removeAnchor(endAnchor.side, endAnchor);
-          endAnchor.destroy();
-        }
+        this.cut(tempLink);
       }
     });
 
@@ -144,18 +137,12 @@ class Anchor extends Proxy {
     $('.layer.nodes,' + otherNodes).one('mouseup', (event) => {
       $(event.currentTarget).removeClass('selected');
 
-      this.graph.destroy();
-      this.graph = undefined;
+      this.removeGraph();
+      // will cause destruction of anchor when no link left
 
-      if (this.links.length === 0) {
-        this.node.removeAnchor(this.side, this);
-        this.destroy();
-      }
       $(otherNodes).off('mouseenter mouseleave mouseup');
       $('.layer.nodes').off('mousemove mouseup');
     });
-
-    // event.stopPropagation();
   }
 };
 
