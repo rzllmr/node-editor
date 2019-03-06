@@ -91,7 +91,7 @@ body {
   line-height: 30px;
   text-align: center;
   font-size: 10px;
-  color: var(--color-text);
+  color: var(--color-text-faded);
 }
 
 .node .anchor:hover {
@@ -119,8 +119,23 @@ body {
   transform: translate(-50%, -50%);
 }
 
+.node .resizer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  color: var(--color-text-faded);
+  font-size: 10px;
+  cursor: se-resize;
+}
+.node .resizer:hover {
+  color: var(--color-text-highlight);
+}
+.node .resizer i {
+  transform: rotate(-45deg);
+}
+
 .graph {
-  stroke: var(--color-text);
+  stroke: var(--color-text-faded);
   stroke-width: 2;
   fill: none;
 }

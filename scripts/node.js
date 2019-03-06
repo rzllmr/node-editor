@@ -23,6 +23,7 @@ class Node extends Proxy {
     this.registerElement();
 
     this.position = position;
+    this.min_size = {x: 180, y: 120};
     this.cursorPosRel = {x: 0, y: 0};
 
     this.anchors = {
@@ -84,6 +85,32 @@ class Node extends Proxy {
 
     this.makeEditableOnDblClick(this.element.find('.label'), 'readonly', false);
     this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true);
+
+    this.element.find('.resizer').on({
+      mousedown: (event) => {
+        this.cursorPosRel = {x: event.pageX, y: event.pageY};
+        $(window).on({
+          mousemove: (event) => {
+            const width = this.element.width() + (event.pageX - this.cursorPosRel.x);
+            const height = this.element.height() + (event.pageY - this.cursorPosRel.y);
+            this.element.css({
+              width: Math.max(width, this.min_size.x),
+              height: Math.max(height, this.min_size.y)
+            });
+            this.cursorPosRel = {x: event.pageX, y: event.pageY};
+            for (const side in this.anchors) {
+              for (const i in this.anchors[side]) {
+                this.anchors[side][i].link.redraw();
+              }
+            }
+          },
+          mouseup: (event) => {
+            $(window).off('mousemove mouseup');
+          }
+        });
+        event.stopPropagation();
+      }
+    });
   }
 
   // add anchor at evenly distributed slot closest to mouse position
