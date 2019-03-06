@@ -62,9 +62,7 @@ class Node extends Proxy {
               });
               for (const side in this.anchors) {
                 for (const i in this.anchors[side]) {
-                  this.anchors[side][i].links.forEach((link) => {
-                    link.redraw();
-                  });
+                  this.anchors[side][i].link.redraw();
                 }
               }
             },
@@ -88,29 +86,50 @@ class Node extends Proxy {
     this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true);
   }
 
+  // add anchor at evenly distributed slot closest to mouse position
   addAnchor(offset, drag) {
-    const limit = {
-      x: this.element[0].offsetWidth,
-      y: this.element[0].offsetHeight
-    };
+    const limit = {x: this.element[0].offsetWidth, y: this.element[0].offsetHeight};
+
+    // calculate side closest to mouse position
     const sides = ['left', 'top', 'right', 'bottom'];
     const distances = [offset.x, offset.y, limit.x - offset.x, limit.y - offset.y];
     const side = sides[distances.indexOf(Math.min(...distances))];
 
-    if (this.anchors[side].length == 0) {
-      this.anchors[side].push(new Anchor(this, side, drag));
-    } else if (drag) {
-      this.anchors[side][this.anchors[side].length - 1].dragNewLink();
-    }
+    // calculate insertion index based on mouse position
+    const partPrct = 1 / (this.anchors[side].length + 1);
+    const offsetPrct = ['top', 'bottom'].includes(side) ? offset.x / limit.x : offset.y / limit.y;
+    const index = Math.floor(offsetPrct / partPrct);
 
-    return this.anchors[side][this.anchors[side].length - 1];
+    // distribute present anchors to slots besides insertion index
+    const percentage = this.relocateAnchors(side, this.anchors[side].length + 1, index);
+    // insert anchor at index and corresponding slot
+    this.anchors[side].splice(index, 0, new Anchor(this, side, percentage * (index + 1), drag));
+
+    return this.anchors[side][index];
   }
 
+  // remove anchor and redistribute remaining
   removeAnchor(side, anchor) {
     const index = this.anchors[side].indexOf(anchor);
     if (index > -1) {
       this.anchors[side].splice(index, 1);
     }
+
+    // distribute anchors to remaining slots
+    this.relocateAnchors(side, this.anchors[side].length);
+  }
+
+  // distribute registered anchors to available slots
+  relocateAnchors(side, slots, skip = -1) {
+    const percentage = Math.floor(100 / (slots + 1));
+    let offset = 0;
+    for (const i in this.anchors[side]) {
+      if (i == skip) offset++;
+      this.anchors[side][i].position(side, percentage * (parseInt(offset) + 1));
+      this.anchors[side][i].link.redraw();
+      offset++;
+    }
+    return percentage;
   }
 
   makeEditableOnDblClick(element, property, editable) {
@@ -132,19 +151,6 @@ class Node extends Proxy {
         $(event.target).prop(property, !editable);
       }
     });
-  }
-
-  positionAnchor(anchor, side) {
-    switch (side) {
-      case 'top':
-        anchor[0].style.left = '50%'; break;
-      case 'right':
-        anchor[0].style.top = '50%'; break;
-      case 'bottom':
-        anchor[0].style.left = '50%'; break;
-      case 'left':
-        anchor[0].style.top = '50%'; break;
-    }
   }
 
   select() {

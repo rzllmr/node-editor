@@ -10,32 +10,29 @@ const Link = require('./link.js');
  * .anchor representative to handle links
  */
 class Anchor extends Proxy {
-  constructor(node, side, drag = false) {
+  constructor(node, side, percentage, drag = false) {
     const id = node.id + side.charAt(0) + node.anchors[side].length;
     super(id);
 
     this.node = node;
     this.side = side;
+    this.endType = 'circle';
 
     this.element = $('#template-anchor').clone();
     this.element.attr('id', this.id);
     this.element.addClass(side);
     this.element.appendTo(this.node.element);
-    node.positionAnchor(this.element, side);
+    this.position(side, percentage);
     this.element.show();
 
-    this.links = [];
+    this.link;
     this.graph;
     if (drag) this.dragNewLink();
   }
 
   destroy() {
     this.side = undefined;
-
-    for (const i in this.links) {
-      this.removeLink(this.links[i]);
-    }
-    this.links = undefined;
+    this.link = undefined;
 
     this.element.remove();
     this.element = undefined;
@@ -43,25 +40,34 @@ class Anchor extends Proxy {
   }
 
   // create and connect link
-  link(toAnchor) {
+  connect(toAnchor, endType) {
     const link = new Link(this, toAnchor);
-    this.links.push(link);
-    toAnchor.links.push(link);
+    this.link = link;
+    toAnchor.link = link;
+    let side;
+    switch (toAnchor.side) {
+      case 'top': side = 'down'; break;
+      case 'right': side = 'left'; break;
+      case 'bottom': side = 'up'; break;
+      case 'left': side = 'right'; break;
+    }
+    if (endType == 'arrow') {
+      toAnchor.element.find('i').first()[0].className = 'fas fa-angle-' + side;
+      toAnchor.element.css('font-size', '20px');
+      toAnchor.endType = 'arrow';
+    }
   }
 
   // cut and delete link
-  cut(link) {
+  cutLink(link) {
     link.startAnchor.removeLink(link);
     link.endAnchor.removeLink(link);
     link.destroy();
   }
 
   removeLink(link) {
-    const index = this.links.indexOf(link);
-    if (index > -1) {
-      this.links.splice(index, 1);
-    }
-    if (this.links.length == 0 && this.graph == undefined) {
+    this.link = undefined;
+    if (!this.link && !this.graph) {
       this.node.removeAnchor(this.side, this);
       this.destroy();
     }
@@ -75,9 +81,23 @@ class Anchor extends Proxy {
   removeGraph() {
     this.graph.destroy();
     this.graph = undefined;
-    if (this.links.length == 0 && this.graph == undefined) {
+    if (!this.link && !this.graph) {
       this.node.removeAnchor(this.side, this);
       this.destroy();
+    }
+  }
+
+  position(side, percentage) {
+    percentage += '%';
+    switch (side) {
+      case 'top':
+        this.element[0].style.left = percentage; break;
+      case 'right':
+        this.element[0].style.top = percentage; break;
+      case 'bottom':
+        this.element[0].style.left = percentage; break;
+      case 'left':
+        this.element[0].style.top = percentage; break;
     }
   }
 
@@ -96,7 +116,7 @@ class Anchor extends Proxy {
   }
 
   // drag Graph to establish new Link
-  dragNewLink() {
+  dragNewLink(endType = 'arrow') {
     // graph for feedback of drawing connection
     this.createGraph();
 
@@ -121,15 +141,14 @@ class Anchor extends Proxy {
         };
         const targetNode = this.resolve(event.currentTarget.id);
         const endAnchor = targetNode.addAnchor(offset);
-        this.link(endAnchor);
+        this.connect(endAnchor, endType);
       },
       mouseleave: (event) => {
         $(event.currentTarget).removeClass('selected');
         this.graph.element.show();
 
         // remove link
-        const tempLink = this.links[this.links.length - 1];
-        this.cut(tempLink);
+        this.cutLink(this.link);
       }
     });
 
@@ -140,8 +159,29 @@ class Anchor extends Proxy {
       this.removeGraph();
       // will cause destruction of anchor when no link left
 
+      if (this.link) {
+        this.link.startAnchor.registerDragOut();
+        this.link.endAnchor.registerDragOut();
+      }
+
       $(otherNodes).off('mouseenter mouseleave mouseup');
       $('.layer.nodes').off('mousemove mouseup');
+    });
+  }
+
+  registerDragOut() {
+    this.element.on('mousedown', (event) => {
+      if (event.button != 2) return;
+      // right click
+
+      // restore state of link creation while preserving endType
+      const otherAnchor = this.link.otherAnchor(this);
+      otherAnchor.element.off('mousedown');
+      otherAnchor.dragNewLink(this.endType);
+      otherAnchor.graph.element.hide();
+      this.node.select();
+
+      event.stopPropagation();
     });
   }
 };
