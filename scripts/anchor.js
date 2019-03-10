@@ -120,11 +120,14 @@ class Anchor extends Proxy {
     // graph for feedback of drawing connection
     this.createGraph();
 
+    const thisNode = `#${this.node.id}.node`;
     const otherNodes = `.node:not(#${this.node.id})`;
+
+    $(thisNode).css('pointer-events', 'none');
 
     // drag end point of graph
     $('.layer.nodes').on('mousemove', (event) => {
-      this.graph.update(null, {x: event.pageX, y: event.pageY});
+      this.graph.update(null, {x: event.offsetX, y: event.offsetY});
     });
 
     // create and remove links when
@@ -164,6 +167,7 @@ class Anchor extends Proxy {
         this.link.endAnchor.registerDragOut();
       }
 
+      $(thisNode).css('pointer-events', '');
       $(otherNodes).off('mouseenter mouseleave mouseup');
       $('.layer.nodes').off('mousemove mouseup');
     });

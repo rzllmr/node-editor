@@ -12,8 +12,14 @@ class Node extends Proxy {
   constructor(id = null, position = {x: 0, y: 0}) {
     super(id);
 
+    this.minSize = {x: 180, y: 120};
+
     this.element = $('#template-node').clone();
-    this.element.css({left: position.x, top: position.y, display: 'block'});
+    this.element.css({
+      left: position.x - this.minSize.x / 2,
+      top: position.y - this.minSize.y / 2,
+      display: ''
+    });
     if (id == null) {
       this.element.removeAttr('id');
     } else {
@@ -23,7 +29,6 @@ class Node extends Proxy {
     this.registerElement();
 
     this.position = position;
-    this.min_size = {x: 180, y: 120};
     this.cursorPosRel = {x: 0, y: 0};
 
     this.anchors = {
@@ -52,8 +57,8 @@ class Node extends Proxy {
     this.element.on({
       mousedown: (event) => {
         if (event.button == 0) { // left click
-          this.cursorPosRel.x = event.pageX - this.element[0].offsetLeft;
-          this.cursorPosRel.y = event.pageY - this.element[0].offsetTop;
+          this.cursorPosRel.x = event.offsetX + event.target.offsetLeft;
+          this.cursorPosRel.y = event.offsetY + event.target.offsetTop;
 
           $(window).on({
             mousemove: (event) => {
@@ -94,8 +99,8 @@ class Node extends Proxy {
             const width = this.element.width() + (event.pageX - this.cursorPosRel.x);
             const height = this.element.height() + (event.pageY - this.cursorPosRel.y);
             this.element.css({
-              width: Math.max(width, this.min_size.x),
-              height: Math.max(height, this.min_size.y)
+              width: Math.max(width, this.minSize.x),
+              height: Math.max(height, this.minSize.y)
             });
             this.cursorPosRel = {x: event.pageX, y: event.pageY};
             for (const side in this.anchors) {

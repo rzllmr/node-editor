@@ -18,20 +18,22 @@
     <script>if (window.module) module = window.module;</script>
   </head>
   <body>
-    <svg class="layer graphs">
-      <!-- <path d="M 100 350 q 150 -300 300 0" class="graph" /> -->
-      <path class="graph" id="template-graph" d="M 0 0 L 0 0" style="display: none" />
-    </svg>
-    <div class="layer nodes">
-      <div class="node" id="template-node" style="display: none">
-        <div class="head">
-          <input type="text" class="label" placeholder="Enter title..." readonly="true">
+    <div id="desk">
+      <svg class="layer graphs">
+        <!-- <path d="M 100 350 q 150 -300 300 0" class="graph" /> -->
+        <path class="graph" id="template-graph" d="M 0 0 L 0 0" style="display: none" />
+      </svg>
+      <div class="layer nodes">
+        <div class="node" id="template-node" style="display: none">
+          <div class="head">
+            <input type="text" class="label" placeholder="Enter title..." readonly="true">
+          </div>
+          <div class="body">
+            <div class="details" data-text="Enter details..." contentEditable="false"></div>
+          </div>
+          <div class="anchor" id="template-anchor" style="display: none"><i class="fas fa-circle"></i></div>
+          <div class="resizer"><i class="fas fa-wifi"></i></div>
         </div>
-        <div class="body">
-          <div class="details" data-text="Enter details..." contentEditable="false"></div>
-        </div>
-        <div class="anchor" id="template-anchor" style="display: none"><i class="fas fa-circle"></i></div>
-        <div class="resizer"><i class="fas fa-wifi"></i></div>
       </div>
     </div>
   </body>
