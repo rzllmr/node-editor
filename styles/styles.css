@@ -17,9 +17,11 @@ body {
 }
 
 .layer {
-  position: absolute;
   width: 1000%;
   height: 1000%;
+}
+.layer.graphs {
+  position: absolute;
 }
 
 .node {
@@ -146,6 +148,26 @@ body {
   stroke-width: 2;
   fill: none;
 }
-.graph:hover {
+.graph.selected {
   stroke: var(--color-text-highlight);
+}
+.graph-area {
+  stroke: transparent;
+  stroke-width: 30px;
+  fill: none;
+}
+
+.sign {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 8px;
+  box-sizing: border-box;
+  background-color: var(--color-node);
+  border-radius: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.sign .details:empty:before{
+  content: attr(data-text);
+  color: var(--color-text-faded);
 }

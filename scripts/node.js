@@ -181,6 +181,13 @@ class Node extends Proxy {
       },
       blur: (event, param) => {
         $(event.target).prop(property, !editable);
+      },
+      keydown: (event) => {
+        // prevent Enter to create new div
+        if (event.keyCode === 13) {
+          document.execCommand('insertHTML', false, '<br><br>');
+          return false;
+        }
       }
     });
   }

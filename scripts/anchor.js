@@ -75,7 +75,7 @@ class Anchor extends Proxy {
 
   createGraph() {
     const anchorPos = this.locate();
-    this.graph = new Graph(this.id + '-', {x: anchorPos.x, y: anchorPos.y});
+    this.graph = new Graph(this.id + '-', {x: anchorPos.x, y: anchorPos.y}, false);
   }
 
   removeGraph() {
@@ -126,7 +126,7 @@ class Anchor extends Proxy {
     $(thisNode).css('pointer-events', 'none');
 
     // drag end point of graph
-    $('.layer.nodes').on('mousemove', (event) => {
+    $('.layer.graphs').on('mousemove', (event) => {
       this.graph.update(null, {x: event.offsetX, y: event.offsetY});
     });
 
@@ -156,7 +156,7 @@ class Anchor extends Proxy {
     });
 
     // check for hit on anchor of another node
-    $('.layer.nodes,' + otherNodes).one('mouseup', (event) => {
+    $('.layer.graphs,' + otherNodes).one('mouseup', (event) => {
       $(event.currentTarget).removeClass('selected');
 
       this.removeGraph();
@@ -169,7 +169,7 @@ class Anchor extends Proxy {
 
       $(thisNode).css('pointer-events', '');
       $(otherNodes).off('mouseenter mouseleave mouseup');
-      $('.layer.nodes').off('mousemove mouseup');
+      $('.layer.graphs').off('mousemove mouseup');
     });
   }
 

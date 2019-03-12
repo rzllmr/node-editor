@@ -49,9 +49,9 @@
         event.stopPropagation();
       }
     });
-    $('.layer.nodes').on({
+    $('.layer.graphs').on({
       dblclick: (event) => {
-        if (event.target !== $('.layer.nodes')[0]) return;
+        if (event.target !== $('.layer.graphs')[0]) return;
         const newNode = new Node(g.elem.nodes.length, {x: event.offsetX, y: event.offsetY});
         g.elem.nodes.push(newNode);
       }
