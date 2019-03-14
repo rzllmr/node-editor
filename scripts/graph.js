@@ -3,11 +3,14 @@
 // from HTML ids of .graph elements
 const Proxy = require('./proxy.js');
 
+const Connection = require('./connection.js');
+const Sign = require('./sign.js');
+
 /**
  * .graph representative to handle drawing of vector lines
  */
 class Graph extends Proxy {
-  constructor(id = null, position = {x: 0, y: 0}, createHoverArea = true) {
+  constructor(id = null, anchor) {
     super(id);
 
     this.element = $('#template-graph').clone();
@@ -15,14 +18,14 @@ class Graph extends Proxy {
     this.element.appendTo('.layer.graphs');
     this.element.show();
 
-    if (createHoverArea) {
-      this.addHoverArea();
-    }
+    this.anchors = new Connection(anchor);
 
-    this.update({x: position.x, y: position.y}, {x: position.x, y: position.y});
+    this.update(this.anchors.start, this.anchors.start.locate());
   }
 
   destroy() {
+    this.anchors = undefined;
+
     this.element.remove();
     this.element = undefined;
     if (this.hoverArea != undefined) {
@@ -30,7 +33,7 @@ class Graph extends Proxy {
       this.hoverArea = undefined;
     }
     if (this.sign != undefined) {
-      this.sign.remove();
+      this.sign.destroy();
       this.sign = undefined;
     }
     super.destroy();
@@ -57,36 +60,72 @@ class Graph extends Proxy {
     });
   }
 
-  addSign() {
-    this.sign = $('#template-sign').clone();
-    this.sign.attr('id', this.id + '_sign');
-    this.sign.appendTo('.layer.nodes');
-    this.sign.show();
-
-    const middle = this.bezierMiddle(this.start, this.ctrl1, this.ctrl2, this.end);
-    this.sign.css({left: middle.x, top: middle.y});
-
-    this.makeEditableOnDblClick(this.sign.find('.details'), 'contentEditable', true);
-    this.sign.find('.details').dblclick();
+  removeHoverArea() {
+    this.hoverArea.remove();
+    this.hoverArea = undefined;
   }
 
-  update(start, end, startSide = null, endSide = null) {
-    if (start) this.start = start;
-    if (end) this.end = end;
+  addSign() {
+    const middle = this.bezierMiddle(this.start, this.ctrl1, this.ctrl2, this.end);
+    this.sign = new Sign(this.id + '_sign', middle);
+    this.sign.focus();
+  }
+
+  connect(anchor) {
+    this.anchors.add(anchor);
+    if (this.connected) {
+      this.change(this.anchors.start.id + '-' + this.anchors.end.id);
+      this.element.attr('id', this.id);
+      this.addHoverArea();
+      this.update();
+    }
+  }
+
+  disconnect(anchor) {
+    this.anchors.remove(anchor);
+    if (!this.connected) {
+      this.removeHoverArea();
+    }
+  }
+
+  get connected() {
+    return this.anchors.count == 2;
+  }
+
+  otherAnchor(anchor) {
+    return this.anchors.other(anchor);
+  }
+
+  update(startAnchor = null, end = null) {
+    if (this.anchors.start) this.start = this.anchors.start.locate();
+    if (this.anchors.end) this.end = this.anchors.end.locate();
+    if (!this.connected) {
+      const otherSlot = this.anchors.otherSlot(startAnchor);
+      this[otherSlot] = end;
+    }
 
     let path;
-    if (startSide != null && endSide != null) {
+    if (this.connected) {
+      const startSide = this.anchors.start.side;
+      const endSide = this.anchors.end.side;
       path = this.bezier(this.start, this.end, startSide, endSide);
     } else {
       path = this.line(this.start, this.end);
     }
     this.element.attr('d', path);
+
     if (this.hoverArea != undefined) {
       this.hoverArea.attr('d', path);
     }
+
     if (this.sign != undefined) {
-      const middle = this.bezierMiddle(this.start, this.ctrl1, this.ctrl2, this.end);
-      this.sign.css({left: middle.x, top: middle.y});
+      let middle;
+      if (this.connected) {
+        middle = this.bezierMiddle(this.start, this.ctrl1, this.ctrl2, this.end);
+      } else {
+        middle = this.lineMiddle(this.start, this.end);
+      }
+      this.sign.position(middle);
     }
   }
 
@@ -102,11 +141,21 @@ class Graph extends Proxy {
     //   return Math.pow(1-t, 3)*p0 + 3*Math.pow(1-t, 2)*t*p1 +
     //       3*(1-t)*Math.pow(t, 2)*p2 + Math.pow(t, 3)*p3;
     // };
-    // const t = 0.5;
+    // const Vector = require('./vector.js');
+    // const startV = new Vector(start.x, start.y);
+    // const ctrl1V = new Vector(ctrl1.x, ctrl1.y);
+    // const ctrl2V = new Vector(ctrl2.x, ctrl2.y);
+    // const endV = new Vector(end.x, end.y);
+    // const ctrl1Dot = Math.sign(ctrl1V.subtract(startV).dot(endV.subtract(startV)));
+    // const ctrl2Dot = Math.sign(ctrl2V.subtract(endV).dot(startV.subtract(endV)));
+    // const part = 0.5 + 0.25 * (ctrl2Dot - ctrl1Dot);
+    // const t = 0.25 + part / 2;
     // return {
     //   x: cubicBezier(start.x, ctrl1.x, ctrl2.x, end.x, t),
     //   y: cubicBezier(start.y, ctrl1.y, ctrl2.y, end.y, t)
     // };
+
+    // reduced term for t = 0.5
     return {
       x: 0.125*(start.x + 3*ctrl1.x + 3*ctrl2.x + end.x),
       y: 0.125*(start.y + 3*ctrl1.y + 3*ctrl2.y + end.y)
@@ -153,34 +202,6 @@ class Graph extends Proxy {
     this.ctrl2 = ctrl2;
 
     return `M${start.x},${start.y} C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${end.x},${end.y}`;
-  }
-
-  makeEditableOnDblClick(element, property, editable) {
-    element.on({
-      mousedown: (event) => {
-        let propertyValue = $(event.target).prop(property);
-        if (typeof propertyValue == 'string') propertyValue = propertyValue === 'true';
-        if (propertyValue === editable) {
-          event.stopPropagation();
-        } else {
-          event.preventDefault();
-        }
-      },
-      dblclick: (event) => {
-        $(event.target).prop(property, editable);
-        $(event.target).focus();
-      },
-      blur: (event, param) => {
-        $(event.target).prop(property, !editable);
-      },
-      keydown: (event) => {
-        // prevent Enter to create new div
-        if (event.keyCode === 13) {
-          document.execCommand('insertHTML', false, '<br><br>');
-          return false;
-        }
-      }
-    });
   }
 };
 

@@ -68,7 +68,7 @@ class Node extends Proxy {
               });
               for (const side in this.anchors) {
                 for (const i in this.anchors[side]) {
-                  this.anchors[side][i].link.redraw();
+                  this.anchors[side][i].link.update();
                 }
               }
             },
@@ -105,7 +105,7 @@ class Node extends Proxy {
             this.cursorPosRel = {x: event.pageX, y: event.pageY};
             for (const side in this.anchors) {
               for (const i in this.anchors[side]) {
-                this.anchors[side][i].link.redraw();
+                this.anchors[side][i].link.update();
               }
             }
           },
@@ -158,7 +158,7 @@ class Node extends Proxy {
     for (const i in this.anchors[side]) {
       if (i == skip) offset++;
       this.anchors[side][i].position(side, percentage * (parseInt(offset) + 1));
-      this.anchors[side][i].link.redraw();
+      this.anchors[side][i].link.update();
       offset++;
     }
     return percentage;

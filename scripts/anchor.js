@@ -4,7 +4,6 @@
 const Proxy = require('./proxy.js');
 
 const Graph = require('./graph.js');
-const Link = require('./link.js');
 
 /**
  * .anchor representative to handle links
@@ -25,8 +24,7 @@ class Anchor extends Proxy {
     this.position(side, percentage);
     this.element.show();
 
-    this.link;
-    this.graph;
+    this.link = new Graph(this.id + '-', this);
     if (drag) this.dragNewLink();
   }
 
@@ -40,10 +38,9 @@ class Anchor extends Proxy {
   }
 
   // create and connect link
-  connect(toAnchor, endType) {
-    const link = new Link(this, toAnchor);
-    this.link = link;
-    toAnchor.link = link;
+  connectLink(toAnchor, endType) {
+    this.link.connect(toAnchor);
+    toAnchor.link = this.link;
     let side;
     switch (toAnchor.side) {
       case 'top': side = 'down'; break;
@@ -58,33 +55,16 @@ class Anchor extends Proxy {
     }
   }
 
-  // cut and delete link
-  cutLink(link) {
-    link.startAnchor.removeLink(link);
-    link.endAnchor.removeLink(link);
-    link.destroy();
+  cutLink() {
+    const otherAnchor = this.link.otherAnchor(this);
+    this.link.disconnect(otherAnchor);
+    otherAnchor.removeLink();
   }
 
-  removeLink(link) {
+  removeLink() {
     this.link = undefined;
-    if (!this.link && !this.graph) {
-      this.node.removeAnchor(this.side, this);
-      this.destroy();
-    }
-  }
-
-  createGraph() {
-    const anchorPos = this.locate();
-    this.graph = new Graph(this.id + '-', {x: anchorPos.x, y: anchorPos.y}, false);
-  }
-
-  removeGraph() {
-    this.graph.destroy();
-    this.graph = undefined;
-    if (!this.link && !this.graph) {
-      this.node.removeAnchor(this.side, this);
-      this.destroy();
-    }
+    this.node.removeAnchor(this.side, this);
+    this.destroy();
   }
 
   position(side, percentage) {
@@ -117,9 +97,6 @@ class Anchor extends Proxy {
 
   // drag Graph to establish new Link
   dragNewLink(endType = 'arrow') {
-    // graph for feedback of drawing connection
-    this.createGraph();
-
     const thisNode = `#${this.node.id}.node`;
     const otherNodes = `.node:not(#${this.node.id})`;
 
@@ -127,7 +104,7 @@ class Anchor extends Proxy {
 
     // drag end point of graph
     $('.layer.graphs').on('mousemove', (event) => {
-      this.graph.update(null, {x: event.offsetX, y: event.offsetY});
+      this.link.update(this, {x: event.offsetX, y: event.offsetY});
     });
 
     // create and remove links when
@@ -135,38 +112,32 @@ class Anchor extends Proxy {
     $(otherNodes).on({
       mouseenter: (event) => {
         $(event.currentTarget).addClass('selected');
-        this.graph.element.hide();
 
-        // create link
         const offset = {
           x: event.offsetX + event.target.offsetLeft,
           y: event.offsetY + event.target.offsetTop
         };
         const targetNode = this.resolve(event.currentTarget.id);
         const endAnchor = targetNode.addAnchor(offset);
-        this.connect(endAnchor, endType);
+        this.connectLink(endAnchor, endType);
       },
       mouseleave: (event) => {
         $(event.currentTarget).removeClass('selected');
-        this.graph.element.show();
 
-        // remove link
-        this.cutLink(this.link);
+        this.cutLink();
       }
     });
 
     // check for hit on anchor of another node
     $('.layer.graphs,' + otherNodes).one('mouseup', (event) => {
       $(event.currentTarget).removeClass('selected');
-
-      this.removeGraph();
-      // will cause destruction of anchor when no link left
-
-      if (this.link) {
-        this.link.startAnchor.registerDragOut();
-        this.link.endAnchor.registerDragOut();
+      if (this.link.connected) {
+        this.link.anchors.start.registerDragOut();
+        this.link.anchors.end.registerDragOut();
+      } else {
+        this.link.destroy();
+        this.removeLink();
       }
-
       $(thisNode).css('pointer-events', '');
       $(otherNodes).off('mouseenter mouseleave mouseup');
       $('.layer.graphs').off('mousemove mouseup');
@@ -182,7 +153,6 @@ class Anchor extends Proxy {
       const otherAnchor = this.link.otherAnchor(this);
       otherAnchor.element.off('mousedown');
       otherAnchor.dragNewLink(this.endType);
-      otherAnchor.graph.element.hide();
       this.node.select();
 
       event.stopPropagation();
