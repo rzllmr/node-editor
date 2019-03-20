@@ -5,6 +5,8 @@
 
   // Listen for the jQuery ready event on the document
   $(function() {
+    const Node = require('./scripts/node.js');
+    const Selection = require('./scripts/selection.js');
     g = {
       elem: {
         browserWindow: require('electron').remote.getCurrentWindow(),
@@ -12,14 +14,13 @@
       },
       var: {
         zoomFactor: 100,
-        scrollPos: {x: 0, y: 0}
+        scrollPos: {x: 0, y: 0},
+        selection: new Selection()
       }
     };
 
     $('#desk')[0].scrollLeft = $('.layer').width() / 2;
     $('#desk')[0].scrollTop = $('.layer').height() / 2;
-
-    const Node = require('./scripts/node.js');
 
     g.elem.browserWindow.webContents.setZoomFactor(1);
     $(document).on({

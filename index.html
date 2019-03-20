@@ -7,7 +7,10 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 
     <link rel="stylesheet" href="styles/variables.css">
-    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/general.css">
+    <link rel="stylesheet" href="styles/menu.css">
+    <link rel="stylesheet" href="styles/node.css">
+    <link rel="stylesheet" href="styles/graph.css">
 
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
 
@@ -18,6 +21,13 @@
     <script>if (window.module) module = window.module;</script>
   </head>
   <body>
+    <div id="menu">
+      <div id="toolbar">
+        <button class="tool" id="remove" disabled>
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
     <div id="desk">
       <svg class="layer graphs">
         <!-- <path d="M 100 350 q 150 -300 300 0" class="graph" /> -->

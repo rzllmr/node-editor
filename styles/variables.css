@@ -13,4 +13,14 @@
     --color-node: #0e0e14;
     --color-node-faded: #2a3234;
     --color-node-highlight: #d38223;
+
+    --color-valid: green;
+    --color-invalid: firebrick;
+    --color-changed: orange;
+    --color-special: mediumorchid;
+
+    --color-button: #202020;
+    --color-border: #181818;
+    --color-panel: #282828;
+    --color-input: #191919;
 }

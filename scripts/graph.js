@@ -67,7 +67,7 @@ class Graph extends Proxy {
 
   addSign() {
     const middle = this.bezierMiddle(this.start, this.ctrl1, this.ctrl2, this.end);
-    this.sign = new Sign(this.id + '_sign', middle);
+    this.sign = new Sign(this, middle);
     this.sign.focus();
   }
 

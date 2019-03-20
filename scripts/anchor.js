@@ -29,7 +29,16 @@ class Anchor extends Proxy {
   }
 
   destroy() {
+    this.node.removeAnchor(this.side, this);
+    this.node = undefined;
     this.side = undefined;
+
+    if (this.link) {
+      const linkedAnchor = this.link.otherAnchor(this);
+      linkedAnchor.link = undefined;
+      linkedAnchor.destroy();
+      this.link.destroy();
+    }
     this.link = undefined;
 
     this.element.remove();
@@ -40,6 +49,7 @@ class Anchor extends Proxy {
   // create and connect link
   connectLink(toAnchor, endType) {
     this.link.connect(toAnchor);
+    toAnchor.link.destroy();
     toAnchor.link = this.link;
     let side;
     switch (toAnchor.side) {

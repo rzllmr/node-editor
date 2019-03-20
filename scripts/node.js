@@ -44,7 +44,10 @@ class Node extends Proxy {
     this.cursorPosRel = undefined;
 
     for (const side in this.anchors) {
-      this.anchors[side].destroy();
+      // copy anchors[side] array to remove elements while iterating
+      for (const anchor of this.anchors[side].slice()) {
+        anchor.destroy();
+      }
     }
     this.anchors = undefined;
 
@@ -197,6 +200,9 @@ class Node extends Proxy {
   }
   deselect() {
     this.element.removeClass('selected');
+  }
+  get selected() {
+    return this.element[0].className.endsWith('selected');
   }
 };
 
