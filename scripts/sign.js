@@ -29,7 +29,10 @@ class Sign extends Proxy {
   }
 
   position(offset) {
-    this.element.css({left: offset.x, top: offset.y});
+    this.element.css({
+      left: offset.x - this.element[0].offsetWidth / 2,
+      top: offset.y - this.element[0].offsetHeight / 2
+    });
   }
 
   focus() {
