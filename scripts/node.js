@@ -85,7 +85,7 @@ class Node extends Proxy {
               x: event.offsetX + event.target.offsetLeft,
               y: event.offsetY + event.target.offsetTop
             };
-            this.addAnchor(offset, true);
+            this.addAnchor(offset, 'source', true);
           });
         }
       }
@@ -122,7 +122,7 @@ class Node extends Proxy {
   }
 
   // add anchor at evenly distributed slot closest to mouse position
-  addAnchor(offset, drag) {
+  addAnchor(offset, end, drag) {
     const limit = {x: this.element[0].offsetWidth, y: this.element[0].offsetHeight};
 
     // calculate side closest to mouse position
@@ -138,7 +138,8 @@ class Node extends Proxy {
     // distribute present anchors to slots besides insertion index
     const percentage = this.relocateAnchors(side, this.anchors[side].length + 1, index);
     // insert anchor at index and corresponding slot
-    this.anchors[side].splice(index, 0, new Anchor(this, side, percentage * (index + 1), drag));
+    this.anchors[side].splice(index, 0,
+        new Anchor(this, end, side, percentage * (index + 1), drag));
 
     return this.anchors[side][index];
   }

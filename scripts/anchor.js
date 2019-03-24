@@ -9,15 +9,15 @@ const Graph = require('./graph.js');
  * .anchor representative to handle links
  */
 class Anchor extends Proxy {
-  constructor(node, side, percentage, drag = false) {
+  constructor(node, end, side, percentage, drag = false) {
     const id = node.id + side.charAt(0) + node.anchors[side].length;
     super(id);
 
     this.node = node;
+    this.end = end;
     this.side = side;
-    this.endType = 'circle';
 
-    this.element = $('#template-anchor').clone();
+    this.element = $('#template-anchor-' + end).clone();
     this.element.attr('id', this.id);
     this.element.addClass(side);
     this.element.appendTo(this.node.element);
@@ -47,7 +47,7 @@ class Anchor extends Proxy {
   }
 
   // create and connect link
-  connectLink(toAnchor, endType) {
+  connectLink(toAnchor) {
     this.link.connect(toAnchor);
     toAnchor.link.destroy();
     toAnchor.link = this.link;
@@ -58,10 +58,8 @@ class Anchor extends Proxy {
       case 'bottom': side = 'up'; break;
       case 'left': side = 'right'; break;
     }
-    if (endType == 'arrow') {
-      toAnchor.element.find('i').first()[0].className = 'fas fa-angle-' + side;
-      toAnchor.element.css('font-size', '20px');
-      toAnchor.endType = 'arrow';
+    if (toAnchor.end == 'target') {
+      toAnchor.element.find('i').first()[0].className = 'fas fa-caret-' + side;
     }
   }
 
@@ -106,13 +104,13 @@ class Anchor extends Proxy {
   }
 
   // drag Graph to establish new Link
-  dragNewLink(endType = 'arrow') {
+  dragNewLink(end = 'target') {
     const thisNode = `#${this.node.id}.node`;
     const otherNodes = `.node:not(#${this.node.id})`;
 
     $(thisNode).css('pointer-events', 'none');
 
-    // drag end point of graph
+    // drag target point of graph
     $('.layer.graphs').on('mousemove', (event) => {
       this.link.update(this, {x: event.offsetX, y: event.offsetY});
     });
@@ -121,18 +119,18 @@ class Anchor extends Proxy {
     // entering and leaving nodes
     $(otherNodes).on({
       mouseenter: (event) => {
-        $(event.currentTarget).addClass('selected');
+        $(event.currentTarget).addClass('target');
 
         const offset = {
-          x: event.offsetX + event.target.offsetLeft,
-          y: event.offsetY + event.target.offsetTop
+          x: event.offsetX,
+          y: event.offsetY
         };
         const targetNode = this.resolve(event.currentTarget.id);
-        const endAnchor = targetNode.addAnchor(offset);
-        this.connectLink(endAnchor, endType);
+        const targetAnchor = targetNode.addAnchor(offset, end);
+        this.connectLink(targetAnchor);
       },
       mouseleave: (event) => {
-        $(event.currentTarget).removeClass('selected');
+        $(event.currentTarget).removeClass('target');
 
         this.cutLink();
       }
@@ -140,10 +138,10 @@ class Anchor extends Proxy {
 
     // check for hit on anchor of another node
     $('.layer.graphs,' + otherNodes).one('mouseup', (event) => {
-      $(event.currentTarget).removeClass('selected');
+      $(event.currentTarget).removeClass('target');
       if (this.link.connected) {
-        this.link.anchors.start.registerDragOut();
-        this.link.anchors.end.registerDragOut();
+        this.link.anchors.source.registerDragOut();
+        this.link.anchors.target.registerDragOut();
       } else {
         this.link.destroy();
         this.removeLink();
@@ -159,11 +157,10 @@ class Anchor extends Proxy {
       if (event.button != 2) return;
       // right click
 
-      // restore state of link creation while preserving endType
+      // restore state of link creation while preserving end type
       const otherAnchor = this.link.otherAnchor(this);
       otherAnchor.element.off('mousedown');
-      otherAnchor.dragNewLink(this.endType);
-      this.node.select();
+      otherAnchor.dragNewLink(this.end);
 
       event.stopPropagation();
     });

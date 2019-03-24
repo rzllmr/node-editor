@@ -1,11 +1,11 @@
 
 .graph {
-  stroke: var(--color-text-faded);
+  stroke: var(--color-graph);
   stroke-width: 2;
   fill: none;
 }
 .graph.selected {
-  stroke: var(--color-text-highlight);
+  stroke: var(--color-highlight);
 }
 .graph-area {
   stroke: transparent;
@@ -19,6 +19,7 @@
   padding: 8px;
   box-sizing: border-box;
   background-color: var(--color-node);
+  box-shadow: var(--shadow-near);
   border-radius: 10px;
   overflow: hidden;
   white-space: nowrap;
@@ -28,6 +29,6 @@
   color: var(--color-text-faded);
 }
 .sign.selected {
-  border: 2px solid var(--color-node-highlight);
-  transform: translate(-50%-2px, -50%-2px);
+  border: 1px solid var(--color-highlight);
+  transform: translate(-50%-1px, -50%-1px);
 }

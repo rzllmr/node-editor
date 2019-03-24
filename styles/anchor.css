@@ -1,0 +1,61 @@
+
+.anchor {
+  position: absolute;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  color: var(--color-node);
+}
+.anchor.source {
+  font-size: 11px;
+}
+.anchor.target {
+  font-size: 22px;
+}
+
+.anchor:hover {
+  color: var(--color-highlight);
+}
+
+.anchor.top {
+  left: 50%;
+  top: 0;
+}
+.anchor.top.source {
+  transform: translate(-50%, -50%);
+}
+.anchor.top.target {
+  transform: translate(-50%, -55%);
+}
+.anchor.right {
+  right: 0;
+  top: 50%;
+}
+.anchor.right.source {
+  transform: translate(50%, -50%);
+}
+.anchor.right.target {
+  transform: translate(55%, -50%);
+}
+.anchor.bottom {
+  left: 50%;
+  bottom: 0;
+}
+.anchor.bottom.source {
+  transform: translate(-50%, 50%);
+}
+.anchor.bottom.target {
+  transform: translate(-50%, 55%);
+}
+.anchor.left {
+  left: 0;
+  top: 50%;
+}
+.anchor.left.source {
+  transform: translate(-50%, -50%);
+}
+.anchor.left.target {
+  transform: translate(-55%, -50%);
+}

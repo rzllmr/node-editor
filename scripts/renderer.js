@@ -7,6 +7,7 @@
   $(function() {
     const Node = require('./scripts/node.js');
     const Selection = require('./scripts/selection.js');
+    const Options = require('./scripts/options.js');
     g = {
       elem: {
         browserWindow: require('electron').remote.getCurrentWindow(),
@@ -15,7 +16,8 @@
       var: {
         zoomFactor: 100,
         scrollPos: {x: 0, y: 0},
-        selection: new Selection()
+        selection: new Selection(),
+        options: new Options()
       }
     };
 

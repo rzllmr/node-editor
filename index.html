@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="dark">
   <head>
     <meta charset="UTF-8">
     <title>PinBoard</title>
@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/menu.css">
     <link rel="stylesheet" href="styles/node.css">
+    <link rel="stylesheet" href="styles/anchor.css">
     <link rel="stylesheet" href="styles/graph.css">
 
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
@@ -23,6 +24,9 @@
   <body>
     <div id="menu">
       <div id="toolbar">
+        <button class="tool" id="theme">
+          <i class="far fa-lightbulb"></i>
+        </button>
         <button class="tool" id="remove" disabled>
           <i class="fas fa-times"></i>
         </button>
@@ -42,7 +46,8 @@
           <div class="body">
             <div class="details" data-text="Enter details..." contentEditable="false"></div>
           </div>
-          <div class="anchor" id="template-anchor" style="display: none"><i class="fas fa-circle"></i></div>
+          <div class="anchor source" id="template-anchor-source" style="display: none"><i class="fas fa-circle"></i></div>
+          <div class="anchor target" id="template-anchor-target" style="display: none"><i class="fas fa-caret-right"></i></div>
           <div class="resizer"><i class="fas fa-wifi"></i></div>
         </div>
         <div class="sign" id="template-sign" style="display: none">

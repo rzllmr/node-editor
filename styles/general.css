@@ -3,10 +3,13 @@ body {
   font-family: var(--font-sans);
   font-size: 13px;
   color: var(--color-text);
-  background: var(--color-background) fixed;
-  background-image: url("../data/rebel.png");
+  background: var(--background-color);
   height: 100%;
   margin: 0;
+}
+
+:focus {
+  outline: none;
 }
 
 #desk {
@@ -22,4 +25,5 @@ body {
 }
 .layer.graphs {
   position: absolute;
+  background-image: var(--background-image);
 }

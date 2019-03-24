@@ -1,26 +1,54 @@
+@font-face {
+  font-family: 'SourceSansPro';
+  src: url('../data/SourceSansPro-Regular.ttf')  format('truetype');
+}
 
 :root {
-    --font-sans: Tahoma, Geneva, sans-serif;
-    --font-serif: "Palatino Linotype", "Book Antiqua", Palatino, serif;
-    --font-monospaced: "Lucida Console", Monaco, monospace;
+  --font-sans: 'SourceSansPro', Fallback, sans-serif;
 
-    --color-text: #b9bcba;
-    --color-text-faded: #757d7c;
-    --color-text-highlight: #d38223;
+  --color-lightest: #f0f4f5;
+  --color-light: #c7c7c7;
+  --color-neutral: #777777;
+  --color-dark: #4b4b4b;
+  --color-darkest: #282828;
 
-    --color-background: #1e1e1d;
+  --shadow-ui: 0 0 10px 5px rgba(0, 0, 0, 0.2);
+  --shadow-near: 0px 2px 4px 0 rgba(0, 0, 0, 0.3);
 
-    --color-node: #0e0e14;
-    --color-node-faded: #2a3234;
-    --color-node-highlight: #d38223;
+  --background-color: var(--color-neutral);
+  --background-image: url("../data/worn-dots.png");
+  /* Transparent variant from transparenttextures.com
+  based on background pattern from Toptal Subtle Patterns */
+  --color-text-faded: var(--color-neutral);
 
-    --color-valid: green;
-    --color-invalid: firebrick;
-    --color-changed: orange;
-    --color-special: mediumorchid;
+  --color-tool-remove: firebrick;
+  --color-tool-theme: orange;
 
-    --color-button: #202020;
-    --color-border: #181818;
-    --color-panel: #282828;
-    --color-input: #191919;
+  --color-variant: linear-gradient(to right, #6d0019, #a90329);
+}
+
+:root.dark {
+  --color-highlight: rgb(229, 151, 0);
+
+  --color-node: var(--color-darkest);
+  --color-text: var(--color-lightest);
+  --color-text-highlight: var(--color-highlight);
+  --color-graph: var(--color-light);
+
+  --color-menu: var(--color-darkest);
+
+  --color-button: var(--color-dark);
+}
+
+:root.light {
+  --color-highlight: #0000EE;
+
+  --color-node: var(--color-lightest);
+  --color-text: var(--color-darkest);
+  --color-text-highlight: var(--color-highlight);
+  --color-graph: var(--color-dark);
+
+  --color-menu: var(--color-lightest);
+
+  --color-button: var(--color-light);
 }

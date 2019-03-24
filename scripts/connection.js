@@ -1,18 +1,18 @@
 
 class Connection {
-  constructor(startAnchor = null, endAnchor = null) {
+  constructor(sourceAnchor = null, targetAnchor = null) {
     this.slots = {
-      start: startAnchor,
-      end: endAnchor
+      source: sourceAnchor,
+      target: targetAnchor
     };
   }
 
-  get start() {
-    return this.slots.start;
+  get source() {
+    return this.slots.source;
   }
 
-  get end() {
-    return this.slots.end;
+  get target() {
+    return this.slots.target;
   }
 
   get count() {

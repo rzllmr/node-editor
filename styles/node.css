@@ -1,30 +1,40 @@
 
 .node {
   position: absolute;
-  width: 180px;
-  height: 120px;
-  border-radius: 10px;
+  width: 200px;
+  height: 150px;
+  border-radius: 5px;
+  background-image: var(--color-variant);
+  box-shadow: var(--shadow-near);
 }
 
 .node.selected {
-  border: 2px solid var(--color-node-highlight);
-  transform: translate(-2px, -2px);
+  border: 1px solid var(--color-highlight);
+  transform: translate(-1px, -1px);
+  background-clip: content-box;
+}
+
+.node.target {
+  border: 1px dashed var(--color-highlight);
+  transform: translate(-1px, -1px);
+  background-clip: content-box;
+}
+
+.node > .head, .node > .body {
+  background: var(--color-node);
+  box-sizing: border-box;
+  padding: 6px 10px;
 }
 
 .node .head {
-  height: 30px;
-  padding: 8px;
-  box-sizing: border-box;
-  background-image: linear-gradient(to top, #082136, #0f2d49);
-  border-radius: 10px 10px 0 0;
+  height: 36px;
+  border-radius: 5px 5px 0 0;
+  margin-bottom: 5px;
 }
 
 .node .body {
-  height: calc(100% - 30px);
-  padding: 8px;
-  box-sizing: border-box;
-  background-color: var(--color-node);
-  border-radius: 0 0 10px 10px;
+  height: calc(100% - 41px);
+  border-radius: 0 0 5px 5px;
 }
 
 .node .label, .node .details {
@@ -41,6 +51,7 @@
 
 .node .label {
   font-weight: bold;
+  font-size: 16px;
   border: none;
 }
 .node .label::placeholder {
@@ -49,6 +60,7 @@
 }
 
 .node .details {
+  font-size: 15px;
   overflow-y: auto;
 }
 .node .details:empty:before{
@@ -67,48 +79,13 @@
   border-radius: 10px;
 }
 
-.node .anchor {
-  position: absolute;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
-  text-align: center;
-  font-size: 10px;
-  color: var(--color-text-faded);
-}
-
-.node .anchor:hover {
-  color: var(--color-text-highlight);
-}
-
-.node .anchor.top {
-  left: 50%;
-  top: 0;
-  transform: translate(-50%, -50%);
-}
-.node .anchor.right {
-  right: 0;
-  top: 50%;
-  transform: translate(50%, -50%);
-}
-.node .anchor.bottom {
-  left: 50%;
-  bottom: 0;
-  transform: translate(-50%, 50%);
-}
-.node .anchor.left {
-  left: 0;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
 
 .node .resizer {
   position: absolute;
   bottom: 0;
   right: 0;
   color: var(--color-text-faded);
-  font-size: 10px;
+  font-size: 9px;
   cursor: se-resize;
 }
 .node .resizer:hover {
