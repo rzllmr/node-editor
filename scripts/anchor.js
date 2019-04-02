@@ -9,8 +9,8 @@ const Graph = require('./graph.js');
  * .anchor representative to handle links
  */
 class Anchor extends Proxy {
-  constructor(node, end, side, percentage, drag = false) {
-    const id = node.id + side.charAt(0) + node.anchors[side].length;
+  constructor(node, end, side, index, drag = false) {
+    const id = node.id + side.charAt(0) + index;
     super(id);
 
     this.node = node;
@@ -21,11 +21,16 @@ class Anchor extends Proxy {
     this.element.attr('id', this.id);
     this.element.addClass(side);
     this.element.appendTo(this.node.element);
-    this.position(side, percentage);
     this.element.show();
 
     this.link = new Graph(this.id + '-', this);
     if (drag) this.dragNewLink();
+  }
+
+  changeIdx(idx) {
+    const newId = this.id.match(/\d+\D/)[0] + idx;
+    this.change(newId);
+    this.element.attr('id', this.id);
   }
 
   destroy() {
@@ -49,6 +54,7 @@ class Anchor extends Proxy {
   // create and connect link
   connectLink(toAnchor) {
     this.link.connect(toAnchor);
+    this.link.updateIdxs();
     toAnchor.link.destroy();
     toAnchor.link = this.link;
     let side;
@@ -119,11 +125,12 @@ class Anchor extends Proxy {
     // entering and leaving nodes
     $(otherNodes).on({
       mouseenter: (event) => {
+        $(event.currentTarget).removeClass('selected');
         $(event.currentTarget).addClass('target');
 
         const offset = {
-          x: event.offsetX,
-          y: event.offsetY
+          x: event.offsetX + event.target.offsetLeft,
+          y: event.offsetY + event.target.offsetTop
         };
         const targetNode = this.resolve(event.currentTarget.id);
         const targetAnchor = targetNode.addAnchor(offset, end);

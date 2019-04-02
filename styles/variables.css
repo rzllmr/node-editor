@@ -21,8 +21,10 @@
   based on background pattern from Toptal Subtle Patterns */
   --color-text-faded: var(--color-neutral);
 
-  --color-tool-remove: firebrick;
+  --color-tool-save: mediumorchid;
+  --color-tool-load: mediumorchid;
   --color-tool-theme: orange;
+  --color-tool-remove: firebrick;
 
   --color-variant: linear-gradient(to right, #6d0019, #a90329);
 }

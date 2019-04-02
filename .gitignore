@@ -2,6 +2,8 @@
 ### Third-party ###
 */jquery-*.js
 data/*
+package-lock.json
+save.json
 
 
 ### Atom ###

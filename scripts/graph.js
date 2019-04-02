@@ -23,6 +23,14 @@ class Graph extends Proxy {
     this.update(this.anchors.source, this.anchors.source.locate());
   }
 
+  updateIdxs() {
+    const newId = this.anchors.source.id + '-' + this.anchors.target.id;
+    this.change(newId);
+    this.element.attr('id', this.id);
+    this.hoverArea.attr('id', this.id + '_hover');
+    if (this.sign != undefined) this.sign.updateId();
+  }
+
   destroy() {
     this.anchors = undefined;
 
@@ -42,7 +50,7 @@ class Graph extends Proxy {
   addHoverArea() {
     this.hoverArea = $('#template-graph-area').clone();
     this.hoverArea.attr('id', this.id + '_hover');
-    this.hoverArea.appendTo('.layer.graphs');
+    this.hoverArea.insertAfter(this.element);
     this.hoverArea.show();
 
     this.hoverArea.on({
@@ -55,6 +63,7 @@ class Graph extends Proxy {
       dblclick: () => {
         if (this.sign == undefined) {
           this.addSign();
+          this.sign.focus();
         }
       }
     });
@@ -68,7 +77,7 @@ class Graph extends Proxy {
   addSign() {
     const middle = this.bezierMiddle(this.source, this.ctrl1, this.ctrl2, this.target);
     this.sign = new Sign(this, middle);
-    this.sign.focus();
+    return this.sign;
   }
 
   connect(anchor) {
@@ -84,6 +93,10 @@ class Graph extends Proxy {
   disconnect(anchor) {
     this.anchors.remove(anchor);
     if (!this.connected) {
+      const sourceId = this.anchors.source ? this.anchors.source.id : '';
+      const targetId = this.anchors.target ? this.anchors.target.id : '';
+      this.change(sourceId + '-' + targetId);
+      this.element.attr('id', this.id);
       this.removeHoverArea();
     }
   }
@@ -201,8 +214,42 @@ class Graph extends Proxy {
     this.ctrl1 = ctrl1;
     this.ctrl2 = ctrl2;
 
-    return `M${source.x},${source.y} C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
+    return `M${source.x},${source.y} \
+C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
+  }
+
+  export() {
+    const element = this.element[0];
+    const object = {
+      type: element.className.baseVal.split(' ')[0],
+      source: element.id.split('-')[0],
+      target: element.id.split('-')[1]
+    };
+    return object;
+  }
+
+  static import(object) {
+    const sides = {'t': 'top', 'r': 'right', 'b': 'bottom', 'l': 'left'};
+
+    // create source anchor
+    const sourceMatch = object.source.match(/(\d+)(\D)(\d+)/);
+    const source = {id: sourceMatch[1], side: sides[sourceMatch[2]], index: sourceMatch[3]};
+    const sourceNode = this.proxy.resolve(source.id);
+    const sourceAnchor = sourceNode.addAnchorDirectly('source', source.side, source.index);
+    sourceAnchor.registerDragOut();
+
+    // create target anchor
+    const targetMatch = object.target.match(/(\d+)(\D)(\d+)/);
+    const target = {id: targetMatch[1], side: sides[targetMatch[2]], index: targetMatch[3]};
+    const targetNode = this.proxy.resolve(target.id);
+    const targetAnchor = targetNode.addAnchorDirectly('target', target.side, target.index);
+    targetAnchor.registerDragOut();
+
+    // connect source to target anchor
+    sourceAnchor.connectLink(targetAnchor);
   }
 };
+
+Graph.proxy = new Proxy();
 
 module.exports = Graph;

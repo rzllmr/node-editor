@@ -1,0 +1,20 @@
+
+.sign {
+  position: absolute;
+  padding: 8px;
+  box-sizing: border-box;
+  background-color: var(--color-node);
+  box-shadow: var(--shadow-near);
+  border-radius: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+}
+.sign .details:empty:before{
+  content: attr(data-text);
+  color: var(--color-text-faded);
+}
+.sign.selected {
+  border: 1px solid var(--color-highlight);
+  transform: translate(-1px, -1px);
+}

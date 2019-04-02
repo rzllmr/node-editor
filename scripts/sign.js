@@ -20,6 +20,11 @@ class Sign extends Proxy {
     this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true);
   }
 
+  updateId() {
+    this.change(this.graph.id + '_sign');
+    this.element.attr('id', this.id);
+  }
+
   destroy() {
     this.graph.sign = undefined;
 
@@ -28,10 +33,11 @@ class Sign extends Proxy {
     super.destroy();
   }
 
-  position(offset) {
+  position(offset = null) {
+    if (offset) this.offset = offset;
     this.element.css({
-      left: offset.x - this.element[0].offsetWidth / 2,
-      top: offset.y - this.element[0].offsetHeight / 2
+      left: this.offset.x - this.element[0].offsetWidth / 2,
+      top: this.offset.y - this.element[0].offsetHeight / 2
     });
   }
 
@@ -73,9 +79,31 @@ class Sign extends Proxy {
           document.execCommand('insertHTML', false, '<br><br>');
           return false;
         }
+      },
+      keyup: () => {
+        this.position();
       }
     });
   }
+
+  export() {
+    const element = this.element[0];
+    const object = {
+      type: element.className.split(' ')[0],
+      graph: element.id.replace('_sign', ''),
+      details: element.querySelector('div.details').innerText
+    };
+    return object;
+  }
+
+  static import(object) {
+    const graph = this.proxy.resolve(object.graph);
+    const element = graph.addSign().element;
+
+    element.find('div.details').text(object.details);
+  }
 };
+
+Sign.proxy = new Proxy();
 
 module.exports = Sign;

@@ -39,9 +39,15 @@
   color: var(--color-text-faded);
   pointer-events: none;
 }
-#remove.tool:hover {
-  background: var(--color-tool-remove);
+#save.tool:hover {
+  background: var(--color-tool-save);
+}
+#load.tool:hover {
+  background: var(--color-tool-load);
 }
 #theme.tool:hover {
   background: var(--color-tool-theme);
+}
+#remove.tool:hover {
+  background: var(--color-tool-remove);
 }

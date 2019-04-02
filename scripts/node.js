@@ -139,7 +139,20 @@ class Node extends Proxy {
     const percentage = this.relocateAnchors(side, this.anchors[side].length + 1, index);
     // insert anchor at index and corresponding slot
     this.anchors[side].splice(index, 0,
-        new Anchor(this, end, side, percentage * (index + 1), drag));
+        new Anchor(this, end, side, index, drag));
+    this.anchors[side][index].position(side, percentage * (index + 1));
+
+    return this.anchors[side][index];
+  }
+
+  addAnchorDirectly(end, side, index) {
+    index = Math.min(index, this.anchors[side].length);
+    // distribute present anchors to slots besides insertion index
+    const percentage = this.relocateAnchors(side, this.anchors[side].length + 1, index);
+    // insert anchor at index and corresponding slot
+    this.anchors[side].splice(index, 0,
+        new Anchor(this, end, side, index, false));
+    this.anchors[side][index].position(side, percentage * (index + 1));
 
     return this.anchors[side][index];
   }
@@ -161,7 +174,9 @@ class Node extends Proxy {
     let offset = 0;
     for (const i in this.anchors[side]) {
       if (i == skip) offset++;
+      this.anchors[side][i].changeIdx(offset);
       this.anchors[side][i].position(side, percentage * (parseInt(offset) + 1));
+      this.anchors[side][i].link.updateIdxs();
       this.anchors[side][i].link.update();
       offset++;
     }
@@ -205,6 +220,36 @@ class Node extends Proxy {
   get selected() {
     return this.element[0].className.endsWith('selected');
   }
+
+  export() {
+    const element = this.element[0];
+    const object = {
+      type: element.className.split(' ')[0],
+      posX: element.offsetLeft,
+      posY: element.offsetTop,
+      width: element.offsetWidth,
+      height: element.offsetHeight,
+      label: element.querySelector('input.label').value,
+      details: element.querySelector('div.details').innerText
+    };
+    return object;
+  }
+
+  static import(object) {
+    const board = this.proxy.resolve('main');
+    const element = board.addNode().element;
+
+    element.css({
+      left: object.posX,
+      top: object.posY,
+      width: object.width,
+      height: object.height
+    });
+    element.find('input.label').val(object.label);
+    element.find('div.details').text(object.details);
+  }
 };
+
+Node.proxy = new Proxy();
 
 module.exports = Node;

@@ -4,7 +4,6 @@
   width: 200px;
   height: 150px;
   border-radius: 5px;
-  background-image: var(--color-variant);
   box-shadow: var(--shadow-near);
 }
 
@@ -29,7 +28,11 @@
 .node .head {
   height: 36px;
   border-radius: 5px 5px 0 0;
-  margin-bottom: 5px;
+}
+
+.node .divider {
+  height: 5px;
+  background: var(--color-variant);
 }
 
 .node .body {

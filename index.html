@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="styles/node.css">
     <link rel="stylesheet" href="styles/anchor.css">
     <link rel="stylesheet" href="styles/graph.css">
+    <link rel="stylesheet" href="styles/sign.css">
 
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
 
@@ -24,15 +25,13 @@
   <body>
     <div id="menu">
       <div id="toolbar">
-        <button class="tool" id="theme">
-          <i class="far fa-lightbulb"></i>
-        </button>
-        <button class="tool" id="remove" disabled>
-          <i class="fas fa-times"></i>
-        </button>
+        <button class="tool" id="save"><i class="fas fa-save"></i></button>
+        <button class="tool" id="load"><i class="fas fa-folder-open"></i></button>
+        <button class="tool" id="theme"><i class="far fa-lightbulb"></i></button>
+        <button class="tool" id="remove" disabled><i class="fas fa-times"></i></button>
       </div>
     </div>
-    <div id="desk">
+    <div class="board" id="main">
       <svg class="layer graphs">
         <rect id="selection" width="0" height="0" style="display: none" />
         <path class="graph" id="template-graph" d="M 0 0 L 0 0" style="display: none" />
@@ -43,6 +42,7 @@
           <div class="head">
             <input type="text" class="label" placeholder="Enter title..." readonly="true">
           </div>
+          <div class="divider"></div>
           <div class="body">
             <div class="details" data-text="Enter details..." contentEditable="false"></div>
           </div>
