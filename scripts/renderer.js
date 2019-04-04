@@ -8,8 +8,9 @@
     const Board = require('./scripts/board.js');
 
     new FileHandler();
-    new Selection();
     new Options();
-    new Board('main');
+
+    const mainBoard = new Board('main');
+    new Selection(mainBoard);
   });
 }(window.jQuery, window, document));

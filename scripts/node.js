@@ -37,9 +37,13 @@ class Node extends Proxy {
       bottom: [],
       left: []
     };
+
+    $('.minimap').trigger('node:create', [this.id]);
   }
 
   destroy() {
+    $('.minimap').trigger('node:delete', [this.id]);
+
     this.position = undefined;
     this.cursorPosRel = undefined;
 
@@ -77,6 +81,7 @@ class Node extends Proxy {
             },
             mouseup: () => {
               $(window).off('mousemove mouseup');
+              $('.minimap').trigger('node:update', [this.id]);
             }
           });
         } else if (event.button == 2) { // right click
@@ -114,6 +119,7 @@ class Node extends Proxy {
           },
           mouseup: (event) => {
             $(window).off('mousemove mouseup');
+            $('.minimap').trigger('node:update', [this.id]);
           }
         });
         event.stopPropagation();
@@ -247,6 +253,7 @@ class Node extends Proxy {
     });
     element.find('input.label').val(object.label);
     element.find('div.details').text(object.details);
+    $('.minimap').trigger('node:update', [element[0].id]);
   }
 };
 

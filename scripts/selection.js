@@ -2,7 +2,8 @@
 const Proxy = require('./proxy.js');
 
 class Selection {
-  constructor() {
+  constructor(board) {
+    this.board = board;
     this.proxy = new Proxy();
     this.selection = new Set();
     this.removeButton = $('#remove.tool');
@@ -65,6 +66,9 @@ class Selection {
 
   deleteSelection() {
     this.selection.forEach((_, element) => {
+      if (element.element[0].className.split(' ')[0] === 'node') {
+        this.board.removeNode(element);
+      }
       element.destroy();
     });
     this.selection.clear();
