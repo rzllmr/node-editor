@@ -1,0 +1,29 @@
+
+.minimap {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 240px;
+  height: 160px;
+  background: var(--color-dark);
+  box-shadow: var(--shadow-ui);
+  opacity: 0.5;
+}
+
+.mini {
+  position: absolute;
+  background: var(--color-darkest);
+}
+
+.mini.mini-node {
+  background: black;
+}
+.mini.mini-node.selected {
+  background: var(--color-highlight);
+}
+.mini.mini-node.in {
+  background: var(--color-in);
+}
+.mini.mini-node.out {
+  background: var(--color-out);
+}

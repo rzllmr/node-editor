@@ -19,6 +19,16 @@
   color: var(--color-highlight);
 }
 
+.anchor.selected {
+  color: var(--color-highlight);
+}
+.anchor.in {
+  color: var(--color-in);
+}
+.anchor.out {
+  color: var(--color-out);
+}
+
 .anchor.top {
   left: 50%;
   top: 0;

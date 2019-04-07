@@ -4,11 +4,18 @@
   stroke-width: 2;
   fill: none;
 }
-.graph.selected {
-  stroke: var(--color-highlight);
-}
 .graph-area {
   stroke: transparent;
   stroke-width: 30px;
   fill: none;
+}
+
+.graph.selected {
+  stroke: var(--color-highlight);
+}
+.graph.in {
+  stroke: var(--color-in);
+}
+.graph.out {
+  stroke: var(--color-out);
 }

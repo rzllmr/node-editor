@@ -36,6 +36,8 @@
   --color-text: var(--color-lightest);
   --color-text-highlight: var(--color-highlight);
   --color-graph: var(--color-light);
+  --color-in: #3CC47C;
+  --color-out: #FF3B3F;
 
   --color-menu: var(--color-darkest);
 
@@ -49,6 +51,8 @@
   --color-text: var(--color-darkest);
   --color-text-highlight: var(--color-highlight);
   --color-graph: var(--color-dark);
+  --color-in: #0D2;
+  --color-out: #F22;
 
   --color-menu: var(--color-lightest);
 

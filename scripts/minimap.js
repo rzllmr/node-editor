@@ -48,6 +48,14 @@ class Minimap {
       },
       'node:delete': (event, id) => {
         this.minimap.find('#' + id + '-mini').remove();
+      },
+      'node:highlight': (event, id) => {
+        const nodeClass = $('#' + id)[0].className.split(' ');
+        if (nodeClass.length > 1) {
+          this.minimap.find('#' + id + '-mini')[0].className = 'mini mini-node ' + nodeClass.pop();
+        } else {
+          this.minimap.find('#' + id + '-mini')[0].className = 'mini mini-node';
+        }
       }
     });
   }

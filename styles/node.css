@@ -13,6 +13,17 @@
   background-clip: content-box;
 }
 
+.node.in {
+  border: 1px solid var(--color-in);
+  transform: translate(-1px, -1px);
+  background-clip: content-box;
+}
+.node.out {
+  border: 1px solid var(--color-out);
+  transform: translate(-1px, -1px);
+  background-clip: content-box;
+}
+
 .node.target {
   border: 1px dashed var(--color-highlight);
   transform: translate(-1px, -1px);
