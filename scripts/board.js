@@ -4,7 +4,9 @@
 const Proxy = require('./proxy.js');
 
 const Node = require('./node.js');
+const Selection = require('./selection.js');
 const Minimap = require('./minimap.js');
+const Zoom = require('./zoom.js');
 
 /**
  * .board representative to handle nodes
@@ -25,20 +27,34 @@ class Board extends Proxy {
     this.element[0].scrollLeft = this.scrollPos.x;
     this.element[0].scrollTop = this.scrollPos.y;
 
-    this.minimap = new Minimap(this.element);
+    this.zoom = new Zoom(this.element.find('.layer'), 100, 10);
+
+    this.selection = new Selection(this);
+    this.minimap = new Minimap(this);
     $('.minimap').trigger('window:update', [this.id]);
 
-    this.zoomFactor = 100;
-    this.browserWindow = require('electron').remote.getCurrentWindow();
-    this.browserWindow.webContents.setZoomFactor(this.zoomFactor / 100);
+    $(window).trigger('resize');
   }
 
   register() {
     $(window).on({
       mousewheel: (event) => {
+        const scaleBefore = this.zoom.scale;
+
         const scroll = event.originalEvent.wheelDeltaY / 120;
-        this.zoomFactor = (this.zoomFactor + scroll * 10).clamp(10, 200);
-        this.browserWindow.webContents.setZoomFactor(this.zoomFactor / 100);
+        this.zoom.change(scroll);
+
+        // adjust window scrolling to zoom to mouse position
+        const scrollShift = {
+          x: (this.element[0].scrollLeft + event.pageX)
+            * (scaleBefore - this.zoom.scale) / this.zoom.scale,
+          y: (this.element[0].scrollTop + event.pageY)
+            * (scaleBefore - this.zoom.scale) / this.zoom.scale
+        };
+        this.element[0].scrollLeft += scrollShift.x;
+        this.element[0].scrollTop += scrollShift.y;
+
+        $('.minimap').trigger('window:update', [this.id]);
       },
       mousedown: (event) => {
         if (event.button != 1) return;
@@ -63,19 +79,20 @@ class Board extends Proxy {
         event.stopPropagation();
       },
       resize: (event) => {
+        this.zoom.check();
         $('.minimap').trigger('window:update', [this.id]);
       }
     });
     $('.layer.graphs').on({
       dblclick: (event) => {
         if (event.target !== $('.layer.graphs')[0]) return;
-        this.addNode({x: event.offsetX, y: event.offsetY});
+        this.addNode({x: event.offsetX * this.zoom.scale, y: event.offsetY * this.zoom.scale});
       }
     });
   }
 
   addNode(offset = {x: 0, y: 0}) {
-    const newNode = new Node(this.nodes.length, offset);
+    const newNode = new Node(this.nodes.length, this.zoom, offset);
     this.nodes.push(newNode);
     return this.nodes[this.nodes.length - 1];
   }

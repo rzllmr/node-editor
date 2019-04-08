@@ -118,7 +118,10 @@ class Anchor extends Proxy {
 
     // drag target point of graph
     $('.layer.graphs').on('mousemove', (event) => {
-      this.link.update(this, {x: event.offsetX, y: event.offsetY});
+      this.link.update(this, {
+        x: event.offsetX * this.node.zoom.scale,
+        y: event.offsetY * this.node.zoom.scale
+      });
     });
 
     // create and remove links when
@@ -129,8 +132,8 @@ class Anchor extends Proxy {
         $(event.currentTarget).addClass('target');
 
         const offset = {
-          x: event.offsetX + event.target.offsetLeft,
-          y: event.offsetY + event.target.offsetTop
+          x: event.offsetX * this.node.zoom.scale + event.target.offsetLeft,
+          y: event.offsetY * this.node.zoom.scale + event.target.offsetTop
         };
         const targetNode = this.resolve(event.currentTarget.id);
         const targetAnchor = targetNode.addAnchor(offset, end);

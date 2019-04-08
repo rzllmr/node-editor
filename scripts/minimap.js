@@ -1,16 +1,19 @@
 
 class Minimap {
   constructor(board) {
-    this.minimap = board.find('.minimap');
-    this.miniWindow = board.find('.mini.window');
+    this.minimap = board.element.find('.minimap');
+    this.miniWindow = board.element.find('.mini.window');
 
-    const layer = board.find('.layer');
+    this.zoom = board.zoom;
+    this.zoomInfo = this.minimap.find('.zoominfo');
+
+    const layer = board.element.find('.layer');
     this.scaleFactor = {
       x: this.minimap.width() / layer.width(),
       y: this.minimap.height() / layer.height()
     };
 
-    this.updateWindow('main');
+    this.updateWindow(board.id);
     this.registerMonitors();
   }
 
@@ -62,7 +65,13 @@ class Minimap {
 
   updateWindow(id) {
     // update window representation in minimap
+    this.zoomInfo.text(this.zoom.percent + '%');
     const board = $('#' + id);
+    const layer = board.find('.layer');
+    this.scaleFactor = {
+      x: this.minimap.width() / layer.width() / this.zoom.factor,
+      y: this.minimap.height() / layer.height() / this.zoom.factor
+    };
     this.miniWindow.css({
       left: board[0].scrollLeft * this.scaleFactor.x,
       top: board[0].scrollTop * this.scaleFactor.y,
@@ -76,10 +85,10 @@ class Minimap {
     const node = $('#' + id);
     const miniNode = this.minimap.find('#' + id + '-mini');
     miniNode.css({
-      left: node[0].offsetLeft * this.scaleFactor.x,
-      top: node[0].offsetTop * this.scaleFactor.y,
-      width: node[0].offsetWidth * this.scaleFactor.x,
-      height: node[0].offsetHeight * this.scaleFactor.y
+      left: node[0].offsetLeft / this.zoom.scale * this.scaleFactor.x,
+      top: node[0].offsetTop / this.zoom.scale * this.scaleFactor.y,
+      width: node[0].offsetWidth / this.zoom.scale * this.scaleFactor.x,
+      height: node[0].offsetHeight / this.zoom.scale * this.scaleFactor.y
     });
   }
 

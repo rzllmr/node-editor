@@ -1,10 +1,15 @@
 @font-face {
-  font-family: 'SourceSansPro';
-  src: url('../data/SourceSansPro-Regular.ttf')  format('truetype');
+  font-family: 'NotoSans';
+  src: url('../data/NotoSans-Regular.ttf')  format('truetype');
+}
+@font-face {
+  font-family: 'NotoSerif';
+  src: url('../data/NotoSerif-Regular.ttf')  format('truetype');
 }
 
 :root {
-  --font-sans: 'SourceSansPro', Fallback, sans-serif;
+  --font-sans: 'NotoSans', Fallback, sans-serif;
+  --font-serif: 'NotoSerif', Fallback, serif;
 
   --color-lightest: #f0f4f5;
   --color-light: #c7c7c7;
@@ -26,6 +31,9 @@
   --color-tool-theme: orange;
   --color-tool-remove: firebrick;
 
+  --color-in: #3CC47C;
+  --color-out: #FF3B3F;
+
   --color-variant: linear-gradient(to right, #6d0019, #a90329);
 }
 
@@ -36,8 +44,6 @@
   --color-text: var(--color-lightest);
   --color-text-highlight: var(--color-highlight);
   --color-graph: var(--color-light);
-  --color-in: #3CC47C;
-  --color-out: #FF3B3F;
 
   --color-menu: var(--color-darkest);
 
@@ -48,11 +54,9 @@
   --color-highlight: #0000EE;
 
   --color-node: var(--color-lightest);
-  --color-text: var(--color-darkest);
+  --color-text: black;
   --color-text-highlight: var(--color-highlight);
   --color-graph: var(--color-dark);
-  --color-in: #0D2;
-  --color-out: #F22;
 
   --color-menu: var(--color-lightest);
 

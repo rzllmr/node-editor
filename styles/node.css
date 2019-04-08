@@ -64,8 +64,7 @@
 }
 
 .node .label {
-  font-weight: bold;
-  font-size: 16px;
+  font-size: 13pt;
   border: none;
 }
 .node .label::placeholder {
@@ -74,7 +73,9 @@
 }
 
 .node .details {
-  font-size: 15px;
+  font-size: 9pt;
+  line-height: 1.5em;
+  letter-spacing: 0.08em;
   overflow-y: auto;
 }
 .node .details:empty:before{

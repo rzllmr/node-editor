@@ -1,9 +1,14 @@
 
 const Proxy = require('./proxy.js');
 
+/**
+ * handle selection for the board element
+ */
 class Selection {
   constructor(board) {
     this.board = board;
+    this.zoom = board.zoom;
+
     this.proxy = new Proxy();
     this.selection = new Set();
     this.removeButton = $('#remove.tool');
@@ -26,7 +31,10 @@ class Selection {
 
         if (target[0].tagName == 'svg') {
           if (!event.ctrlKey) this.clearSelection();
-          this.rectangleSelect({x: event.offsetX, y: event.offsetY});
+          this.rectangleSelect({
+            x: event.offsetX * this.zoom.scale,
+            y: event.offsetY * this.zoom.scale
+          });
         } else {
           if (event.ctrlKey) this.multiSelect(target[0].id);
           else this.singleSelect(target[0].id);
@@ -99,12 +107,12 @@ class Selection {
 
         // draw rectangle
         const difference = {
-          x: event.offsetX - this.rectOrigin.x,
-          y: event.offsetY - this.rectOrigin.y
+          x: event.offsetX * this.zoom.scale - this.rectOrigin.x,
+          y: event.offsetY * this.zoom.scale - this.rectOrigin.y
         };
         const selectionRect = {
-          x: (difference.x < 0) ? event.offsetX : this.rectOrigin.x,
-          y: (difference.y < 0) ? event.offsetY : this.rectOrigin.y,
+          x: (difference.x < 0) ? event.offsetX * this.zoom.scale : this.rectOrigin.x,
+          y: (difference.y < 0) ? event.offsetY * this.zoom.scale : this.rectOrigin.y,
           width: Math.abs(difference.x),
           height: Math.abs(difference.y)
         };

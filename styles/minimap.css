@@ -27,3 +27,11 @@
 .mini.mini-node.out {
   background: var(--color-out);
 }
+
+.zoominfo {
+  color: var(--color-lightest);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}

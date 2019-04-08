@@ -20,8 +20,9 @@ body {
 }
 
 .layer {
-  width: 3000px;
-  height: 2000px;
+  width: 9000px;
+  height: 6000px;
+  zoom: 1.0;
 }
 .layer.graphs {
   position: absolute;

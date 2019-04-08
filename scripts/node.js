@@ -9,9 +9,10 @@ const Anchor = require('./anchor.js');
  * .node representative to handle content
  */
 class Node extends Proxy {
-  constructor(id = null, position = {x: 0, y: 0}) {
+  constructor(id = null, zoom, position = {x: 0, y: 0}) {
     super(id);
 
+    this.zoom = zoom;
     this.minSize = {x: 180, y: 120};
 
     this.element = $('#template-node').clone();
@@ -64,14 +65,14 @@ class Node extends Proxy {
     this.element.on({
       mousedown: (event) => {
         if (event.button == 0) { // left click
-          this.cursorPosRel.x = event.offsetX + event.target.offsetLeft;
-          this.cursorPosRel.y = event.offsetY + event.target.offsetTop;
+          this.cursorPosRel.x = event.offsetX * this.zoom.scale + event.target.offsetLeft;
+          this.cursorPosRel.y = event.offsetY * this.zoom.scale + event.target.offsetTop;
 
           $(window).on({
             mousemove: (event) => {
               this.element.offset({
-                left: event.pageX - this.cursorPosRel.x,
-                top: event.pageY - this.cursorPosRel.y
+                left: (event.pageX * this.zoom.scale - this.cursorPosRel.x),
+                top: (event.pageY * this.zoom.scale - this.cursorPosRel.y)
               });
               for (const side in this.anchors) {
                 for (const i in this.anchors[side]) {
@@ -87,8 +88,8 @@ class Node extends Proxy {
         } else if (event.button == 2) { // right click
           this.element.one('mouseleave', (event) => {
             const offset = {
-              x: event.offsetX + event.target.offsetLeft,
-              y: event.offsetY + event.target.offsetTop
+              x: event.offsetX * this.zoom.scale + event.target.offsetLeft,
+              y: event.offsetY * this.zoom.scale + event.target.offsetTop
             };
             this.addAnchor(offset, 'source', true);
           });
@@ -101,9 +102,13 @@ class Node extends Proxy {
 
     this.element.find('.resizer').on({
       mousedown: (event) => {
-        this.cursorPosRel = {x: event.pageX, y: event.pageY};
+        this.cursorPosRel = {
+          x: event.pageX * this.zoom.scale,
+          y: event.pageY * this.zoom.scale
+        };
         $(window).on({
           mousemove: (event) => {
+            event.pageX *= this.zoom.scale; event.pageY *= this.zoom.scale;
             const width = this.element.width() + (event.pageX - this.cursorPosRel.x);
             const height = this.element.height() + (event.pageY - this.cursorPosRel.y);
             this.element.css({
