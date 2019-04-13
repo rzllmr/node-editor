@@ -64,36 +64,16 @@ class Node extends Proxy {
   registerElement() {
     this.element.on({
       mousedown: (event) => {
-        if (event.button == 0) { // left click
-          this.cursorPosRel.x = event.offsetX * this.zoom.scale + event.target.offsetLeft;
-          this.cursorPosRel.y = event.offsetY * this.zoom.scale + event.target.offsetTop;
+        if (event.button != 2) return;
+        // right click
 
-          $(window).on({
-            mousemove: (event) => {
-              this.element.offset({
-                left: (event.pageX * this.zoom.scale - this.cursorPosRel.x),
-                top: (event.pageY * this.zoom.scale - this.cursorPosRel.y)
-              });
-              for (const side in this.anchors) {
-                for (const i in this.anchors[side]) {
-                  this.anchors[side][i].link.update();
-                }
-              }
-            },
-            mouseup: () => {
-              $(window).off('mousemove mouseup');
-              $('.minimap').trigger('node:update', [this.id]);
-            }
-          });
-        } else if (event.button == 2) { // right click
-          this.element.one('mouseleave', (event) => {
-            const offset = {
-              x: event.offsetX * this.zoom.scale + event.target.offsetLeft,
-              y: event.offsetY * this.zoom.scale + event.target.offsetTop
-            };
-            this.addAnchor(offset, 'source', true);
-          });
-        }
+        this.element.one('mouseleave', (event) => {
+          const offset = {
+            x: event.offsetX * this.zoom.scale + event.target.offsetLeft,
+            y: event.offsetY * this.zoom.scale + event.target.offsetTop
+          };
+          this.addAnchor(offset, 'source', true);
+        });
       }
     });
 
@@ -106,26 +86,24 @@ class Node extends Proxy {
           x: event.pageX * this.zoom.scale,
           y: event.pageY * this.zoom.scale
         };
-        $(window).on({
-          mousemove: (event) => {
-            event.pageX *= this.zoom.scale; event.pageY *= this.zoom.scale;
-            const width = this.element.width() + (event.pageX - this.cursorPosRel.x);
-            const height = this.element.height() + (event.pageY - this.cursorPosRel.y);
-            this.element.css({
-              width: Math.max(width, this.minSize.x),
-              height: Math.max(height, this.minSize.y)
-            });
-            this.cursorPosRel = {x: event.pageX, y: event.pageY};
-            for (const side in this.anchors) {
-              for (const i in this.anchors[side]) {
-                this.anchors[side][i].link.update();
-              }
+        $(window).on('mousemove', (event) => {
+          event.pageX *= this.zoom.scale; event.pageY *= this.zoom.scale;
+          const width = this.element.width() + (event.pageX - this.cursorPosRel.x);
+          const height = this.element.height() + (event.pageY - this.cursorPosRel.y);
+          this.element.css({
+            width: Math.max(width, this.minSize.x),
+            height: Math.max(height, this.minSize.y)
+          });
+          this.cursorPosRel = {x: event.pageX, y: event.pageY};
+          for (const side in this.anchors) {
+            for (const i in this.anchors[side]) {
+              this.anchors[side][i].link.update();
             }
-          },
-          mouseup: (event) => {
-            $(window).off('mousemove mouseup');
-            $('.minimap').trigger('node:update', [this.id]);
           }
+        });
+        $(window).one('mouseup', (event) => {
+          $(window).off('mousemove');
+          $('.minimap').trigger('node:update', [this.id]);
         });
         event.stopPropagation();
       }
@@ -244,10 +222,20 @@ class Node extends Proxy {
     return this.element[0].className.endsWith('selected');
   }
 
+  move(offset) {
+    this.element.offset(offset);
+    for (const side in this.anchors) {
+      for (const i in this.anchors[side]) {
+        this.anchors[side][i].link.update();
+      }
+    }
+  }
+
   export() {
     const element = this.element[0];
     const object = {
       type: element.className.split(' ')[0],
+      id: element.id,
       posX: element.offsetLeft,
       posY: element.offsetTop,
       width: element.offsetWidth,

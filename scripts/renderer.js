@@ -9,5 +9,11 @@
     new FileHandler();
     new Options();
     new Board('main');
+
+    // disable default drag events
+    $(document).on('dragstart', (event) => {
+      event.preventDefault();
+      return false;
+    });
   });
 }(window.jQuery, window, document));

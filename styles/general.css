@@ -6,6 +6,7 @@ body {
   background: var(--background-color);
   height: 100%;
   margin: 0;
+  user-select: none;
 }
 
 :focus {

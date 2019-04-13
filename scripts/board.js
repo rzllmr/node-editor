@@ -16,7 +16,8 @@ class Board extends Proxy {
     super(id);
 
     this.element = $('#' + this.id);
-    this.nodes = [];
+    this.nodes = new Map();
+    this.nodeIdxMax = -1;
 
     this.register();
 
@@ -58,22 +59,21 @@ class Board extends Proxy {
       },
       mousedown: (event) => {
         if (event.button != 1) return;
+        // middle click
+
         this.scrollPos = {x: event.clientX, y: event.clientY};
-        const originalTarget = event.target;
-        originalTarget.style.cursor = 'grabbing';
+        event.target.style.cursor = 'grabbing';
 
-        $(window).on({
-          mousemove: (event) => {
-            this.element[0].scrollLeft += this.scrollPos.x - event.clientX;
-            this.element[0].scrollTop += this.scrollPos.y - event.clientY;
-            this.scrollPos = {x: event.clientX, y: event.clientY};
+        $(window).on('mousemove', (event) => {
+          this.element[0].scrollLeft += this.scrollPos.x - event.clientX;
+          this.element[0].scrollTop += this.scrollPos.y - event.clientY;
+          this.scrollPos = {x: event.clientX, y: event.clientY};
 
-            $('.minimap').trigger('window:update', [this.id]);
-          },
-          mouseup: (event) => {
-            originalTarget.style.cursor = 'default';
-            $(window).off('mousemove mouseup');
-          }
+          $('.minimap').trigger('window:update', [this.id]);
+        });
+        $(window).one('mouseup', (event) => {
+          event.target.style.cursor = 'default';
+          $(window).off('mousemove');
         });
         event.preventDefault();
         event.stopPropagation();
@@ -91,15 +91,14 @@ class Board extends Proxy {
     });
   }
 
-  addNode(offset = {x: 0, y: 0}) {
-    const newNode = new Node(this.nodes.length, this.zoom, offset);
-    this.nodes.push(newNode);
-    return this.nodes[this.nodes.length - 1];
+  addNode(offset = {x: 0, y: 0}, id = null) {
+    if (!id) id = ++this.nodeIdxMax;
+    else if (id > this.nodeIdxMax) this.nodeIdxMax = id;
+    this.nodes.set(id, new Node(id, this.zoom, offset));
+    return this.nodes.get(id);
   }
   removeNode(node) {
-    this.nodes = this.nodes.filter((value) => {
-      return value != node;
-    });
+    this.nodes.delete(node.id);
   }
 }
 

@@ -9,7 +9,7 @@ class FileHandler {
     this.saveButton = $('#save.tool');
     this.loadButton = $('#load.tool');
 
-    this.filePath = './save.json';
+    this.dialog = require('electron').remote.dialog;
 
     this.register();
   }
@@ -29,7 +29,11 @@ class FileHandler {
 
     const content = JSON.stringify(board).replace(/},/g, '},\n');
 
-    fs.writeFile(this.filePath, content, 'utf8', (error) => {
+    const filePath = this.dialog.showSaveDialog({
+      filters: [{name: 'Save File', extensions: ['json']}]
+    });
+    if (!filePath) return;
+    fs.writeFile(filePath, content, 'utf8', (error) => {
       if (error) {
         alert(`An error ocurred creating the file ${filePath}:\n${error.message}`);
       }
@@ -37,9 +41,14 @@ class FileHandler {
   }
 
   load() {
-    fs.readFile(this.filePath, 'utf8', (error, content) => {
+    const filePaths = this.dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [{name: 'Save File', extensions: ['json']}]
+    });
+    if (!filePaths) return;
+    fs.readFile(filePaths[0], 'utf8', (error, content) => {
       if (error) {
-        alert(`An error ocurred reading the file ${filePath}:\n${error.message}`);
+        alert(`An error ocurred reading the file ${filePaths[0]}:\n${error.message}`);
       } else {
         const classes = new Map();
         const board = JSON.parse(content);

@@ -37,7 +37,7 @@
   transform: translate(-50%, -50%);
 }
 .anchor.top.target {
-  transform: translate(-50%, -55%);
+  transform: translate(-50%, -62%);
 }
 .anchor.right {
   right: 0;
@@ -47,7 +47,7 @@
   transform: translate(50%, -50%);
 }
 .anchor.right.target {
-  transform: translate(55%, -50%);
+  transform: translate(58%, -50%);
 }
 .anchor.bottom {
   left: 50%;
@@ -57,7 +57,7 @@
   transform: translate(-50%, 50%);
 }
 .anchor.bottom.target {
-  transform: translate(-50%, 55%);
+  transform: translate(-50%, 52%);
 }
 .anchor.left {
   left: 0;
@@ -67,5 +67,5 @@
   transform: translate(-50%, -50%);
 }
 .anchor.left.target {
-  transform: translate(-55%, -50%);
+  transform: translate(-58%, -50%);
 }

@@ -108,4 +108,5 @@
 }
 .node .resizer i {
   transform: rotate(-45deg);
+  pointer-events: none;
 }
