@@ -1,4 +1,7 @@
 
+/**
+ * .minimap representative to visualize board layout and view window
+ */
 class Minimap {
   constructor(board) {
     this.minimap = board.element.find('.minimap');

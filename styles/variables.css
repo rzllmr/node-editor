@@ -33,32 +33,30 @@
 
   --color-in: #3CC47C;
   --color-out: #FF3B3F;
-
-  --color-variant: linear-gradient(to right, #6d0019, #a90329);
 }
 
 :root.dark {
   --color-highlight: rgb(229, 151, 0);
+  --divider-lf: 22%;
+  --divider-lt: 34%;
 
   --color-node: var(--color-darkest);
   --color-text: var(--color-lightest);
   --color-text-highlight: var(--color-highlight);
   --color-graph: var(--color-light);
-
   --color-menu: var(--color-darkest);
-
   --color-button: var(--color-dark);
 }
 
 :root.light {
   --color-highlight: #0000EE;
+  --divider-lf: 62%;
+  --divider-lt: 74%;
 
   --color-node: var(--color-lightest);
   --color-text: black;
   --color-text-highlight: var(--color-highlight);
   --color-graph: var(--color-dark);
-
   --color-menu: var(--color-lightest);
-
   --color-button: var(--color-light);
 }

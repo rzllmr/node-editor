@@ -1,6 +1,6 @@
 {
   "name": "pin-board",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Plan with nodes and links",
   "main": "main.js",
   "scripts": {

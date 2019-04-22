@@ -9,18 +9,15 @@ const Anchor = require('./anchor.js');
  * .node representative to handle content
  */
 class Node extends Proxy {
-  constructor(id = null, zoom, position = {x: 0, y: 0}) {
+  constructor(id = null, zoom, colorPicker) {
     super(id);
 
     this.zoom = zoom;
+    this.colorPicker = colorPicker;
     this.minSize = {x: 180, y: 120};
 
     this.element = $('#template-node').clone();
-    this.element.css({
-      left: position.x - this.minSize.x / 2,
-      top: position.y - this.minSize.y / 2,
-      display: ''
-    });
+    this.element.css('display', '');
     if (id == null) {
       this.element.removeAttr('id');
     } else {
@@ -29,7 +26,8 @@ class Node extends Proxy {
     this.element.appendTo('.layer.nodes');
     this.registerElement();
 
-    this.position = position;
+    this.element.find('.divider')[0].style.setProperty('--hue', this.colorPicker.currentHue);
+
     this.cursorPosRel = {x: 0, y: 0};
 
     this.anchors = {
@@ -45,7 +43,6 @@ class Node extends Proxy {
   destroy() {
     $('.minimap').trigger('node:delete', [this.id]);
 
-    this.position = undefined;
     this.cursorPosRel = undefined;
 
     for (const side in this.anchors) {
@@ -107,6 +104,10 @@ class Node extends Proxy {
         });
         event.stopPropagation();
       }
+    });
+
+    this.element.find('.divider').on('click', (event) => {
+      this.colorPicker.attach(event.target);
     });
   }
 
@@ -222,8 +223,15 @@ class Node extends Proxy {
     return this.element[0].className.endsWith('selected');
   }
 
-  move(offset) {
-    this.element.offset(offset);
+  move(offset, useOffset = true) {
+    if (useOffset) {
+      this.element.offset(offset);
+    } else {
+      this.element.css({
+        left: offset.left - this.element[0].offsetWidth / 2,
+        top: offset.top - this.element[0].offsetHeight / 2
+      });
+    }
     for (const side in this.anchors) {
       for (const i in this.anchors[side]) {
         this.anchors[side][i].link.update();
@@ -240,6 +248,7 @@ class Node extends Proxy {
       posY: element.offsetTop,
       width: element.offsetWidth,
       height: element.offsetHeight,
+      hue: element.querySelector('.divider').style.getPropertyValue('--hue'),
       label: element.querySelector('input.label').value,
       details: element.querySelector('div.details').innerText
     };
@@ -248,7 +257,7 @@ class Node extends Proxy {
 
   static import(object) {
     const board = this.proxy.resolve('main');
-    const element = board.addNode().element;
+    const element = board.addNode(object.id, object.hue).element;
 
     element.css({
       left: object.posX,
@@ -256,6 +265,7 @@ class Node extends Proxy {
       width: object.width,
       height: object.height
     });
+    element.find('.divider')[0].style.setProperty('--hue', object.hue);
     element.find('input.label').val(object.label);
     element.find('div.details').text(object.details);
     $('.minimap').trigger('node:update', [element[0].id]);

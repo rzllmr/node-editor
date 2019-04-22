@@ -1,10 +1,10 @@
 
 ### Third-party ###
 */jquery-*.js
-data/*
+data/
 package-lock.json
-save.json
-
+save*.json
+styles/fontawesome*/
 
 ### Atom ###
 # User Preferences
