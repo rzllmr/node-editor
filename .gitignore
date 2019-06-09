@@ -2,8 +2,8 @@
 ### Third-party ###
 */jquery-*.js
 data/
-package-lock.json
-save*.json
+*.json
+!package.json
 styles/fontawesome*/
 
 ### Atom ###

@@ -132,9 +132,13 @@ class Anchor extends Proxy {
         $(event.currentTarget).addClass('target');
 
         const offset = {
-          x: event.offsetX * this.node.zoom.scale + event.target.offsetLeft,
-          y: event.offsetY * this.node.zoom.scale + event.target.offsetTop
+          x: event.offsetX * this.node.zoom.scale,
+          y: event.offsetY * this.node.zoom.scale
         };
+        if (event.target != event.currentTarget) {
+          offset.x += event.target.offsetLeft;
+          offset.y += event.target.offsetTop;
+        }
         const targetNode = this.resolve(event.currentTarget.id);
         const targetAnchor = targetNode.addAnchor(offset, end);
         this.connectLink(targetAnchor);

@@ -40,13 +40,21 @@ class Board extends Proxy {
     $(window).trigger('resize');
   }
 
+  clear() {
+    this.nodes.forEach((node) => {
+      this.colorPicker.removeNode(node.id);
+      this.nodes.delete(Number(node.id));
+      node.destroy();
+    });
+    this.nodeIdxMax = -1;
+  }
+
   register() {
     $(window).on({
       mousewheel: (event) => {
         const scaleBefore = this.zoom.scale;
 
-        const scroll = event.originalEvent.wheelDeltaY / 120;
-        this.zoom.change(scroll);
+        this.zoom.change(Math.sign(event.originalEvent.wheelDeltaY));
 
         // adjust window scrolling to zoom to mouse position
         const scrollShift = {
@@ -99,8 +107,10 @@ class Board extends Proxy {
   }
 
   addNode(id = null, hue = null) {
+    id = id == null ? null : Number(id);
     if (!id) id = ++this.nodeIdxMax;
     else if (id > this.nodeIdxMax) this.nodeIdxMax = id;
+
     if (hue == null) this.colorPicker.addNode(id);
     else this.colorPicker.addNode(id, hue);
     this.nodes.set(id, new Node(id, this.zoom, this.colorPicker));
@@ -108,7 +118,7 @@ class Board extends Proxy {
   }
   removeNode(node) {
     this.colorPicker.removeNode(node.id);
-    this.nodes.delete(node.id);
+    this.nodes.delete(Number(node.id));
   }
 }
 

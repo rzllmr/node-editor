@@ -26,6 +26,7 @@
   based on background pattern from Toptal Subtle Patterns */
   --color-text-faded: var(--color-neutral);
 
+  --color-tool-new: mediumorchid;
   --color-tool-save: mediumorchid;
   --color-tool-load: mediumorchid;
   --color-tool-theme: orange;

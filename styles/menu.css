@@ -39,7 +39,13 @@
   color: var(--color-text-faded);
   pointer-events: none;
 }
+#new.tool:hover {
+  background: var(--color-tool-new);
+}
 #save.tool:hover {
+  background: var(--color-tool-save);
+}
+#save-as.tool:hover {
   background: var(--color-tool-save);
 }
 #load.tool:hover {

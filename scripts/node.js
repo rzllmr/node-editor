@@ -71,6 +71,9 @@ class Node extends Proxy {
           };
           this.addAnchor(offset, 'source', true);
         });
+        this.element.one('mouseup', (event) => {
+          this.element.off('mouseleave');
+        });
       }
     });
 
