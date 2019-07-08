@@ -1,11 +1,4 @@
 
-.color-picker {
-  position: absolute;
-  z-index: 1;
-  width: 200px;
-  background: var(--color-button);
-}
-
 .color-picker .divider {
   width: 100%;
   height: 5px;
@@ -33,6 +26,7 @@
   line-height: 10px;
   text-align: center;
   color: var(--color-lightest);
+  background: var(--color-dark);
 }
 #color-reset i {
   pointer-events: none;

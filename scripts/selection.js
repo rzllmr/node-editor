@@ -1,5 +1,6 @@
 
 const Proxy = require('./proxy.js');
+const ColorPicker = require('./color-picker.js');
 
 /**
  * handle selection for the board element
@@ -12,6 +13,7 @@ class Selection {
     this.proxy = new Proxy();
     this.selection = new Set();
     this.removeButton = $('#remove.tool');
+    this.colorPicker = new ColorPicker(this.selection);
 
     this.rect = $('rect#selection');
     this.rectOrigin = {x: 0, y: 0};
@@ -72,6 +74,8 @@ class Selection {
         const target = $(event.target).closest('.layer, .node, .sign');
         if (target.length == 0) return;
 
+        this.colorPicker.updatePresets();
+
         if (this.drawingRectangle) {
           this.drawingRectangle = false;
 
@@ -96,6 +100,7 @@ class Selection {
     const object = this.proxy.resolve(id);
     object.select();
     this.selection.add(object);
+    if (this.selection.size == 1) this.colorPicker.setSlider(object);
     this.updateButton();
   }
 
@@ -107,6 +112,7 @@ class Selection {
     } else {
       object.select();
       this.selection.add(object);
+      if (this.selection.size == 1) this.colorPicker.setSlider(object);
     }
     this.updateButton();
   }

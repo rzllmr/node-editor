@@ -7,7 +7,6 @@ const Node = require('./node.js');
 const Selection = require('./selection.js');
 const Minimap = require('./minimap.js');
 const Zoom = require('./zoom.js');
-const ColorPicker = require('./color-picker.js');
 
 /**
  * .board representative to handle nodes
@@ -35,14 +34,11 @@ class Board extends Proxy {
     this.minimap = new Minimap(this);
     $('.minimap').trigger('window:update', [this.id]);
 
-    this.colorPicker = new ColorPicker(this);
-
     $(window).trigger('resize');
   }
 
   clear() {
     this.nodes.forEach((node) => {
-      this.colorPicker.removeNode(node.id);
       this.nodes.delete(Number(node.id));
       node.destroy();
     });
@@ -111,13 +107,13 @@ class Board extends Proxy {
     if (!id) id = ++this.nodeIdxMax;
     else if (id > this.nodeIdxMax) this.nodeIdxMax = id;
 
-    if (hue == null) this.colorPicker.addNode(id);
-    else this.colorPicker.addNode(id, hue);
-    this.nodes.set(id, new Node(id, this.zoom, this.colorPicker));
+    const currentHue = this.selection.colorPicker.currentHue;
+    this.selection.colorPicker.addNode(id, hue === null ? currentHue : hue);
+    this.nodes.set(id, new Node(id, this.zoom, currentHue));
     return this.nodes.get(id);
   }
   removeNode(node) {
-    this.colorPicker.removeNode(node.id);
+    this.selection.colorPicker.removeNode(node.id);
     this.nodes.delete(Number(node.id));
   }
 }

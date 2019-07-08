@@ -9,8 +9,17 @@
   box-shadow: var(--shadow-ui);
 }
 
-#toolbar {
-  padding: 5px;
+h1 {
+  font-size: 11px;
+  width: 100%;
+  padding: 0 5px;
+  color: var(--color-text-faded);
+  margin: 5px 0 0 0;
+}
+
+hr {
+  border-color: var(--color-text-faded);
+  margin: 0;
 }
 
 .tool {
@@ -23,8 +32,15 @@
   border-radius: 50%;
   cursor: pointer;
   padding: 0;
+  margin: 5px 0;
   transition: 0.3s;
   font-size: 15px;
+}
+.tool:first-child{
+  margin-left: 5px;
+}
+.tool:last-child{
+  margin-right: 5px;
 }
 .tool:focus {
   outline: none;

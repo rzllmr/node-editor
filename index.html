@@ -28,13 +28,27 @@
   </head>
   <body>
     <div id="menu">
-      <div id="toolbar">
+      <h1>board</h1>
+      <hr>
+      <div id="board-tools" class="toolbar">
         <button class="tool" id="new"><i class="fas fa-file"></i></button>
         <button class="tool" id="save"><i class="fas fa-save"></i></button>
         <button class="tool" id="save-as"><i class="far fa-save"></i></button>
         <button class="tool" id="load"><i class="fas fa-folder-open"></i></button>
         <button class="tool" id="theme"><i class="far fa-lightbulb"></i></button>
+      </div>
+      <h1>node</h1>
+      <hr>
+      <div id="node-tools" class="toolbar">
         <button class="tool" id="remove" disabled><i class="fas fa-times"></i></button>
+        <div class="color-picker">
+          <div class="divider"></div>
+          <input class="color-slider" type="range" min="0" max="360" value="0">
+          <div class="color-presets">
+            <div id="color-reset" class="color-preset"><i class="fas fa-undo-alt"></i></div>
+            <div id="color-preset-template" class="color-preset" style="display: none"></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="board" id="main">
@@ -64,14 +78,6 @@
         <div class="zoominfo">100%</div>
         <div class="mini window"></div>
         <div class="mini mini-node" id="mini-node-template" style="display:none"></div>
-      </div>
-      <div class="color-picker" style="display: none">
-        <div class="divider"></div>
-        <input class="color-slider" type="range" min="0" max="360" value="180">
-        <div class="color-presets">
-          <div id="color-reset" class="color-preset"><i class="fas fa-undo-alt"></i></div>
-          <div id="color-preset-template" class="color-preset" style="display: none"></div>
-        </div>
       </div>
     </div>
   </body>

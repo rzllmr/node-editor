@@ -9,11 +9,10 @@ const Anchor = require('./anchor.js');
  * .node representative to handle content
  */
 class Node extends Proxy {
-  constructor(id = null, zoom, colorPicker) {
+  constructor(id = null, zoom, hue) {
     super(id);
 
     this.zoom = zoom;
-    this.colorPicker = colorPicker;
     this.minSize = {x: 180, y: 120};
 
     this.element = $('#template-node').clone();
@@ -26,7 +25,7 @@ class Node extends Proxy {
     this.element.appendTo('.layer.nodes');
     this.registerElement();
 
-    this.element.find('.divider')[0].style.setProperty('--hue', this.colorPicker.currentHue);
+    this.color = hue;
 
     this.cursorPosRel = {x: 0, y: 0};
 
@@ -107,10 +106,6 @@ class Node extends Proxy {
         });
         event.stopPropagation();
       }
-    });
-
-    this.element.find('.divider').on('click', (event) => {
-      this.colorPicker.attach(event.target);
     });
   }
 
@@ -240,6 +235,15 @@ class Node extends Proxy {
         this.anchors[side][i].link.update();
       }
     }
+  }
+
+  set color(hue) {
+    this.hue = hue;
+    this.element.find('.divider')[0].style.setProperty('--hue', this.hue);
+  }
+
+  get color() {
+    return this.hue;
   }
 
   export() {

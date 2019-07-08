@@ -4,8 +4,8 @@
  * used colors are tracked to be selectable directly
  */
 class ColorPicker {
-  constructor(board) {
-    this.element = board.element.find('.color-picker');
+  constructor(selection) {
+    this.element = $('#menu .color-picker');
     this.dividerPreview = this.element.find('.divider');
     this.slider = this.element.find('.color-slider');
     this.presetContainer = this.element.find('.color-presets');
@@ -13,8 +13,11 @@ class ColorPicker {
     this.reset = this.element.find('#color-reset');
 
     this.presets = new Map();
-    this.attachedDivider = null;
-    this.currentHue = 0;
+    this.selection = selection;
+    this.currentHue = '0';
+
+    this.lastSelection = new Set();
+    this.initialHue = new Map();
 
     this.register();
   }
@@ -22,61 +25,45 @@ class ColorPicker {
   register() {
     // update divider preview with slider
     this.slider.on('input', (event) => {
-      const hue = event.target.value;
-      this.dividerPreview[0].style.setProperty('--hue', hue);
+      this.currentHue = event.target.value;
+      this.dividerPreview[0].style.setProperty('--hue', this.currentHue);
+      this.apply();
     });
 
     // discard color changes of divider preview
-    this.reset.on('click', (event) => {
-      const hue = event.target.style.getPropertyValue('--hue');
-      this.slider[0].value = hue;
-      this.slider.trigger('input');
-    });
-  }
-
-  attach(divider) {
-    const node = divider.parentNode;
-
-    // overlay color picker menu
-    this.element.css({
-      left: node.offsetLeft + divider.offsetLeft,
-      top: node.offsetTop + divider.offsetTop,
-      width: divider.offsetWidth
-    });
-    // assign node hue to reset preview
-    const hue = divider.style.getPropertyValue('--hue');
-    this.reset[0].style.setProperty('--hue', hue);
-    this.reset.click();
-    this.element.show();
-
-    this.attachedDivider = divider;
-
-    // apply changes when clicking outside of color menu
-    const picker = this;
-    $(window).on('mousedown', function clickOutside(event) {
-      if ($(event.target).closest('.color-picker').length == 0) {
-        $(window).off('mousedown', clickOutside);
-        picker.apply();
+    this.reset.on('click', () => {
+      for (const [node, hue] of this.initialHue.entries()) {
+        node.color = hue;
+        this.setSlider(node);
       }
+      this.initialHue.clear();
     });
   }
 
   apply() {
-    const nodeId = Number(this.attachedDivider.parentNode.id);
-    const oldHue = Number(this.attachedDivider.style.getPropertyValue('--hue'));
-    const newHue = Number(this.dividerPreview[0].style.getPropertyValue('--hue'));
+    const initialChange = this.initialHue.size === 0;
+    this.selection.forEach((_, node) => {
+      if (node.element[0].className.split(' ')[0] === 'node') {
+        // store initial color at first change
+        if (initialChange) this.initialHue.set(node, node.color);
+        // change hue of node's divider
+        node.color = this.currentHue;
+      }
+    });
+  }
 
-    if (oldHue != newHue) {
-      // update color presets
-      this.removeNode(nodeId, oldHue);
-      this.addNode(nodeId, newHue);
+  setSlider(node) {
+    this.slider[0].value = node.color;
+    this.currentHue = this.slider[0].value;
+    this.dividerPreview[0].style.setProperty('--hue', this.currentHue);
+  }
 
-      // change hue of node's divider
-      this.attachedDivider.style.setProperty('--hue', newHue);
-      this.currentHue = newHue;
+  updatePresets() {
+    for (const [node, hue] of this.initialHue.entries()) {
+      this.removeNode(node.id, hue);
+      this.addNode(node.id);
     }
-
-    this.element.hide();
+    this.initialHue.clear();
   }
 
   addNode(id, hue = this.currentHue) {

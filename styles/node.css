@@ -44,7 +44,6 @@
 .node .divider {
   height: 5px;
   background: linear-gradient(to right, hsl(var(--hue), 100%, var(--divider-lf)), hsl(var(--hue), 96%, var(--divider-lt)));
-  cursor: pointer;
 }
 
 .node .body {
