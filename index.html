@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="styles/minimap.css">
     <link rel="stylesheet" href="styles/node.css">
     <link rel="stylesheet" href="styles/sign.css">
+    <link rel="stylesheet" href="styles/treeview.css">
     <link rel="stylesheet" href="styles/variables.css">
 
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
@@ -28,6 +29,7 @@
   </head>
   <body>
     <div id="menu">
+      <div class="overlay" style="display:none"></div>
       <h1>board</h1>
       <hr>
       <div id="board-tools" class="toolbar">
@@ -36,6 +38,31 @@
         <button class="tool" id="save-as"><i class="far fa-save"></i></button>
         <button class="tool" id="load"><i class="fas fa-folder-open"></i></button>
         <button class="tool" id="theme"><i class="far fa-lightbulb"></i></button>
+      </div>
+      <h1>tabs</h1>
+      <hr>
+      <div id="board-tree">
+        <div id="tree-tools" class="toolbar">
+          <button class="tool small" id="new-board"><i class="far fa-file"></i></button>
+          <button class="tool small" id="new-folder"><i class="far fa-folder"></i></button>
+          <button class="tool small" id="rnm-board"><i class="fas fa-ellipsis-h"></i></button>
+          <button class="tool small" id="del-board"><i class="fas fa-times"></i></button>
+          <input type="text" class="selector" style="display:none"></input>
+          <span id="del-confirm" style="display:none">
+            <span>Delete board?</span>
+            <button class="tool small" id="apply-del"><i class="fas fa-check"></i></button>
+            <button class="tool small" id="discard-del"><i class="fas fa-times"></i></button>
+          </span>
+        </div>
+        <span class="insert-line" style="display:none"></span>
+        <ul class="treeview">
+          <li class="branch" id="branch-template" style="display:none">
+            <span class="branch title"><i class="fas fa-folder"></i><span class="selector">branch</span></span>
+            <ul class="nested" style="display:none">
+            </ul>
+          </li>
+          <li class="leaf" id="leaf-template" style="display:none"><i class="far fa-file"></i><span class="selector">leaf</span></li>
+        </ul>
       </div>
       <h1>node</h1>
       <hr>

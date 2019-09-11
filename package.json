@@ -1,6 +1,6 @@
 {
   "name": "pin-board",
-  "version": "0.0.20",
+  "version": "0.0.23",
   "description": "Plan with nodes and links",
   "main": "main.js",
   "scripts": {
@@ -19,6 +19,9 @@
   "build": {
     "win": {
       "target": "portable"
+    },
+    "linux": {
+      "target": "AppImage"
     }
   }
 }

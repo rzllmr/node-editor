@@ -37,7 +37,9 @@
 }
 
 :root.dark {
-  --color-highlight: rgb(229, 151, 0);
+  --color-highlight: rgba(229, 151, 0, 1.0);
+  --color-highlight-faded: rgba(229, 151, 0, 0.5);
+  --color-highlight-faded-o: rgb(135, 96, 20);
   --divider-lf: 22%;
   --divider-lt: 34%;
 
@@ -50,7 +52,8 @@
 }
 
 :root.light {
-  --color-highlight: #0000EE;
+  --color-highlight: rgb(0, 0, 238, 1.0);
+  --color-highlight-faded: rgb(0, 0, 238, 0.5);
   --divider-lf: 62%;
   --divider-lt: 74%;
 
