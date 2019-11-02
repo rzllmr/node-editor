@@ -13,10 +13,12 @@ class Graph extends Proxy {
   constructor(id = null, anchor) {
     super(id);
 
-    this.element = $('#template-graph').clone();
+    this.boardId = anchor.node.board[0].id;
+
+    this.element = $('#templates .graph').clone();
+    this.element.removeClass('template');
     this.element.attr('id', id);
-    this.element.appendTo('.layer.graphs');
-    this.element.show();
+    this.element.appendTo(`#${this.boardId} .layer.graphs`);
 
     this.anchors = new Connection(anchor);
 
@@ -48,10 +50,10 @@ class Graph extends Proxy {
   }
 
   addHoverArea() {
-    this.hoverArea = $('#template-graph-area').clone();
+    this.hoverArea = $('#templates .graph-area').clone();
+    this.hoverArea.removeClass('template');
     this.hoverArea.attr('id', this.id + '_hover');
     this.hoverArea.insertAfter(this.element);
-    this.hoverArea.show();
 
     this.hoverArea.on({
       mouseenter: () => {
@@ -254,7 +256,7 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
       }
     }
     otherAnchor.node.element[0].className = 'node' + direction;
-    $('.minimap').trigger('node:highlight', [otherAnchor.node.id]);
+    $('#' + this.boardId).find('.minimap').trigger('node:highlight', [otherAnchor.node.id]);
   }
 
   export() {

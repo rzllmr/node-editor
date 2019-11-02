@@ -4,13 +4,11 @@
   $(function() {
     const FileHandler = require('./scripts/filehandler.js');
     const Options = require('./scripts/options.js');
-    const TreeView = require('./scripts/treeview.js');
-    const Board = require('./scripts/board.js');
+    const BoardTree = require('./scripts/boardtree.js');
 
     new FileHandler();
     new Options();
-    new TreeView('#board-tree');
-    new Board('main');
+    new BoardTree();
 
     // disable default drag events
     $(document).on('dragstart', (event) => {

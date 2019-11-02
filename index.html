@@ -78,14 +78,14 @@
         </div>
       </div>
     </div>
-    <div class="board" id="main">
+    <div class="board template" id="templates">
       <svg class="layer graphs">
-        <rect id="selection" width="0" height="0" style="display: none" />
-        <path class="graph" id="template-graph" d="M 0 0 L 0 0" style="display: none" />
-        <path class="graph-area" id="template-graph-area" d="M 0 0 L 0 0" style="display: none" />
+        <rect class="selection" width="0" height="0" style="display: none" />
+        <path class="graph template" d="M 0 0 L 0 0" />
+        <path class="graph-area template" d="M 0 0 L 0 0" />
       </svg>
       <div class="layer nodes">
-        <div class="node" id="template-node" style="display: none">
+        <div class="node template">
           <div class="head">
             <input type="text" class="label" placeholder="Enter title..." readonly="true">
           </div>
@@ -93,18 +93,18 @@
           <div class="body">
             <div class="details" data-text="Enter details..." contentEditable="false"></div>
           </div>
-          <div class="anchor source" id="template-anchor-source" style="display: none"><i class="fas fa-circle"></i></div>
-          <div class="anchor target" id="template-anchor-target" style="display: none"><i class="fas fa-caret-right"></i></div>
+          <div class="anchor source template"><i class="fas fa-circle"></i></div>
+          <div class="anchor target template"><i class="fas fa-caret-right"></i></div>
           <div class="resizer"><i class="fas fa-wifi"></i></div>
         </div>
-        <div class="sign" id="template-sign" style="display: none">
+        <div class="sign template">
           <div class="details" data-text="Enter..." contentEditable="false"></div>
         </div>
       </div>
       <div class="minimap">
         <div class="zoominfo">100%</div>
         <div class="mini window"></div>
-        <div class="mini mini-node" id="mini-node-template" style="display:none"></div>
+        <div class="mini mini-node template"></div>
       </div>
     </div>
   </body>

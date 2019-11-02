@@ -4,16 +4,17 @@
  */
 class Minimap {
   constructor(board) {
-    this.minimap = board.element.find('.minimap');
+    this.board = board.element;
+    this.element = board.element.find('.minimap');
     this.miniWindow = board.element.find('.mini.window');
 
     this.zoom = board.zoom;
-    this.zoomInfo = this.minimap.find('.zoominfo');
+    this.zoomInfo = this.element.find('.zoominfo');
 
     const layer = board.element.find('.layer');
     this.scaleFactor = {
-      x: this.minimap.width() / layer.width(),
-      y: this.minimap.height() / layer.height()
+      x: this.element.width() / layer.width(),
+      y: this.element.height() / layer.height()
     };
 
     this.updateWindow(board.id);
@@ -22,62 +23,61 @@ class Minimap {
 
   registerMonitors() {
     // move window position with left click in minimap
-    this.minimap.on({
+    this.element.on({
       mousedown: (event) => {
         if (event.button != 0) return;
         this.moveWindow(event.pageX, event.pageY);
-        this.minimap.on('mousemove', (event) => {
+        this.element.on('mousemove', (event) => {
           this.moveWindow(event.pageX, event.pageY);
         });
       },
       mouseup: (event) => {
-        this.minimap.off('mousemove');
+        this.element.off('mousemove');
       }
     });
 
     // catch custom events that notify changes
-    this.minimap.on({
-      'window:update': (event, id) => {
-        this.updateWindow(id);
+    this.element.on({
+      'window:update': (event) => {
+        this.updateWindow();
       },
       'node:create': (event, id) => {
         const node = $('#' + id);
-        const miniNode = this.minimap.find('#mini-node-template').clone();
+        const miniNode = $('#templates .mini-node').clone();
+        miniNode.removeClass('template');
         miniNode.attr('id', node[0].id + '-mini');
-        miniNode.appendTo(this.minimap[0]);
+        miniNode.appendTo(this.element[0]);
 
         this.updateNode(id);
-        miniNode.show();
       },
       'node:update': (event, id) => {
         this.updateNode(id);
       },
       'node:delete': (event, id) => {
-        this.minimap.find('#' + id + '-mini').remove();
+        this.element.find('#' + id + '-mini').remove();
       },
       'node:highlight': (event, id) => {
         const nodeClass = $('#' + id)[0].className.split(' ');
         if (nodeClass.length > 1) {
-          this.minimap.find('#' + id + '-mini')[0].className = 'mini mini-node ' + nodeClass.pop();
+          this.element.find('#' + id + '-mini')[0].className = 'mini mini-node ' + nodeClass.pop();
         } else {
-          this.minimap.find('#' + id + '-mini')[0].className = 'mini mini-node';
+          this.element.find('#' + id + '-mini')[0].className = 'mini mini-node';
         }
       }
     });
   }
 
-  updateWindow(id) {
+  updateWindow() {
     // update window representation in minimap
     this.zoomInfo.text(this.zoom.percent + '%');
-    const board = $('#' + id);
-    const layer = board.find('.layer');
+    const layer = this.board.find('.layer');
     this.scaleFactor = {
-      x: this.minimap.width() / layer.width() / this.zoom.factor,
-      y: this.minimap.height() / layer.height() / this.zoom.factor
+      x: this.element.width() / layer.width() / this.zoom.factor,
+      y: this.element.height() / layer.height() / this.zoom.factor
     };
     this.miniWindow.css({
-      left: board[0].scrollLeft * this.scaleFactor.x,
-      top: board[0].scrollTop * this.scaleFactor.y,
+      left: this.board[0].scrollLeft * this.scaleFactor.x,
+      top: this.board[0].scrollTop * this.scaleFactor.y,
       width: $(window).width() * this.scaleFactor.x,
       height: $(window).height() * this.scaleFactor.y
     });
@@ -86,7 +86,7 @@ class Minimap {
   updateNode(id) {
     // update node representation in minimap
     const node = $('#' + id);
-    const miniNode = this.minimap.find('#' + id + '-mini');
+    const miniNode = this.element.find('#' + id + '-mini');
     miniNode.css({
       left: node[0].offsetLeft / this.zoom.scale * this.scaleFactor.x,
       top: node[0].offsetTop / this.zoom.scale * this.scaleFactor.y,
@@ -98,15 +98,15 @@ class Minimap {
   moveWindow(pageX, pageY) {
     // mouse offset relative to minimap
     const mouseOffset = {
-      x: pageX - this.minimap[0].offsetLeft,
-      y: pageY - this.minimap[0].offsetTop
+      x: pageX - this.element[0].offsetLeft,
+      y: pageY - this.element[0].offsetTop
     };
     // limit offset to keep window in minimap
     const mouseLimit = {
       minX: this.miniWindow[0].offsetWidth / 2,
       minY: this.miniWindow[0].offsetHeight / 2,
-      maxX: this.minimap[0].offsetWidth - this.miniWindow[0].offsetWidth/2,
-      maxY: this.minimap[0].offsetHeight - this.miniWindow[0].offsetHeight/2
+      maxX: this.element[0].offsetWidth - this.miniWindow[0].offsetWidth/2,
+      maxY: this.element[0].offsetHeight - this.miniWindow[0].offsetHeight/2
     };
     mouseOffset.x = Math.min(Math.max(mouseOffset.x, mouseLimit.minX), mouseLimit.maxX);
     mouseOffset.y = Math.min(Math.max(mouseOffset.y, mouseLimit.minY), mouseLimit.maxY);
@@ -115,10 +115,10 @@ class Minimap {
       x: mouseOffset.x / this.scaleFactor.x - $(window).width() / 2,
       y: mouseOffset.y / this.scaleFactor.y - $(window).height() / 2
     };
-    $('#main')[0].scrollLeft = scrollPos.x;
-    $('#main')[0].scrollTop = scrollPos.y;
+    this.board[0].scrollLeft = scrollPos.x;
+    this.board[0].scrollTop = scrollPos.y;
     // update window representation in minimap
-    this.updateWindow('main');
+    this.updateWindow();
   }
 }
 

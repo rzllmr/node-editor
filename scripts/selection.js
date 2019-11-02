@@ -15,7 +15,7 @@ class Selection {
     this.removeButton = $('#remove.tool');
     this.colorPicker = new ColorPicker(this.selection);
 
-    this.rect = $('rect#selection');
+    this.rect = board.element.find('rect.selection');
     this.rectOrigin = {x: 0, y: 0};
     this.rectSelection = new Map();
 
@@ -26,7 +26,7 @@ class Selection {
   }
 
   register() {
-    $(window).on({
+    this.board.element.on({
       mousedown: (event) => {
         if (event.button != 0) return;
         // left click
@@ -84,7 +84,7 @@ class Selection {
         } else if (this.movingSelection) {
           this.movingSelection = false;
 
-          $('.minimap').trigger('node:update', [target[0].id]);
+          this.board.element.find('.minimap').trigger('node:update', [target[0].id]);
         } else if (target[0].tagName != 'svg') {
           if (event.ctrlKey) this.multiSelect(target[0].id);
           else this.singleSelect(target[0].id);
@@ -166,7 +166,7 @@ class Selection {
     this.rect.attr(selectionRect);
 
     // select contained elements
-    $('.node:not(:first), .sign:not(:first)').each((_, element) => {
+    this.board.element.find('.node, .sign').each((_, element) => {
       // check collision
       const elementRect = {
         x: element.offsetLeft,

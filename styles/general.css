@@ -30,9 +30,13 @@ body {
   background-image: var(--background-image);
 }
 
-rect#selection {
+rect.selection {
   fill: var(--color-highlight);
   fill-opacity: 0.3;
   stroke-width: 1;
   stroke: var(--color-highlight);
+}
+
+.template {
+  display: none;
 }

@@ -1,4 +1,8 @@
 
+// extend Static class to hold variable for ColorPicker
+const Static = require('./static.js');
+Static.prototype.hueMap = new Map();
+
 /**
  * .color-picker representative to handle color selection for nodes
  * used colors are tracked to be selectable directly
@@ -12,7 +16,7 @@ class ColorPicker {
     this.presetTemplate = this.element.find('#color-preset-template');
     this.reset = this.element.find('#color-reset');
 
-    this.presets = new Map();
+    this.presets = (new Static).hueMap;
     this.selection = selection;
     this.currentHue = '0';
 

@@ -7,7 +7,7 @@
   background-color: var(--color-menu);
   border-radius: 5px;
   box-shadow: var(--shadow-ui);
-  font-size: 11px;
+  font-size: 12px;
 }
 .overlay {
   position: absolute;

@@ -9,7 +9,7 @@ class TreeItem {
     this.element.removeAttr('style');
     this.icon = this.element.find('i');
 
-    this.name = name;
+    this.setName(name);
     this.parent = null;
     this.level = 0;
 
@@ -17,18 +17,19 @@ class TreeItem {
       this.expanded = false;
       this.nested = this.element.find('ul.nested');
     }
+    this.data = null;
   }
 
   delete() {
     this.element.remove();
-    this.name = '';
+    this.setName('');
     this.level = 0;
     this.element = null;
     this.icon = null;
     this.nested = null;
   }
 
-  set name(name) {
+  setName(name) {
     this.element.find('span.selector:first').text(name);
     this._name = name;
   }
@@ -79,7 +80,19 @@ class TreeView extends Proxy {
     this.menuCover = $('#menu .overlay');
     this.registerTools();
 
-    this.load();
+    this.Item = TreeItem;
+
+    const lastItem = new TreeItem('leaf', 'add item...');
+    lastItem.element.find('i')[0].className = 'fas fa-plus';
+    this.addItem([lastItem], this, 1);
+  }
+
+  createItem(type, name) {
+    const item = new this.Item(type, name);
+    const lastItem = this.items[this.items.length - 2];
+    this.addItem([item], lastItem, 1);
+    this.toolbar.find('#new-board, #new-folder').hide();
+    if (type === 'leaf') this.selectItem(item);
   }
 
   registerTools() {
@@ -91,16 +104,10 @@ class TreeView extends Proxy {
 
     // adding items
     this.toolbar.find('#new-board').click(() => {
-      const item = new TreeItem('leaf', 'new item');
-      const lastItem = this.items[this.items.length - 2];
-      this.addItem([item], lastItem, 1);
-      this.toolbar.find('#new-board, #new-folder').hide();
+      this.createItem('leaf', 'new item');
     });
     this.toolbar.find('#new-folder').click(() => {
-      const item = new TreeItem('branch', 'new item');
-      const lastItem = this.items[this.items.length - 2];
-      this.addItem([item], lastItem, 1);
-      this.toolbar.find('#new-board, #new-folder').hide();
+      this.createItem('branch', 'new item');
     });
 
     // renaming items
@@ -115,7 +122,7 @@ class TreeView extends Proxy {
       this.toolbar.find('#rnm-board, #del-board').hide();
     });
     this.rnmInput.on('change blur', (event) => {
-      this.hovered.name = this.rnmInput.val();
+      this.hovered.setName(this.rnmInput.val());
       this.rnmInput.hide();
       this.menuCover.hide();
       this.toolbar.find('#rnm-board, #del-board').show();
@@ -130,6 +137,7 @@ class TreeView extends Proxy {
     this.toolbar.find('#apply-del, #discard-del').click((event) => {
       if (event.currentTarget.id === 'apply-del') {
         this.removeItem(this.hovered);
+        this.hovered.delete();
         this.hovered = null;
       }
       this.toolbar.find('#del-confirm').hide();
@@ -298,16 +306,10 @@ class TreeView extends Proxy {
   }
 
   selectItem(item) {
-    if (this.selected !== null) this.items[this.selected].select(false);
-    if (item !== null) {
-      const itemIdx = this.items.indexOf(item);
-      if (itemIdx > -1 && itemIdx !== this.selected) {
-        item.select(true);
-        this.selected = itemIdx;
-      } else {
-        this.selected = null;
-      }
-    }
+    if (this.selected === item) return;
+    if (this.selected !== null) this.selected.select(false);
+    if (item !== null) item.select(true);
+    this.selected = item;
   }
 
   hoverItem(item) {
@@ -331,27 +333,6 @@ class TreeView extends Proxy {
       }
     }
   }
-
-  load() {
-    const tree = [
-      [1, 'branch', 'branch 1'],
-      [2, 'branch', 'branch 2'],
-      [3, 'leaf', 'leaf 1'],
-      [2, 'leaf', 'leaf 2'],
-      [1, 'leaf', 'leaf 3']
-    ];
-
-    let before = this;
-    for (const entry of tree) {
-      const item = new TreeItem(entry[1], entry[2]);
-      this.addItem([item], before, entry[0]);
-      before = item;
-    }
-
-    const lastItem = new TreeItem('leaf', 'add item...');
-    lastItem.element.find('i')[0].className = 'fas fa-plus';
-    this.addItem([lastItem], before, 1);
-  }
 }
 
-module.exports = TreeView;
+module.exports = {TreeItem, TreeView};

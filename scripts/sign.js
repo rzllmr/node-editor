@@ -9,10 +9,10 @@ const Proxy = require('./proxy.js');
 class Sign extends Proxy {
   constructor(graph, position) {
     super(graph.id + '_sign');
-    this.element = $('#template-sign').clone();
+    this.element = $('#templates .sign').clone();
+    this.element.removeClass('template');
     this.element.attr('id', this.id);
-    this.element.appendTo('.layer.nodes');
-    this.element.show();
+    this.element.appendTo(`#${graph.boardId} .layer.nodes`);
 
     this.graph = graph;
 

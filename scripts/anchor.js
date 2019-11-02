@@ -17,11 +17,11 @@ class Anchor extends Proxy {
     this.end = end;
     this.side = side;
 
-    this.element = $('#template-anchor-' + end).clone();
+    this.element = $('#templates .anchor.' + end).clone();
+    this.element.removeClass('template');
     this.element.attr('id', this.id);
     this.element.addClass(side);
     this.element.appendTo(this.node.element);
-    this.element.show();
 
     this.link = new Graph(this.id + '-', this);
     if (drag) this.dragNewLink();
@@ -117,7 +117,7 @@ class Anchor extends Proxy {
     $(thisNode).css('pointer-events', 'none');
 
     // drag target point of graph
-    $('.layer.graphs').on('mousemove', (event) => {
+    this.node.board.find('.layer.graphs').on('mousemove', (event) => {
       this.link.update(this, {
         x: event.offsetX * this.node.zoom.scale,
         y: event.offsetY * this.node.zoom.scale
@@ -151,7 +151,7 @@ class Anchor extends Proxy {
     });
 
     // check for hit on anchor of another node
-    $('.layer.graphs,' + otherNodes).one('mouseup', (event) => {
+    this.node.board.find('.layer.graphs,' + otherNodes).one('mouseup', (event) => {
       $(event.currentTarget).removeClass('target');
       if (this.link.connected) {
         this.link.anchors.source.registerDragOut();
@@ -162,7 +162,7 @@ class Anchor extends Proxy {
       }
       $(thisNode).css('pointer-events', '');
       $(otherNodes).off('mouseenter mouseleave mouseup');
-      $('.layer.graphs').off('mousemove mouseup');
+      this.node.board.find('.layer.graphs').off('mousemove mouseup');
     });
   }
 

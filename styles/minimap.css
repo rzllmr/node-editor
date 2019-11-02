@@ -6,7 +6,6 @@
   width: 240px;
   height: 160px;
   background: var(--color-dark);
-  box-shadow: var(--shadow-ui);
   opacity: 0.5;
 }
 

@@ -9,20 +9,20 @@ const Anchor = require('./anchor.js');
  * .node representative to handle content
  */
 class Node extends Proxy {
-  constructor(id = null, zoom, hue) {
+  constructor(id = null, board, zoom, hue) {
     super(id);
 
+    this.board = board;
+    this.minimap = board.find('.minimap');
     this.zoom = zoom;
     this.minSize = {x: 180, y: 120};
 
-    this.element = $('#template-node').clone();
-    this.element.css('display', '');
-    if (id == null) {
-      this.element.removeAttr('id');
-    } else {
+    this.element = $('#templates .node').clone();
+    this.element.removeClass('template');
+    if (id !== null) {
       this.element.attr('id', this.id);
     }
-    this.element.appendTo('.layer.nodes');
+    this.element.appendTo(board.find('.layer.nodes'));
     this.registerElement();
 
     this.color = hue;
@@ -36,11 +36,11 @@ class Node extends Proxy {
       left: []
     };
 
-    $('.minimap').trigger('node:create', [this.id]);
+    this.minimap.trigger('node:create', [this.id]);
   }
 
   destroy() {
-    $('.minimap').trigger('node:delete', [this.id]);
+    this.minimap.trigger('node:delete', [this.id]);
 
     this.cursorPosRel = undefined;
 
@@ -102,7 +102,6 @@ class Node extends Proxy {
         });
         $(window).one('mouseup', (event) => {
           $(window).off('mousemove');
-          $('.minimap').trigger('node:update', [this.id]);
         });
         event.stopPropagation();
       }
@@ -206,7 +205,7 @@ class Node extends Proxy {
         this.anchors[side][i].link.highlight(this.anchors[side][i], true);
       }
     }
-    $('.minimap').trigger('node:highlight', [this.id]);
+    this.minimap.trigger('node:highlight', [this.id]);
   }
   deselect() {
     this.element[0].className = 'node';
@@ -215,7 +214,7 @@ class Node extends Proxy {
         this.anchors[side][i].link.highlight(this.anchors[side][i], false);
       }
     }
-    $('.minimap').trigger('node:highlight', [this.id]);
+    this.minimap.trigger('node:highlight', [this.id]);
   }
   get selected() {
     return this.element[0].className.endsWith('selected');
@@ -235,6 +234,7 @@ class Node extends Proxy {
         this.anchors[side][i].link.update();
       }
     }
+    this.minimap.trigger('node:update', [this.id]);
   }
 
   set color(hue) {
@@ -275,7 +275,7 @@ class Node extends Proxy {
     element.find('.divider')[0].style.setProperty('--hue', object.hue);
     element.find('input.label').val(object.label);
     element.find('div.details').text(object.details);
-    $('.minimap').trigger('node:update', [element[0].id]);
+    this.minimap.trigger('node:update', [element[0].id]);
   }
 };
 
