@@ -1,7 +1,8 @@
 
 ### Third-party ###
 */jquery-*.js
-data/
+data/*
+!data/icon.ico
 *.json
 !package.json
 styles/fontawesome*/

@@ -18,7 +18,8 @@
   },
   "build": {
     "win": {
-      "target": "portable"
+      "target": "portable",
+      "icon": "data/icon.ico"
     },
     "linux": {
       "target": "AppImage"
