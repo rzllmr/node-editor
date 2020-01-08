@@ -31,7 +31,7 @@ li.leaf i {
 li.leaf.selected {
   background: var(--color-highlight-faded);
 }
-li.leaf.hovered, span.branch.hovered {
+li.leaf.hovered:not(:nth-last-of-type(3)) {
   background: var(--color-highlight-faded);
 }
 li.leaf.insert, span.branch.insert {
