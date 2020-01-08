@@ -262,20 +262,20 @@ class Node extends Proxy {
     return object;
   }
 
-  static import(object) {
-    const board = this.proxy.resolve('main');
-    const element = board.addNode(object.id, object.hue).element;
+  static import(object, boardId) {
+    const board = this.proxy.resolve(boardId);
+    const node = board.addNode(object.id, object.hue);
 
-    element.css({
+    node.element.css({
       left: object.posX,
       top: object.posY,
       width: object.width,
       height: object.height
     });
-    element.find('.divider')[0].style.setProperty('--hue', object.hue);
-    element.find('input.label').val(object.label);
-    element.find('div.details').text(object.details);
-    this.minimap.trigger('node:update', [element[0].id]);
+    node.element.find('.divider')[0].style.setProperty('--hue', object.hue);
+    node.element.find('input.label').val(object.label);
+    node.element.find('div.details').text(object.details);
+    node.minimap.trigger('node:update', [node.element[0].id]);
   }
 };
 
