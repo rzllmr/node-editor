@@ -249,6 +249,7 @@ class Node extends Proxy {
   export() {
     const element = this.element[0];
     const object = {
+      board: this.board[0].id,
       type: element.className.split(' ')[0],
       id: element.id,
       posX: element.offsetLeft,

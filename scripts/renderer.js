@@ -6,9 +6,9 @@
     const Options = require('./scripts/options.js');
     const BoardTree = require('./scripts/boardtree.js');
 
-    new FileHandler();
+    const boardTree = new BoardTree();
+    new FileHandler(boardTree);
     new Options();
-    new BoardTree();
 
     // disable default drag events
     $(document).on('dragstart', (event) => {

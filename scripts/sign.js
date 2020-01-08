@@ -89,6 +89,7 @@ class Sign extends Proxy {
   export() {
     const element = this.element[0];
     const object = {
+      board: this.graph.boardId,
       type: element.className.split(' ')[0],
       graph: element.id.replace('_sign', ''),
       details: element.querySelector('div.details').innerText

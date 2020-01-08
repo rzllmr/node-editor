@@ -4,7 +4,9 @@ const fs = require('fs');
 
 
 class FileHandler {
-  constructor() {
+  constructor(boardTree) {
+    this.boardTree = boardTree;
+
     this.proxy = new Proxy();
     this.newButton = $('#new.tool');
     this.saveButton = $('#save.tool');
@@ -16,43 +18,59 @@ class FileHandler {
     this.title = this.window.getTitle();
     this.current = null;
 
+    this.contentChanged = true;
+    // TODO: consider content changes
+
     this.register();
   }
 
   register() {
-    this.newButton.click(this.clear.bind(this));
+    this.newButton.click(this.new.bind(this));
     this.saveButton.click(this.save.bind(this));
     this.saveAsButton.click(this.saveAs.bind(this));
     this.loadButton.click(this.load.bind(this));
   }
 
+  new() {
+    if (this.clear()) {
+      this.boardTree.createItem('leaf', 'main');
+    }
+  }
+
   clear() {
-    const board = this.proxy.resolve('main');
     let cancel = false;
-    console.log(board.nodes);
-    if (board.nodes.size > 0) {
+    if (this.contentChanged) {
       cancel = this.dialog.showMessageBox(null, {
         type: 'warning',
         title: 'Warning',
-        message: 'Clear board?',
+        message: 'Discard changes?',
         detail: 'Your unsaved data will be lost.',
         buttons: ['OK', 'Cancel']
       }) == 1;
     }
     if (!cancel) {
-      board.clear();
       this.current = null;
+      this.boardTree.clear();
       this.window.setTitle(this.title);
     }
+    return !cancel;
   }
 
   gatherContent() {
-    const board = [];
+    const boards = {};
+
+    boards['TOC'] = this.boardTree.export();
+
     for (const entry of this.proxy.mapping) {
-      if (entry[0] == undefined || entry[1].export == undefined) continue;
-      board.push(entry[1].export());
+      if (entry[0] == undefined || entry[1].export == undefined
+        || entry[1].constructor.name === 'BoardTree') continue;
+      const data = entry[1].export();
+      const boardId = data.board;
+      delete data.board;
+      if (!boards[boardId]) boards[boardId] = [];
+      boards[boardId].push(data);
     }
-    return JSON.stringify(board).replace(/},/g, '},\n');
+    return JSON.stringify(boards).replace(/(},|\[)/g, '$1\n  ').replace(/(],)/g, '$1\n');
   }
 
   save() {
@@ -90,22 +108,31 @@ class FileHandler {
   }
 
   load() {
-    this.clear();
+    if (!this.clear()) return;
 
     const filePaths = this.dialog.showOpenDialog({
       properties: ['openFile'],
       filters: [{name: 'Save File', extensions: ['json']}]
     });
-    if (!filePaths) return;
+    if (!filePaths) {
+      this.boardTree.createItem('leaf', 'main');
+      return;
+    }
     fs.readFile(filePaths[0], 'utf8', (error, content) => {
       if (error) {
         alert(`An error ocurred reading the file ${filePaths[0]}:\n${error.message}`);
       } else {
         const classes = new Map();
-        const board = JSON.parse(content);
-        for (const entry of board) {
-          if (!classes.has(entry.type)) classes.set(entry.type, require(`./${entry.type}.js`));
-          classes.get(entry.type).import(entry);
+        const boards = JSON.parse(content);
+        if (boards.TOC) {
+          this.boardTree.import(boards.TOC);
+          delete boards.TOC;
+        }
+        for (const [boardId, entries] of Object.entries(boards)) {
+          for (const entry of entries) {
+            if (!classes.has(entry.type)) classes.set(entry.type, require(`./${entry.type}.js`));
+            classes.get(entry.type).import(entry, boardId);
+          }
         }
         this.current = filePaths[0];
         this.window.setTitle(this.title + ' - ' + this.current);

@@ -35,9 +35,29 @@ class BoardItem extends TreeItem {
 class BoardTree extends TreeView {
   constructor() {
     super('#board-tree');
-    this.Item = BoardItem;
+    this.ItemType = BoardItem;
 
     this.createItem('leaf', 'main');
+  }
+
+  export() {
+    const itemList = [];
+    for (let i = 0; i < this.items.length-1; i++) {
+      const item = this.items[i];
+      const board = {
+        level: item.level,
+        type: item.type,
+        name: item.name
+      };
+      itemList.push(board);
+    }
+    return itemList;
+  }
+
+  import(itemList) {
+    for (const entry of itemList) {
+      this.createItem(entry.type, entry.name, entry.level);
+    }
   }
 }
 

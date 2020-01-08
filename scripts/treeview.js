@@ -80,28 +80,43 @@ class TreeView extends Proxy {
     this.menuCover = $('#menu .overlay');
     this.registerTools();
 
-    this.Item = TreeItem;
+    this.ItemType = TreeItem;
 
     const lastItem = new TreeItem('leaf', 'add item...');
     lastItem.element.find('i')[0].className = 'fas fa-plus';
     this.addItem([lastItem], this, 1);
   }
 
-  createItem(type, name) {
-    const item = new this.Item(type, name);
+  clear() {
+    const leaves = [];
+    const branches = [];
+    for (let i = 0; i < this.items.length-1; i++) {
+      const item = this.items[i];
+      if (item.type === 'leaf') {
+        leaves.push(item);
+      } else {
+        branches.push(item);
+      }
+    }
+    this.selectItem(null);
+    for (const item of leaves) {
+      this.removeItem(item);
+      item.delete();
+    }
+    for (const item of branches) {
+      this.removeItem(item);
+    }
+  }
+
+  createItem(type, name, level = 1) {
+    const item = new this.ItemType(type, name);
     const lastItem = this.items[this.items.length - 2];
-    this.addItem([item], lastItem, 1);
+    this.addItem([item], lastItem, level);
     this.toolbar.find('#new-board, #new-folder').hide();
     if (type === 'leaf') this.selectItem(item);
   }
 
   registerTools() {
-    // this.toolbar.find('> button').on('mouseleave', (event) => {
-    //   if (this.hovered && event.toElement !== this.hovered.element[0]) {
-    //     this.hovered.element.trigger(event);
-    //   }
-    // });
-
     // adding items
     this.toolbar.find('#new-board').click(() => {
       this.createItem('leaf', 'new item');
@@ -143,6 +158,13 @@ class TreeView extends Proxy {
       this.toolbar.find('#del-confirm').hide();
       this.toolbar.find('#rnm-board, #del-board').show();
       this.menuCover.hide();
+    });
+
+    // register general mouseleave
+    this.toolbar.on('mouseleave', (event) => {
+      if (event.toElement.tagName === 'svg') {
+        this.hoverItem(null);
+      }
     });
   }
 

@@ -262,6 +262,7 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
   export() {
     const element = this.element[0];
     const object = {
+      board: this.boardId,
       type: element.className.baseVal.split(' ')[0],
       source: element.id.split('-')[0],
       target: element.id.split('-')[1]
