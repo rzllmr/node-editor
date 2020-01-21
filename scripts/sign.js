@@ -99,9 +99,10 @@ class Sign extends Proxy {
 
   static import(object) {
     const graph = this.proxy.resolve(object.graph);
-    const element = graph.addSign().element;
+    const sign = graph.addSign();
 
-    element.find('div.details').text(object.details);
+    sign.element.find('div.details').html(object.details.replace('\n', '<br>'));
+    sign.position();
   }
 };
 

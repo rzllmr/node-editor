@@ -275,7 +275,7 @@ class Node extends Proxy {
     });
     node.element.find('.divider')[0].style.setProperty('--hue', object.hue);
     node.element.find('input.label').val(object.label);
-    node.element.find('div.details').text(object.details);
+    node.element.find('div.details').html(object.details.replace('\n', '<br>'));
     node.minimap.trigger('node:update', [node.element[0].id]);
   }
 };
