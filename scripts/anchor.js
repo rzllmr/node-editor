@@ -23,14 +23,28 @@ class Anchor extends Proxy {
     this.element.addClass(side);
     this.element.appendTo(this.node.element);
 
-    this.link = new Graph(this.id + '-', this);
-    if (drag) this.dragNewLink();
+    if (drag) {
+      this.link = new Graph(this.id + '-', this);
+      this.dragNewLink();
+    }
   }
 
   changeIdx(idx) {
     const newId = this.id.match(/\d+\D/)[0] + idx;
     this.change(newId);
     this.element.attr('id', this.id);
+  }
+
+  changeEnd(end) {
+    if (end === this.end) return;
+    this.end = end;
+    this.element.removeClass(this.end);
+    this.element.addClass(end);
+    if (this.end === 'source') {
+      this.element.find('i').first()[0].className = 'fas fa-circle';
+    } else {
+      this.element.find('i').first()[0].className = 'fas fa-caret-' + this.side;
+    }
   }
 
   destroy() {
@@ -53,9 +67,10 @@ class Anchor extends Proxy {
 
   // create and connect link
   connectLink(toAnchor) {
+    if (!this.link) this.link = new Graph(this.id + '-', this);
     this.link.connect(toAnchor);
     this.link.updateIdxs();
-    toAnchor.link.destroy();
+    if (toAnchor.link) toAnchor.link.destroy();
     toAnchor.link = this.link;
     let side;
     switch (toAnchor.side) {
@@ -152,6 +167,7 @@ class Anchor extends Proxy {
 
     // check for hit on anchor of another node
     this.node.board.find('.layer.graphs,' + otherNodes).one('mouseup', (event) => {
+      this.node.board.find('.layer.graphs').off('mousemove mouseup');
       $(event.currentTarget).removeClass('target');
       if (this.link.connected) {
         this.link.anchors.source.registerDragOut();
@@ -162,7 +178,6 @@ class Anchor extends Proxy {
       }
       $(thisNode).css('pointer-events', '');
       $(otherNodes).off('mouseenter mouseleave mouseup');
-      this.node.board.find('.layer.graphs').off('mousemove mouseup');
     });
   }
 

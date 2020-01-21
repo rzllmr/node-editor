@@ -133,14 +133,15 @@ class Node extends Proxy {
   }
 
   addAnchorDirectly(end, side, index) {
-    index = Math.min(index, this.anchors[side].length);
-    // distribute present anchors to slots besides insertion index
-    const percentage = this.relocateAnchors(side, this.anchors[side].length + 1, index);
-    // insert anchor at index and corresponding slot
-    this.anchors[side].splice(index, 0,
-        new Anchor(this, end, side, index, false));
-    this.anchors[side][index].position(side, percentage * (index + 1));
-
+    // add placeholder anchors up to index
+    for (let i = this.anchors[side].length; i <= index; i++) {
+      // distribute present anchors to slots besides insertion index
+      const percentage = this.relocateAnchors(side, this.anchors[side].length + 1, i);
+      this.anchors[side].push(new Anchor(this, 'source', side, i, false));
+      this.anchors[side][i].position(side, percentage * (i + 1));
+    }
+    // adjust placeholder anchor
+    this.anchors[side][index].changeEnd(end);
     return this.anchors[side][index];
   }
 
@@ -163,8 +164,10 @@ class Node extends Proxy {
       if (i == skip) offset++;
       this.anchors[side][i].changeIdx(offset);
       this.anchors[side][i].position(side, percentage * (parseInt(offset) + 1));
-      this.anchors[side][i].link.updateIdxs();
-      this.anchors[side][i].link.update();
+      if (this.anchors[side][i].link) {
+        this.anchors[side][i].link.updateIdxs();
+        this.anchors[side][i].link.update();
+      }
       offset++;
     }
     return percentage;
