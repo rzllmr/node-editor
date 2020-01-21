@@ -1,11 +1,15 @@
 
 ### Third-party ###
-*/jquery-*.js
+!/data
 data/*
+!data/fonts/
+data/fonts/*
+!data/fonts/Noto_Sans/
 !data/icon.ico
+!data/worn-dots.*
 *.json
 !package.json
-styles/fontawesome*/
+
 
 ### Atom ###
 # User Preferences

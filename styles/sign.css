@@ -12,6 +12,8 @@
   font-size: 8pt;
   line-height: 1.5em;
   letter-spacing: 0.15em;
+  font-family: var(--font-sans);
+  font-weight: 200;
 }
 .sign .details:empty:before{
   content: attr(data-text);

@@ -73,7 +73,8 @@
 }
 
 .node .details {
-  font-family: var(--font-sans-light);
+  font-family: var(--font-sans);
+  font-weight: 200;
   font-size: 8pt;
   line-height: 1.5em;
   letter-spacing: 0.15em;

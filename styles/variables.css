@@ -1,25 +1,16 @@
 @font-face {
   font-family: 'NotoSans';
   src: url('../data/fonts/Noto_Sans/NotoSans-Regular.ttf')  format('truetype');
+  font-weight: normal;
 }
 @font-face {
-  font-family: 'NotoSansLight';
+  font-family: 'NotoSans';
   src: url('../data/fonts/Noto_Sans/NotoSans-Light.ttf')  format('truetype');
-}
-@font-face {
-  font-family: 'NotoSansBold';
-  src: url('../data/fonts/Noto_Sans/NotoSans-Bold.ttf')  format('truetype');
-}
-@font-face {
-  font-family: 'NotoSerif';
-  src: url('../data/fonts/Noto_Serif/NotoSerif-Regular.ttf')  format('truetype');
+  font-weight: 200;
 }
 
 :root {
   --font-sans: 'NotoSans', Fallback, sans-serif;
-  --font-sans-light: 'NotoSansLight', Fallback, sans-serif;
-  --font-serif: 'NotoSerif', Fallback, serif;
-
   --color-lightest: #f0f4f5;
   --color-light: #c7c7c7;
   --color-neutral: #777777;
