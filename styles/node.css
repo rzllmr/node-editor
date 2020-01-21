@@ -73,9 +73,10 @@
 }
 
 .node .details {
-  font-size: 9pt;
+  font-family: var(--font-sans-light);
+  font-size: 8pt;
   line-height: 1.5em;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.15em;
   overflow-y: auto;
 }
 .node .details:empty:before{
