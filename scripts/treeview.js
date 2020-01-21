@@ -83,7 +83,7 @@ class TreeView extends Proxy {
     this.ItemType = TreeItem;
 
     const lastItem = new TreeItem('leaf', 'add item...');
-    lastItem.element.find('i')[0].className = 'fas fa-plus';
+    lastItem.element.find('i')[0].className = 'fa fa-plus';
     this.addItem([lastItem], this, 1);
   }
 
@@ -182,10 +182,10 @@ class TreeView extends Proxy {
       element.click(() => {
         if (item.expanded) {
           item.nested.hide();
-          item.icon[0].className = 'fas fa-folder';
+          item.icon[0].className = 'fa fa-folder';
         } else {
           item.nested.show();
-          item.icon[0].className = 'far fa-folder-open';
+          item.icon[0].className = 'fa fa-folder-open-o';
         }
         item.expanded = !item.expanded;
       });

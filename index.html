@@ -2,11 +2,9 @@
 <html class="dark">
   <head>
     <meta charset="UTF-8">
-    <title>PinBoard</title>
+    <title>Node Editor</title>
 
-    <link rel="stylesheet" href="styles/fontawesome-free-5.8.1-web/css/fontawesome.min.css">
-    <link rel="stylesheet" href="styles/fontawesome-free-5.8.1-web/css/regular.min.css">
-    <link rel="stylesheet" href="styles/fontawesome-free-5.8.1-web/css/solid.min.css">
+    <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="styles/anchor.css">
     <link rel="stylesheet" href="styles/color-picker.css">
@@ -33,46 +31,51 @@
       <h1>board</h1>
       <hr>
       <div id="board-tools" class="toolbar">
-        <button class="tool" id="new"><i class="fas fa-file"></i></button>
-        <button class="tool" id="save"><i class="fas fa-save"></i></button>
-        <button class="tool" id="save-as"><i class="far fa-save"></i></button>
-        <button class="tool" id="load"><i class="fas fa-folder-open"></i></button>
-        <button class="tool" id="theme"><i class="far fa-lightbulb"></i></button>
+        <button class="tool" id="new"><i class="fa fa-file"></i></button>
+        <button class="tool" id="save"><i class="fa fa-save"></i></button>
+        <button class="tool" id="save-as">
+          <span class="fa-stack" style="font-size: 8px; top: -1px;">
+            <i class="fa fa-save fa-stack-2x"></i>
+            <i class="fa fa-pencil fa-stack-1x" style="bottom: -1px; left: 2px"></i>
+          </span>
+        </button>
+        <button class="tool" id="load"><i class="fa fa-folder-open"></i></button>
+        <button class="tool" id="theme"><i class="fa fa-lightbulb-o"></i></button>
       </div>
       <h1>tabs</h1>
       <hr>
       <div id="board-tree">
         <div id="tree-tools" class="toolbar">
-          <button class="tool small" id="new-board"><i class="far fa-file"></i></button>
-          <button class="tool small" id="new-folder"><i class="far fa-folder"></i></button>
-          <button class="tool small" id="rnm-board"><i class="fas fa-ellipsis-h"></i></button>
-          <button class="tool small" id="del-board"><i class="fas fa-times"></i></button>
+          <button class="tool small" id="new-board"><i class="fa fa-file-o"></i></button>
+          <button class="tool small" id="new-folder"><i class="fa fa-folder-o"></i></button>
+          <button class="tool small" id="rnm-board"><i class="fa fa-ellipsis-h"></i></button>
+          <button class="tool small" id="del-board"><i class="fa fa-times"></i></button>
           <input type="text" class="selector" style="display:none"></input>
           <span id="del-confirm" style="display:none">
             <span>Delete board?</span>
-            <button class="tool small" id="apply-del"><i class="fas fa-check"></i></button>
-            <button class="tool small" id="discard-del"><i class="fas fa-times"></i></button>
+            <button class="tool small" id="apply-del"><i class="fa fa-check"></i></button>
+            <button class="tool small" id="discard-del"><i class="fa fa-times"></i></button>
           </span>
         </div>
         <span class="insert-line" style="display:none"></span>
         <ul class="treeview">
           <li class="branch" id="branch-template" style="display:none">
-            <span class="branch title"><i class="fas fa-folder"></i><span class="selector">branch</span></span>
+            <span class="branch title"><i class="fa fa-folder"></i><span class="selector">branch</span></span>
             <ul class="nested" style="display:none">
             </ul>
           </li>
-          <li class="leaf" id="leaf-template" style="display:none"><i class="far fa-file"></i><span class="selector">leaf</span></li>
+          <li class="leaf" id="leaf-template" style="display:none"><i class="fa fa-file-o"></i><span class="selector">leaf</span></li>
         </ul>
       </div>
       <h1>node</h1>
       <hr>
       <div id="node-tools" class="toolbar">
-        <button class="tool" id="remove" disabled><i class="fas fa-times"></i></button>
+        <button class="tool" id="remove" disabled><i class="fa fa-times"></i></button>
         <div class="color-picker">
           <div class="divider"></div>
           <input class="color-slider" type="range" min="0" max="360" value="0">
           <div class="color-presets">
-            <div id="color-reset" class="color-preset"><i class="fas fa-undo-alt"></i></div>
+            <div id="color-reset" class="color-preset"><i class="fa fa-undo"></i></div>
             <div id="color-preset-template" class="color-preset" style="display: none"></div>
           </div>
         </div>
@@ -93,9 +96,9 @@
           <div class="body">
             <div class="details" data-text="Enter details..." contentEditable="false"></div>
           </div>
-          <div class="anchor source template"><i class="fas fa-circle"></i></div>
-          <div class="anchor target template"><i class="fas fa-caret-right"></i></div>
-          <div class="resizer"><i class="fas fa-wifi"></i></div>
+          <div class="anchor source template"><i class="fa fa-circle"></i></div>
+          <div class="anchor target template"><i class="fa fa-caret-right"></i></div>
+          <div class="resizer"><i class="fa fa-wifi"></i></div>
         </div>
         <div class="sign template">
           <div class="details" data-text="Enter..." contentEditable="false"></div>

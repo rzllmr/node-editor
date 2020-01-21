@@ -15,10 +15,10 @@ class Options {
       const root = document.documentElement;
       if (this.options.lightTheme) {
         root.className = 'light';
-        this.themeButton.find('i')[0].className = 'fas fa-lightbulb';
+        this.themeButton.find('i')[0].className = 'fa fa-lightbulb-o';
       } else {
         root.className = 'dark';
-        this.themeButton.find('i')[0].className = 'far fa-lightbulb';
+        this.themeButton.find('i')[0].className = 'fa fa-lightbulb-o';
       }
     });
   }

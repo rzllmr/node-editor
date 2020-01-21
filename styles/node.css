@@ -101,7 +101,7 @@
   bottom: 0;
   right: 0;
   color: var(--color-text-faded);
-  font-size: 9px;
+  font-size: 11px;
   cursor: se-resize;
 }
 .node .resizer:hover {

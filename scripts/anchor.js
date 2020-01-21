@@ -41,9 +41,9 @@ class Anchor extends Proxy {
     this.element.removeClass(this.end);
     this.element.addClass(end);
     if (this.end === 'source') {
-      this.element.find('i').first()[0].className = 'fas fa-circle';
+      this.element.find('i').first()[0].className = 'fa fa-circle';
     } else {
-      this.element.find('i').first()[0].className = 'fas fa-caret-' + this.side;
+      this.element.find('i').first()[0].className = 'fa fa-caret-' + this.side;
     }
   }
 
@@ -80,7 +80,7 @@ class Anchor extends Proxy {
       case 'left': side = 'right'; break;
     }
     if (toAnchor.end == 'target') {
-      toAnchor.element.find('i').first()[0].className = 'fas fa-caret-' + side;
+      toAnchor.element.find('i').first()[0].className = 'fa fa-caret-' + side;
     }
   }
 
