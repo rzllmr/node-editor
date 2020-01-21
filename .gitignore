@@ -14,10 +14,9 @@ data/fonts/*
 ### Atom ###
 # User Preferences
 .atom-build.json
-.eslintrc
 
 # Build Results
-dist/
+bin/
 
 
 ### Node ###
