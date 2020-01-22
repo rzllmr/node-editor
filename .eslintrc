@@ -15,6 +15,7 @@
     "require-jsdoc": "off",
     "comma-dangle": "off",
     "max-len": ["error", { "code": 100 }],
-    "guard-for-in": "off"
+    "guard-for-in": "off",
+    "linebreak-style": "off"
   }
 }

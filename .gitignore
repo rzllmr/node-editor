@@ -9,7 +9,7 @@ data/fonts/*
 !data/worn-dots.*
 !data/preview-*.png
 *.json
-!package.json
+!package*.json
 
 
 ### Atom ###

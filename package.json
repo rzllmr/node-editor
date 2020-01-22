@@ -2,12 +2,13 @@
   "name": "node-editor",
   "version": "0.1.35",
   "description": "An intuitive editor for layouts of nodes and graphs",
-  "main": "main.js",
+  "main": "scripts/main.js",
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder"
   },
+  "repository": "github:rzllmr/node-editor",
   "author": "rzllmr",
   "license": "MIT",
   "devDependencies": {
@@ -34,9 +35,8 @@
     },
     "extraResources": [
       {
-        "from": "scripts",
-        "to": "app",
-        "filter": "env.js"
+        "from": "scripts/env_release.js",
+        "to": "app/scripts/env.js"
       }
     ]
   }
