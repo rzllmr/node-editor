@@ -49,7 +49,7 @@ Obtained through Node.js package management (NPM):
 
 * __ESLint__: An AST-based pattern checker for JavaScript (https://www.npmjs.com/package/eslint)
 
-* __eslint-config-google__: ESLint shareable config for the Google style (https://www.npmjs.com/package/eslint-config-googl)
+* __eslint-config-google__: ESLint shareable config for the Google style (https://www.npmjs.com/package/eslint-config-google)
 
 * __jQuery__: JavaScript library for DOM operations (https://www.npmjs.com/package/jquery)
 
