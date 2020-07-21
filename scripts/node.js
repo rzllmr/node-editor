@@ -194,7 +194,7 @@ class Node extends Proxy {
       keydown: (event) => {
         // prevent Enter to create new div
         if (event.keyCode === 13) {
-          document.execCommand('insertHTML', false, '<br><br>');
+          document.execCommand('insertHTML', false, '<br>');
           return false;
         }
       }
@@ -261,7 +261,7 @@ class Node extends Proxy {
       height: element.offsetHeight,
       hue: element.querySelector('.divider').style.getPropertyValue('--hue'),
       label: element.querySelector('input.label').value,
-      details: element.querySelector('div.details').innerText
+      details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n')
     };
     return object;
   }
@@ -278,7 +278,7 @@ class Node extends Proxy {
     });
     node.element.find('.divider')[0].style.setProperty('--hue', object.hue);
     node.element.find('input.label').val(object.label);
-    node.element.find('div.details').html(object.details.replace('\n', '<br>'));
+    node.element.find('div.details').html(object.details.replace(/\n/g, '<br>'));
     node.minimap.trigger('node:update', [node.element[0].id]);
   }
 };

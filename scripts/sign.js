@@ -76,7 +76,7 @@ class Sign extends Proxy {
       keydown: (event) => {
         // prevent Enter to create new div
         if (event.keyCode === 13) {
-          document.execCommand('insertHTML', false, '<br><br>');
+          document.execCommand('insertHTML', false, '<br>');
           return false;
         }
       },
@@ -92,7 +92,7 @@ class Sign extends Proxy {
       board: this.graph.boardId,
       type: element.className.split(' ')[0],
       graph: element.id.replace('_sign', ''),
-      details: element.querySelector('div.details').innerText
+      details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n')
     };
     return object;
   }
@@ -101,7 +101,7 @@ class Sign extends Proxy {
     const graph = this.proxy.resolve(object.graph);
     const sign = graph.addSign();
 
-    sign.element.find('div.details').html(object.details.replace('\n', '<br>'));
+    sign.element.find('div.details').html(object.details.replace(/\n/g, '<br>'));
     sign.position();
   }
 };
