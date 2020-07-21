@@ -40,7 +40,7 @@ class FileHandler {
   clear() {
     let cancel = false;
     if (this.contentChanged) {
-      cancel = this.dialog.showMessageBox(null, {
+      cancel = this.dialog.showMessageBoxSync(null, {
         type: 'warning',
         title: 'Warning',
         message: 'Discard changes?',
@@ -62,8 +62,8 @@ class FileHandler {
     boards['TOC'] = this.boardTree.export();
 
     for (const entry of this.proxy.mapping) {
-      if (entry[0] == undefined || entry[1].export == undefined
-        || entry[1].constructor.name === 'BoardTree') continue;
+      if (entry[0] == undefined || entry[1].export == undefined ||
+        entry[1].constructor.name === 'BoardTree') continue;
       const data = entry[1].export();
       const boardId = data.board;
       delete data.board;
@@ -76,7 +76,7 @@ class FileHandler {
   save() {
     let filePath = this.current;
     if (!filePath) {
-      filePath = this.dialog.showSaveDialog({
+      filePath = this.dialog.showSaveDialogSync({
         filters: [{name: 'Save File', extensions: ['json']}]
       });
       if (!filePath) return;
@@ -93,7 +93,7 @@ class FileHandler {
   }
 
   saveAs() {
-    const filePath = this.dialog.showSaveDialog({
+    const filePath = this.dialog.showSaveDialogSync({
       filters: [{name: 'Save File', extensions: ['json']}]
     });
     if (!filePath) return;
@@ -110,7 +110,7 @@ class FileHandler {
   load() {
     if (!this.clear()) return;
 
-    const filePaths = this.dialog.showOpenDialog({
+    const filePaths = this.dialog.showOpenDialogSync({
       properties: ['openFile'],
       filters: [{name: 'Save File', extensions: ['json']}]
     });
