@@ -27,8 +27,6 @@ class Node extends Proxy {
 
     this.color = hue;
 
-    this.cursorPosRel = {x: 0, y: 0};
-
     this.anchors = {
       top: [],
       right: [],
@@ -41,8 +39,6 @@ class Node extends Proxy {
 
   destroy() {
     this.minimap.trigger('node:delete', [this.id]);
-
-    this.cursorPosRel = undefined;
 
     for (const side in this.anchors) {
       // copy anchors[side] array to remove elements while iterating
@@ -81,19 +77,14 @@ class Node extends Proxy {
 
     this.element.find('.resizer').on({
       mousedown: (event) => {
-        this.cursorPosRel = {
-          x: event.pageX * this.zoom.scale,
-          y: event.pageY * this.zoom.scale
-        };
         $(window).on('mousemove', (event) => {
           event.pageX *= this.zoom.scale; event.pageY *= this.zoom.scale;
-          const width = this.element.width() + (event.pageX - this.cursorPosRel.x);
-          const height = this.element.height() + (event.pageY - this.cursorPosRel.y);
+          const width = event.pageX - this.element.offset().left + 6;
+          const height = event.pageY - this.element.offset().top + 6;
           this.element.css({
             width: Math.max(width, this.minSize.x),
             height: Math.max(height, this.minSize.y)
           });
-          this.cursorPosRel = {x: event.pageX, y: event.pageY};
           for (const side in this.anchors) {
             for (const i in this.anchors[side]) {
               this.anchors[side][i].link.update();
