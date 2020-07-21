@@ -1,17 +1,32 @@
 @font-face {
   font-family: 'NotoSans';
-  src: url('../data/fonts/Noto_Sans/NotoSans-Regular.ttf')  format('truetype');
-  font-weight: normal;
+  src: url('../data/fonts/Noto_Sans/NotoSans-Light.ttf')  format('truetype');
+  font-weight: 200;
 }
 @font-face {
   font-family: 'NotoSans';
-  src: url('../data/fonts/Noto_Sans/NotoSans-Light.ttf')  format('truetype');
-  font-weight: 200;
+  src: url('../data/fonts/Noto_Sans/NotoSans-Regular.ttf')  format('truetype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'NotoSans';
+  src: url('../data/fonts/Noto_Sans/NotoSans-Medium.ttf')  format('truetype');
+  font-weight: 500;
+}
+@font-face {
+  font-family: 'NotoSans';
+  src: url('../data/fonts/Noto_Sans/NotoSans-SemiBold.ttf')  format('truetype');
+  font-weight: 600;
+}
+@font-face {
+  font-family: 'NotoSans';
+  src: url('../data/fonts/Noto_Sans/NotoSans-Bold.ttf')  format('truetype');
+  font-weight: 700;
 }
 
 :root {
   --font-sans: 'NotoSans', Fallback, sans-serif;
-  --color-lightest: #f0f4f5;
+  --color-lightest: #fffafa;
   --color-light: #c7c7c7;
   --color-neutral: #777777;
   --color-dark: #4b4b4b;
@@ -52,8 +67,8 @@
 }
 
 :root.light {
-  --color-highlight: rgb(0, 0, 238, 1.0);
-  --color-highlight-faded: rgb(0, 0, 238, 0.5);
+  --color-highlight: rgba(33, 136, 255, 1.0);
+  --color-highlight-faded: rgba(33, 136, 255, 0.5);
   --divider-lf: 62%;
   --divider-lt: 74%;
 
