@@ -93,6 +93,13 @@ class Selection {
       }
     });
     this.removeButton.click(this.deleteSelection.bind(this));
+
+    $(document).on('hotkey:blurInput', (event) => {
+      document.activeElement.blur();
+    });
+    $(document).on('hotkey:deleteSelection', (event) => {
+      this.deleteSelection();
+    });
   }
 
   singleSelect(id) {

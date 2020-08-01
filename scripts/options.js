@@ -21,6 +21,10 @@ class Options {
         this.themeButton.find('i')[0].className = 'fa fa-lightbulb-o';
       }
     });
+
+    $(document).on('hotkey:toggleTheme', (event) => {
+      this.themeButton.click();
+    });
   }
 }
 

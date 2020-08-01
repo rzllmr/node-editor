@@ -135,6 +135,16 @@ class Board extends Proxy {
         }, false);
       }
     });
+
+    $(document).on('hotkey:createNode', (event) => {
+      if (this.element.css('visibility') == 'hidden') return;
+      // create Node in the middle of the window
+      const newNode = this.addNode();
+      newNode.move({
+        left: this.element[0].scrollLeft + $(window).width() / 2 * this.zoom.scale,
+        top: this.element[0].scrollTop + $(window).height() / 2 * this.zoom.scale
+      }, false);
+    });
   }
 
   addNode(id = null, hue = null) {
