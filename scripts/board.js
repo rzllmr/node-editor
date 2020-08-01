@@ -53,18 +53,46 @@ class Board extends Proxy {
   }
 
   register() {
+    $(document).keydown((event) => {
+      if (event.key != 'Control' || this.movePivot != undefined) return;
+      this.movePivot = null;
+      event.target.style.cursor = 'all-scroll';
+      this.element.on('mousemove', (event) => {
+        if (this.movePivot == null) this.movePivot = {x: event.clientX, y: event.clientY};
+        this.moveVector = {
+          x: (event.clientX - this.movePivot.x) / 10,
+          y: (event.clientY - this.movePivot.y) / 10
+        };
+      });
+      this.scrollLoop = setInterval(() => {
+        if (this.moveVector != undefined) {
+          this.element[0].scrollLeft += this.moveVector.x;
+          this.element[0].scrollTop += this.moveVector.y;
+          this.minimap.element.trigger('window:update');
+        }
+      }, 16);
+    });
+    $(document).keyup((event) => {
+      if (event.key != 'Control') return;
+      this.movePivot = undefined;
+      event.target.style.cursor = 'default';
+      this.element.off('mousemove');
+      clearInterval(this.scrollLoop);
+    });
+
     this.element.on({
       mousewheel: (event) => {
+        // zoom
         const scaleBefore = this.zoom.scale;
 
         this.zoom.change(Math.sign(event.originalEvent.wheelDeltaY));
 
         // adjust window scrolling to zoom to mouse position
         const scrollShift = {
-          x: (this.element[0].scrollLeft + event.pageX)
-            * (scaleBefore - this.zoom.scale) / this.zoom.scale,
-          y: (this.element[0].scrollTop + event.pageY)
-            * (scaleBefore - this.zoom.scale) / this.zoom.scale
+          x: (this.element[0].scrollLeft + event.pageX) *
+            (scaleBefore - this.zoom.scale) / this.zoom.scale,
+          y: (this.element[0].scrollTop + event.pageY) *
+            (scaleBefore - this.zoom.scale) / this.zoom.scale
         };
         this.element[0].scrollLeft += scrollShift.x;
         this.element[0].scrollTop += scrollShift.y;

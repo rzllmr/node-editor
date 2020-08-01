@@ -183,7 +183,7 @@ class Anchor extends Proxy {
 
   registerDragOut() {
     this.element.on('mousedown', (event) => {
-      if (event.button != 2) return;
+      if (event.button != 2 && !(event.button == 0 && event.altKey)) return;
       // right click
 
       // restore state of link creation while preserving end type

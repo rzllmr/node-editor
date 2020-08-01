@@ -56,7 +56,7 @@ class Node extends Proxy {
   registerElement() {
     this.element.on({
       mousedown: (event) => {
-        if (event.button != 2) return;
+        if (event.button != 2 && !(event.button == 0 && event.altKey)) return;
         // right click
 
         this.element.one('mouseleave', (event) => {

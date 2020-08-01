@@ -28,7 +28,7 @@ class Selection {
   register() {
     this.board.element.on({
       mousedown: (event) => {
-        if (event.button != 0) return;
+        if (event.button != 0 || event.altKey) return;
         // left click
 
         const target = $(event.target).closest('.layer, .node, .sign');
@@ -68,7 +68,7 @@ class Selection {
         }
       },
       mouseup: (event) => {
-        if (event.button != 0) return;
+        if (event.button != 0 || event.altKey) return;
         // left click
 
         const target = $(event.target).closest('.layer, .node, .sign');
