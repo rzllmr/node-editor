@@ -13,7 +13,10 @@
   line-height: 1.5em;
   font-family: var(--font-sans);
 }
-.sign .details:empty:before{
+.sign .details {
+  display: inline-block; /* makes Enter create <br> */
+}
+.sign .details:empty:before {
   content: attr(data-text);
   color: var(--color-text-faded);
 }

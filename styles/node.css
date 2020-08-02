@@ -73,6 +73,7 @@
 }
 
 .node .details {
+  display: inline-block; /* makes Enter create <br> */
   font-family: var(--font-sans);
   font-size: 8pt;
   line-height: 1.5em;
