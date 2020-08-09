@@ -28,8 +28,8 @@ class Selection {
   register() {
     this.board.element.on({
       mousedown: (event) => {
-        if (event.button != 0 || event.altKey) return;
-        // left click
+        if (event.button != 0 || event.altKey || event.ctrlKey) return;
+        // left click alone
 
         const target = $(event.target).closest('.layer, .node, .sign');
         if (target.length == 0) return;
