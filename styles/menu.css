@@ -87,3 +87,6 @@ hr {
 #remove.tool:hover {
   background: var(--color-tool-remove);
 }
+#help.tool:hover {
+  background: var(--color-tool-help);
+}
