@@ -30,6 +30,10 @@ class Options {
         helpPanel.show();
       }
     });
+
+    $(document).on('hotkey:toggleTheme', (event) => {
+      this.themeButton.click();
+    });
   }
 }
 

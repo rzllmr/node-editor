@@ -55,16 +55,17 @@ class Board extends Proxy {
   register() {
     this.element.on({
       mousewheel: (event) => {
+        // zoom
         const scaleBefore = this.zoom.scale;
 
         this.zoom.change(Math.sign(event.originalEvent.wheelDeltaY));
 
         // adjust window scrolling to zoom to mouse position
         const scrollShift = {
-          x: (this.element[0].scrollLeft + event.pageX)
-            * (scaleBefore - this.zoom.scale) / this.zoom.scale,
-          y: (this.element[0].scrollTop + event.pageY)
-            * (scaleBefore - this.zoom.scale) / this.zoom.scale
+          x: (this.element[0].scrollLeft + event.pageX) *
+            (scaleBefore - this.zoom.scale) / this.zoom.scale,
+          y: (this.element[0].scrollTop + event.pageY) *
+            (scaleBefore - this.zoom.scale) / this.zoom.scale
         };
         this.element[0].scrollLeft += scrollShift.x;
         this.element[0].scrollTop += scrollShift.y;
@@ -72,22 +73,30 @@ class Board extends Proxy {
         this.minimap.element.trigger('window:update');
       },
       mousedown: (event) => {
-        if (event.button != 1) return;
-        // middle click
+        if (!(event.button == 1 || event.button == 0 && event.ctrlKey)) return;
+        // middle click OR left click + ctrl
 
-        this.scrollPos = {x: event.clientX, y: event.clientY};
-        event.target.style.cursor = 'grabbing';
-
+        this.movePivot = null;
+        event.target.style.cursor = 'all-scroll';
         this.element.on('mousemove', (event) => {
-          this.element[0].scrollLeft += this.scrollPos.x - event.clientX;
-          this.element[0].scrollTop += this.scrollPos.y - event.clientY;
-          this.scrollPos = {x: event.clientX, y: event.clientY};
-
-          this.minimap.element.trigger('window:update');
+          if (this.movePivot == null) this.movePivot = {x: event.clientX, y: event.clientY};
+          this.moveVector = {
+            x: (event.clientX - this.movePivot.x) / 20,
+            y: (event.clientY - this.movePivot.y) / 20
+          };
         });
+        this.scrollLoop = setInterval(() => {
+          if (this.moveVector != undefined) {
+            this.element[0].scrollLeft += this.moveVector.x;
+            this.element[0].scrollTop += this.moveVector.y;
+            this.minimap.element.trigger('window:update');
+          }
+        }, 16);
         this.element.one('mouseup', (event) => {
+          this.movePivot = undefined;
           event.target.style.cursor = 'default';
           this.element.off('mousemove');
+          clearInterval(this.scrollLoop);
         });
         event.preventDefault();
         event.stopPropagation();
@@ -106,6 +115,16 @@ class Board extends Proxy {
           top: event.offsetY * this.zoom.scale
         }, false);
       }
+    });
+
+    $(document).on('hotkey:createNode', (event) => {
+      if (this.element.css('visibility') == 'hidden') return;
+      // create Node in the middle of the window
+      const newNode = this.addNode();
+      newNode.move({
+        left: this.element[0].scrollLeft + $(window).width() / 2 * this.zoom.scale,
+        top: this.element[0].scrollTop + $(window).height() / 2 * this.zoom.scale
+      }, false);
     });
   }
 

@@ -28,8 +28,8 @@ class Selection {
   register() {
     this.board.element.on({
       mousedown: (event) => {
-        if (event.button != 0) return;
-        // left click
+        if (event.button != 0 || event.altKey || event.ctrlKey) return;
+        // left click alone
 
         const target = $(event.target).closest('.layer, .node, .sign');
         if (target.length == 0) return;
@@ -68,7 +68,7 @@ class Selection {
         }
       },
       mouseup: (event) => {
-        if (event.button != 0) return;
+        if (event.button != 0 || event.altKey) return;
         // left click
 
         const target = $(event.target).closest('.layer, .node, .sign');
@@ -93,6 +93,13 @@ class Selection {
       }
     });
     this.removeButton.click(this.deleteSelection.bind(this));
+
+    $(document).on('hotkey:blurInput', (event) => {
+      document.activeElement.blur();
+    });
+    $(document).on('hotkey:deleteSelection', (event) => {
+      this.deleteSelection();
+    });
   }
 
   singleSelect(id) {
