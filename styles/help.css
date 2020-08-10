@@ -1,0 +1,43 @@
+
+#help-panel {
+  position: absolute;
+  z-index: 1;
+  margin: 10px;
+  right: 0;
+  display: inline-block;
+  background-color: var(--color-menu);
+  border-radius: 5px;
+  box-shadow: var(--shadow-ui);
+  font-size: 12px;
+  --left-width: 159px;
+}
+
+#help-panel h1 {
+  font-size: 11px;
+  padding-left: calc(var(--left-width) + 7px);
+  color: var(--color-text-faded);
+  margin: 5px 0 0 0;
+}
+
+#help-panel table {
+  width: 100%;
+}
+
+#help-panel th {
+  text-align: left;
+  color: var(--color-text-faded);
+  border-bottom: 1px solid var(--color-text-faded);
+}
+
+#help-panel td {
+  vertical-align: top;
+}
+
+#help-panel td:first-child {
+  width: var(--left-width);
+  text-align: right;
+}
+
+#help-panel td:last-child {
+  color: var(--color-text-highlight);
+}
