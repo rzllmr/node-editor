@@ -19,3 +19,6 @@
 .graph.out {
   stroke: var(--color-out);
 }
+.graph.same {
+  stroke: var(--color-same);
+}

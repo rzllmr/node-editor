@@ -224,38 +224,39 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
     let otherAnchor = this.anchors.other(anchor);
 
     let direction;
-    if (otherAnchor.node.element[0].className.endsWith('selected')) {
+    if (otherAnchor.node.selected) {
       if (enable) {
         // graphs between selected nodes are highlighted as selected
-        direction = 'selected';
+        direction = ' selected';
       } else {
-        // when one node gets deselected again the in/out highlighting is restored
+        // when one node gets deselected again the in/out/same highlighting is restored
         anchor = otherAnchor;
         otherAnchor = this.anchors.other(anchor);
-        direction = anchor.end == 'target' ? 'in' : 'out';
+        direction = anchor.end == otherAnchor.end ? ' same' :
+                    anchor.end == 'target' ? ' in' : ' out';
       }
     } else {
       if (enable) {
         // highlight according to direction of graphs linked to selected nodes
-        direction = anchor.end == 'target' ? 'in' : 'out';
+        direction = anchor.end == otherAnchor.end ? ' same' :
+                    anchor.end == 'target' ? ' in' : ' out';
       } else {
         // remove highlight
         direction = '';
       }
     }
-    direction = ' ' + direction;
 
     anchor.element[0].className = `anchor ${anchor.end} ${anchor.side}` + direction;
     this.element[0].className.baseVal = 'graph' + direction;
     otherAnchor.element[0].className = `anchor ${otherAnchor.end} ${otherAnchor.side}` + direction;
-    if (direction == ' ') {
+
+    if (direction == '') {
       // check for other highlighted links before removing highlight of otherAnchor.node
-      const highlightedAnchor = otherAnchor.node.element.find('.anchor.in, .anchor.out').first();
-      if (highlightedAnchor.length > 0) {
-        direction = ' ' + highlightedAnchor[0].className.split(' ').pop();
-      }
+      const highlighted = otherAnchor.node.element.find('.anchor.in, .anchor.out, .anchor.same');
+      if (highlighted.length > 0) direction = ' ' + highlighted[0].className.split(' ').pop();
     }
     otherAnchor.node.element[0].className = 'node' + direction;
+
     $('#' + this.boardId).find('.minimap').trigger('node:highlight', [otherAnchor.node.id]);
   }
 

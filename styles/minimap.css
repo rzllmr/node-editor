@@ -26,6 +26,9 @@
 .mini.mini-node.out {
   background: var(--color-out);
 }
+.mini.mini-node.same {
+  background: var(--color-same);
+}
 
 .zoominfo {
   color: var(--color-lightest);
