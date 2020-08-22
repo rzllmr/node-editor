@@ -28,6 +28,9 @@
 .anchor.out {
   color: var(--color-out);
 }
+.anchor.same {
+  color: var(--color-same);
+}
 
 .anchor.top {
   left: 50%;

@@ -23,6 +23,7 @@ class Anchor extends Proxy {
     this.element.addClass(side);
     this.element.appendTo(this.node.element);
 
+    this.registerToggle();
     if (drag) {
       this.link = new Graph(this.id + '-', this);
       this.dragNewLink();
@@ -37,13 +38,13 @@ class Anchor extends Proxy {
 
   changeEnd(end) {
     if (end === this.end) return;
-    this.end = end;
     this.element.removeClass(this.end);
     this.element.addClass(end);
+    this.end = end;
     if (this.end === 'source') {
       this.element.find('i').first()[0].className = 'fa fa-circle';
     } else {
-      this.element.find('i').first()[0].className = 'fa fa-caret-' + this.side;
+      this.element.find('i').first()[0].className = 'fa fa-caret-' + this.caretSide(this.side);
     }
   }
 
@@ -72,15 +73,18 @@ class Anchor extends Proxy {
     this.link.updateIdxs();
     if (toAnchor.link) toAnchor.link.destroy();
     toAnchor.link = this.link;
-    let side;
-    switch (toAnchor.side) {
-      case 'top': side = 'down'; break;
-      case 'right': side = 'left'; break;
-      case 'bottom': side = 'up'; break;
-      case 'left': side = 'right'; break;
-    }
     if (toAnchor.end == 'target') {
-      toAnchor.element.find('i').first()[0].className = 'fa fa-caret-' + side;
+      toAnchor.element.find('i').first()[0].className =
+        'fa fa-caret-' + this.caretSide(toAnchor.side);
+    }
+  }
+
+  caretSide(side) {
+    switch (side) {
+      case 'top': return 'down';
+      case 'right': return 'left';
+      case 'bottom': return 'up';
+      case 'left': return 'right';
     }
   }
 
@@ -183,14 +187,24 @@ class Anchor extends Proxy {
 
   registerDragOut() {
     this.element.on('mousedown', (event) => {
-      if (event.button != 2 && !(event.button == 0 && event.altKey)) return;
+      if (event.button != 2 && !(event.button == 0 && event.altKey) || event.shiftKey) return;
       // right click
 
       // restore state of link creation while preserving end type
       const otherAnchor = this.link.otherAnchor(this);
       otherAnchor.element.off('mousedown');
+      otherAnchor.registerToggle();
       otherAnchor.dragNewLink(this.end);
 
+      event.stopPropagation();
+    });
+  }
+
+  registerToggle() {
+    this.element.on('mousedown', (event) => {
+      if (!(event.shiftKey && (event.button == 2 || event.button == 0 && event.altKey))) return;
+      const newEnd = this.end == 'target' ? 'source' : 'target';
+      this.changeEnd(newEnd);
       event.stopPropagation();
     });
   }

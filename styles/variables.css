@@ -50,6 +50,7 @@
 
   --color-in: #3CC47C;
   --color-out: #FF3B3F;
+  --color-same: #3AADFF;
 }
 
 :root.dark {

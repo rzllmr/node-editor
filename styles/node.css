@@ -23,6 +23,11 @@
   transform: translate(-1px, -1px);
   background-clip: content-box;
 }
+.node.same {
+  border: 1px solid var(--color-same);
+  transform: translate(-1px, -1px);
+  background-clip: content-box;
+}
 
 .node.target {
   border: 1px dashed var(--color-highlight);
