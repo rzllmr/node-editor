@@ -13,6 +13,16 @@ body {
   outline: none;
 }
 
+em {
+  color: var(--color-text-highlight);
+  font-style: normal;
+  font-weight: normal;
+  cursor: pointer;
+}
+em:hover {
+  text-decoration: underline;
+}
+
 .board {
   position: absolute;
   width: 100%;
