@@ -226,6 +226,9 @@ class Node extends Proxy {
   exitEmphasis(emNode) {
     // remove placeholder character
     emNode.textContent = emNode.textContent.substring(1);
+    $(emNode).on('click', () => {
+      $('#board-tree').trigger('board:create', [emNode.textContent]);
+    });
 
     let nextNode = emNode.nextSibling;
     if (nextNode != null && nextNode.nodeName === '#text') {

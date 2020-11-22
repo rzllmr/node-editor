@@ -166,6 +166,15 @@ class TreeView extends Proxy {
         this.hoverItem(null);
       }
     });
+
+    this.element.on('board:create', (event, name) => {
+      const item = this.getItem(name);
+      if (item == null || item.type == 'branch') {
+        this.createItem('leaf', name);
+      } else {
+        this.selectItem(item);
+      }
+    });
   }
 
   registerItem(item) {
