@@ -137,7 +137,15 @@ class TreeView extends Proxy {
       this.toolbar.find('#rnm-board, #del-board').hide();
     });
     this.rnmInput.on('change blur', (event) => {
-      this.hovered.setName(this.rnmInput.val());
+      const oldName = this.hovered.name;
+      const newName = this.rnmInput.val();
+      this.hovered.setName(newName);
+      $('em.link').each((_, node) => {
+        if (node.textContent == oldName) {
+          node.textContent = newName;
+        }
+      });
+
       this.rnmInput.hide();
       this.menuCover.hide();
       this.toolbar.find('#rnm-board, #del-board').show();
