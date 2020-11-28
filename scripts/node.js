@@ -185,7 +185,12 @@ class Node extends Proxy {
         $(event.target).prop(property, !editable);
       }
     });
-    new DivEdit(element[0]).registerKeys();
+    const onEmClick = (emText) => {
+      return () => {
+        $('#board-tree').trigger('board:create', [emText]);
+      };
+    };
+    new DivEdit(element[0]).registerKeys(onEmClick);
   }
 
   select() {

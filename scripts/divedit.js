@@ -10,7 +10,8 @@ class DivEdit {
     };
   }
 
-  registerKeys() {
+  registerKeys(emClick) {
+    this.emClick = emClick;
     this.editEm = false;
     $(this.div).on({
       keydown: (event) => {
@@ -121,6 +122,7 @@ class DivEdit {
 
   insertEmphasis(key, node) {
     const emNode = document.createElement('em');
+    emNode.className = 'link';
     // setting the caret inside requires content
     emNode.textContent = '#'; // alt: zero-width space '\u200B'
 
@@ -161,9 +163,7 @@ class DivEdit {
 
     // remove link symbol
     node.textContent = node.textContent.trim().substring(1);
-    $(node).on('click', () => {
-      $('#board-tree').trigger('board:create', [node.textContent]);
-    });
+    $(node).on('click', this.emClick(node.textContent));
 
     let nextNode = node.nextSibling;
     if (nextNode == null || nextNode.nodeName != '#text') {
