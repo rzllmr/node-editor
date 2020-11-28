@@ -1,6 +1,6 @@
 
 const Proxy = require('./proxy.js');
-const ColorPicker = require('./color-picker.js');
+const ColorPicker = require('./colorpicker.js');
 
 /**
  * handle selection for the board element
