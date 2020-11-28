@@ -4,6 +4,7 @@
 const Proxy = require('./proxy.js');
 
 const Anchor = require('./anchor.js');
+const DivEdit = require('./divedit.js');
 
 /**
  * .node representative to handle content
@@ -182,92 +183,9 @@ class Node extends Proxy {
       },
       blur: (event, param) => {
         $(event.target).prop(property, !editable);
-      },
-      keydown: (event) => {
-        if (this.emNode == null) {
-          if (event.key === '#') {
-            // get current node with caret
-            const textNode = document.getSelection().anchorNode;
-            this.emNode = this.insertEmphasis(textNode);
-            return false;
-          }
-        } else {
-          if (event.key === 'Tab') {
-            this.exitEmphasis(this.emNode);
-            this.emNode = null;
-            return false;
-          }
-        }
       }
     });
-  }
-
-  insertEmphasis(textNode) {
-    const caretPosition = this.getCaretIndex(textNode);
-    let nextNode = null;
-    if (caretPosition == textNode.nodeValue.length) {
-      nextNode = textNode.nextSibling;
-    } else {
-      nextNode = textNode.splitText(caretPosition);
-    }
-
-    const emNode = document.createElement('em');
-    // setting the caret inside requires content
-    emNode.textContent = '#'; // alt: zero-width space '\u200B'
-    if (nextNode == null) {
-      textNode.parentNode.appendChild(emNode);
-    } else {
-      textNode.parentNode.insertBefore(emNode, nextNode);
-    }
-    this.setCaretIndex(emNode, 1);
-    return emNode;
-  }
-
-  exitEmphasis(emNode) {
-    // remove placeholder character
-    emNode.textContent = emNode.textContent.substring(1);
-    $(emNode).on('click', () => {
-      $('#board-tree').trigger('board:create', [emNode.textContent]);
-    });
-
-    let nextNode = emNode.nextSibling;
-    if (nextNode != null && nextNode.nodeName === '#text') {
-      if (!nextNode.textContent.startsWith(' ')) {
-        nextNode.textContent = ' ' + nextNode.textContent;
-      }
-    } else {
-      const newNode = document.createTextNode('\u00A0'); // space character
-      if (nextNode == null) {
-        emNode.parentNode.appendChild(newNode);
-      } else {
-        emNode.parentNode.insertBefore(newNode, nextNode);
-      }
-      nextNode = newNode;
-    }
-    this.setCaretIndex(nextNode, 1);
-    return nextNode;
-  }
-
-  setCaretIndex(node, position) {
-    const sel = window.getSelection();
-    const range = document.createRange();
-    range.setStart(node, position);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
-  }
-
-  getCaretIndex(element) {
-    let position = 0;
-    const selection = window.getSelection();
-    if (selection.rangeCount !== 0) {
-      const range = window.getSelection().getRangeAt(0);
-      const preCaretRange = range.cloneRange();
-      preCaretRange.selectNodeContents(element);
-      preCaretRange.setEnd(range.endContainer, range.endOffset);
-      position = preCaretRange.toString().length;
-    }
-    return position;
+    new DivEdit(element[0]).registerKeys();
   }
 
   select() {
