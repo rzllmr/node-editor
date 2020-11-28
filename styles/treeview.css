@@ -83,11 +83,11 @@ li.leaf.insert, span.branch.insert {
 }
 #tree-tools.toolbar input.selector {
   position: absolute;
-  top: -1px;
+  top: -2px;
   right: 0;
   background: var(--color-highlight-faded-o);
   border: none;
-  font: 11px var(--font-sans);
+  font: inherit;
   color: var(--color-text);
   z-index: 1;
 }

@@ -128,7 +128,7 @@ class TreeView extends Proxy {
     // renaming items
     this.toolbar.find('#rnm-board').click(() => {
       // overlay renaming input
-      this.rnmInput.width(140 - this.hovered.label.offsetLeft);
+      this.rnmInput.width(166 - this.hovered.label.offsetLeft);
       this.rnmInput.val(this.hovered.name);
       this.rnmInput.show();
       this.rnmInput.focus();
