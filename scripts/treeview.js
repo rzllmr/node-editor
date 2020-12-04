@@ -59,6 +59,18 @@ class TreeItem {
     else if (this.parent === parent) return true;
     else return this.parent.hasParent(parent);
   }
+
+  expand(toggle = true) {
+    if (this.type !== 'branch') return;
+    if (toggle) {
+      this.nested.show();
+      this.icon[0].className = 'fa fa-folder-open-o';
+    } else {
+      this.nested.hide();
+      this.icon[0].className = 'fa fa-folder';
+    }
+    this.expanded = toggle;
+  }
 }
 
 class TreeView extends Proxy {
@@ -197,14 +209,7 @@ class TreeView extends Proxy {
       element = element.find('span.branch');
       element.off('click');
       element.click(() => {
-        if (item.expanded) {
-          item.nested.hide();
-          item.icon[0].className = 'fa fa-folder';
-        } else {
-          item.nested.show();
-          item.icon[0].className = 'fa fa-folder-open-o';
-        }
-        item.expanded = !item.expanded;
+        item.expand(!item.expanded);
       });
     }
     element.on({
