@@ -120,6 +120,37 @@ class TreeView extends Proxy {
     }
   }
 
+  createItemAtPath(path, lastType) {
+    path = path.split('/').filter((str) => str != '');
+
+    let pathIdx = 0;
+    let lastBefore = null;
+    for (let itemIdx = 0; itemIdx < this.items.length - 1; itemIdx++) {
+      const item = this.items[itemIdx];
+      if (item.level == pathIdx + 1 && item.name == path[pathIdx]) {
+        pathIdx++;
+        if (pathIdx == path.length) {
+          // path[--pathIdx] = this.uniqueName(item.name);
+          pathIdx--;
+          break;
+        }
+      } else if (item.level < pathIdx + 1) {
+        break;
+      }
+      lastBefore = item;
+    }
+
+    for (; pathIdx < path.length; pathIdx++) {
+      const level = pathIdx + 1;
+      const name = path[pathIdx];
+      const type = pathIdx == path.length - 1 ? lastType : 'branch';
+      const newItem = new this.ItemType(type, name);
+      this.addItem([newItem], lastBefore, level);
+      lastBefore = newItem;
+    }
+    return lastBefore;
+  }
+
   createItem(type, name, level = 1) {
     const item = new this.ItemType(type, name);
     const lastItem = this.items[this.items.length - 2];
@@ -149,14 +180,10 @@ class TreeView extends Proxy {
       this.toolbar.find('#rnm-board, #del-board').hide();
     });
     this.rnmInput.on('change blur', (event) => {
-      const oldName = this.hovered.name;
-      const newName = this.rnmInput.val();
-      this.hovered.setName(newName);
-      $('em.link').each((_, node) => {
-        if (node.textContent == oldName) {
-          node.textContent = newName;
-        }
-      });
+      const oldPath = this.getItemPath(this.hovered);
+      this.hovered.setName(this.rnmInput.val());
+      const newPath = this.getItemPath(this.hovered);
+      this.updateBoardLinks(oldPath, newPath);
 
       this.rnmInput.hide();
       this.menuCover.hide();
@@ -187,13 +214,14 @@ class TreeView extends Proxy {
       }
     });
 
-    this.element.on('board:create', (event, name) => {
-      const item = this.getItem(name);
+    this.element.on('treeview:createFromLink', (event, emNode) => {
+      const path = emNode.dataset.path;
+      let item = this.getItem(path, 'leaf');
       if (item == null || item.type == 'branch') {
-        this.createItem('leaf', name);
-      } else {
-        this.selectItem(item);
+        item = this.createItemAtPath(path, 'leaf');
       }
+      this.selectItem(item);
+      emNode.dataset.path = this.getItemPath(item);
     });
   }
 
@@ -258,7 +286,10 @@ class TreeView extends Proxy {
           }
         }
         const removed = this.removeItem(this.dragged);
+        const oldPaths = removed.filter((i) => i.type == 'leaf').map((i) => this.getItemPath(i));
         this.addItem(removed, itemBefore);
+        const newPaths = removed.filter((i) => i.type == 'leaf').map((i) => this.getItemPath(i));
+        oldPaths.forEach((_, idx) => this.updateBoardLinks(oldPaths[idx], newPaths[idx]));
         this.dragged = null;
       },
       'mouseover': (event) => {
@@ -337,9 +368,18 @@ class TreeView extends Proxy {
     this.insertLine.width(element.width() - ((level-1) * 15 + 5));
   }
 
-  getItem(name) {
+  getItem(path, type = null) {
+    const name = path.replace(/.*\//, '');
+    const checkPath = name !== path;
+    console.log('check', name, path, checkPath);
+    if (path.startsWith('/')) path = path.substr(1);
     for (const item of this.items) {
-      if (item.name === name) return item;
+      if (item.name === name && (type == null || item.type === type)) {
+        if (checkPath && this.getItemPath(item) !== path) {
+          continue;
+        }
+        return item;
+      }
     }
     return null;
   }
@@ -349,11 +389,41 @@ class TreeView extends Proxy {
     return idx > 0 ? this.items[idx-1] : null;
   }
 
+  getItemPath(item) {
+    const path = [];
+    while (item instanceof TreeItem) {
+      path.push(item.name);
+      item = item.parent;
+    }
+    return path.reverse().join('/');
+  }
+
+  updateBoardLinks(oldPath, newPath) {
+    console.log('updating', oldPath, newPath);
+    $('em.link').each((_, emNode) => {
+      if (emNode.dataset.path == oldPath) {
+        emNode.dataset.path = newPath;
+        emNode.textContent = newPath.replace(/.*\//, '');
+      }
+    });
+  }
+
   selectItem(item) {
     if (this.selected === item) return;
     if (this.selected !== null) this.selected.select(false);
     if (item !== null) item.select(true);
     this.selected = item;
+
+    this.expandPath(item);
+  }
+
+  expandPath(item, toggle = true) {
+    while (item instanceof TreeItem) {
+      if (item.type === 'branch') {
+        item.expand(toggle);
+      }
+      item = item.parent;
+    }
   }
 
   hoverItem(item) {

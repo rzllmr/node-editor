@@ -185,10 +185,8 @@ class Node extends Proxy {
         $(event.target).prop(property, !editable);
       }
     });
-    const onEmClick = (emText) => {
-      return () => {
-        $('#board-tree').trigger('board:create', [emText]);
-      };
+    const onEmClick = (emNode) => {
+      $('#board-tree').trigger('treeview:createFromLink', [emNode]);
     };
     new DivEdit(element[0]).registerKeys(onEmClick);
   }

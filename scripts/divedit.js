@@ -161,9 +161,15 @@ class DivEdit {
       return true;
     }
 
-    // remove link symbol
-    node.textContent = node.textContent.trim().substring(1);
-    $(node).on('click', this.emClick(node.textContent));
+    // remove link symbol and dir path for display
+    const path = node.textContent.trim().substring(1);
+    node.dataset.path = path;
+    node.textContent = path.replace(/.*\//, '');
+
+    // register click event for Node class
+    $(node).on('click', (event) => {
+      this.emClick(event.target);
+    });
 
     let nextNode = node.nextSibling;
     if (nextNode == null || nextNode.nodeName != '#text') {
