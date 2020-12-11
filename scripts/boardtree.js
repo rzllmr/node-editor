@@ -37,7 +37,12 @@ class BoardTree extends TreeView {
     super('#board-tree');
     this.ItemType = BoardItem;
 
-    this.createItem('leaf', 'main');
+    this.createDefault();
+  }
+
+  createDefault() {
+    const mainItem = this.createItemAtPath('/main', 'leaf');
+    this.selectItem(mainItem);
   }
 
   export() {
@@ -55,8 +60,15 @@ class BoardTree extends TreeView {
   }
 
   import(itemList) {
+    this.selectItem(null);
+    let lastItem = null;
     for (const entry of itemList) {
-      this.createItem(entry.type, entry.name, entry.level);
+      const item = new this.ItemType(entry.type, entry.name);
+      this.addItem([item], lastItem, entry.level);
+      if (this.selected == null && entry.type == 'leaf' && entry.level == 1) {
+        this.selectItem(item);
+      }
+      lastItem = item;
     }
   }
 }

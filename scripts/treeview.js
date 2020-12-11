@@ -151,21 +151,49 @@ class TreeView extends Proxy {
     return lastBefore;
   }
 
-  createItem(type, name, level = 1) {
-    const item = new this.ItemType(type, name);
-    const lastItem = this.items[this.items.length - 2];
-    this.addItem([item], lastItem, level);
-    this.toolbar.find('#new-board, #new-folder').hide();
-    if (type === 'leaf') this.selectItem(item);
+  siblingItems(item, includeSelf = false) {
+    let itemIdx = item.parent instanceof TreeView ? 0 :
+      this.items.indexOf(item.parent) + 1;
+    const items = [];
+    for (; itemIdx < this.items.length; itemIdx++) {
+      const currentItem = this.items[itemIdx];
+      if (currentItem.level > item.level ||
+        !includeSelf && currentItem == item) continue;
+      else if (currentItem.level < item.level) break;
+      else items.push(currentItem);
+    }
+    return items;
+  }
+
+  uniqueName(items, name) {
+    // generate names until unique
+    const itemNames = items.map((item) => item.name);
+    let changed;
+    do {
+      changed = false;
+      if (itemNames.includes(name)) {
+        const match = name.match(/\s*\(([0-9]+)\)$/);
+        if (match == null) {
+          name += ' (1)';
+        } else {
+          const increment = Number(match[1]) + 1;
+          name = name.replace(match[0], ` (${increment})`);
+        }
+        changed = true;
+      }
+    } while (changed);
+    return name;
   }
 
   registerTools() {
     // adding items
     this.toolbar.find('#new-board').click(() => {
-      this.createItem('leaf', 'new item');
+      this.createItemAtPath('/new item', 'leaf');
+      this.toolbar.find('#new-board, #new-folder').hide();
     });
     this.toolbar.find('#new-folder').click(() => {
-      this.createItem('branch', 'new item');
+      this.createItemAtPath('/new folder', 'branch');
+      this.toolbar.find('#new-board, #new-folder').hide();
     });
 
     // renaming items
@@ -371,7 +399,6 @@ class TreeView extends Proxy {
   getItem(path, type = null) {
     const name = path.replace(/.*\//, '');
     const checkPath = name !== path;
-    console.log('check', name, path, checkPath);
     if (path.startsWith('/')) path = path.substr(1);
     for (const item of this.items) {
       if (item.name === name && (type == null || item.type === type)) {
@@ -399,7 +426,6 @@ class TreeView extends Proxy {
   }
 
   updateBoardLinks(oldPath, newPath) {
-    console.log('updating', oldPath, newPath);
     $('em.link').each((_, emNode) => {
       if (emNode.dataset.path == oldPath) {
         emNode.dataset.path = newPath;
