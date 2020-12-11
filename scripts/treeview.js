@@ -130,9 +130,7 @@ class TreeView extends Proxy {
       if (item.level == pathIdx + 1 && item.name == path[pathIdx]) {
         pathIdx++;
         if (pathIdx == path.length) {
-          // path[--pathIdx] = this.uniqueName(item.name);
-          pathIdx--;
-          break;
+          path[--pathIdx] = this.uniqueName(this.siblingItems(item, true), path[pathIdx]);
         }
       } else if (item.level < pathIdx + 1) {
         break;
@@ -207,7 +205,17 @@ class TreeView extends Proxy {
       this.menuCover.show();
       this.toolbar.find('#rnm-board, #del-board').hide();
     });
-    this.rnmInput.on('change blur', (event) => {
+    this.rnmInput.on('change blur keydown', (event) => {
+      if (event.type === 'keydown' && !['Enter', 'Escape'].includes(event.key)) return;
+
+      const newName = this.rnmInput.val();
+      const uniqueName = this.uniqueName(this.siblingItems(this.hovered), newName);
+      if (newName !== uniqueName) {
+        this.rnmInput.val(uniqueName);
+        this.rnmInput.select();
+        return false;
+      }
+
       const oldPath = this.getItemPath(this.hovered);
       this.hovered.setName(this.rnmInput.val());
       const newPath = this.getItemPath(this.hovered);
@@ -316,6 +324,8 @@ class TreeView extends Proxy {
         const removed = this.removeItem(this.dragged);
         const oldPaths = removed.filter((i) => i.type == 'leaf').map((i) => this.getItemPath(i));
         this.addItem(removed, itemBefore);
+        const uniqueName = this.uniqueName(this.siblingItems(removed[0]), removed[0].name);
+        removed[0].setName(uniqueName);
         const newPaths = removed.filter((i) => i.type == 'leaf').map((i) => this.getItemPath(i));
         oldPaths.forEach((_, idx) => this.updateBoardLinks(oldPaths[idx], newPaths[idx]));
         this.dragged = null;
