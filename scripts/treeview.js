@@ -151,6 +151,7 @@ class TreeView extends Proxy {
     });
     this.toolbar.find('#apply-del, #discard-del').click((event) => {
       if (event.currentTarget.id === 'apply-del') {
+        if (this.hovered == this.selected) this.selectItem(this.items[0]);
         this.removeItem(this.hovered);
         this.hovered.delete();
         this.hovered = null;
