@@ -13,16 +13,18 @@ class Graph extends Proxy {
   constructor(id = null, anchor) {
     super(id);
 
-    this.boardId = anchor.node.board[0].id;
+    this.anchors = new Connection(anchor);
 
     this.element = $('#templates .graph').clone();
     this.element.removeClass('template');
     this.element.attr('id', id);
-    this.element.appendTo(`#${this.boardId} .layer.graphs`);
-
-    this.anchors = new Connection(anchor);
+    this.element.appendTo(`#${this.boardId()} .layer.graphs`);
 
     this.update(this.anchors.source, this.anchors.source.locate());
+  }
+
+  boardId() {
+    return this.anchors.source.node.board[0].id;
   }
 
   updateIdxs() {
@@ -257,13 +259,13 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
     }
     otherAnchor.node.element[0].className = 'node' + direction;
 
-    $('#' + this.boardId).find('.minimap').trigger('node:highlight', [otherAnchor.node.id]);
+    $('#' + this.boardId()).find('.minimap').trigger('node:highlight', [otherAnchor.node.id]);
   }
 
   export() {
     const element = this.element[0];
     const object = {
-      board: this.boardId,
+      board: this.boardId(),
       type: element.className.baseVal.split(' ')[0],
       source: element.id.split('-')[0],
       target: element.id.split('-')[1]
