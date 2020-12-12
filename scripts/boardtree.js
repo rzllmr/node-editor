@@ -7,6 +7,8 @@ class BoardItem extends TreeItem {
     super(type, name);
     if (type === 'leaf') {
       this.data = new Board(this.toId(name));
+      // make new board invisible first
+      this.select(false);
     }
   }
 
