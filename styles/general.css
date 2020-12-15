@@ -15,8 +15,8 @@ body {
 
 em {
   color: var(--color-text-highlight);
-  font-style: normal;
-  font-weight: normal;
+  font: inherit;
+  font-weight: 500;
   cursor: pointer;
 }
 em:hover {

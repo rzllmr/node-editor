@@ -1,7 +1,8 @@
 
 class DivEdit {
-  constructor(divNode) {
+  constructor(divNode, multiline = true) {
     this.div = divNode;
+    this.multiline = multiline;
 
     this.char = {
       space: '\u00A0',
@@ -52,6 +53,13 @@ class DivEdit {
             this.editEm = handled;
           } else if (['Backspace', 'Delete'].includes(key)) {
             handled = this.removeEmphasis(key, node);
+          } else if (['Enter', 'Escape'].includes(key)) {
+            if (!(this.multiline && key == 'Enter')) {
+              this.setCaretIndex(this.div.firstChild, 0);
+              this.div.scrollLeft = 0;
+              this.div.blur();
+              handled = true;
+            }
           }
         } else if (node.nodeName == 'DIV') {
           if (key == '#') {
