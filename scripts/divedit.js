@@ -54,7 +54,7 @@ class DivEdit {
           } else if (['Backspace', 'Delete'].includes(key)) {
             handled = this.removeEmphasis(key, node);
           } else if (['Enter', 'Escape'].includes(key)) {
-            if (!(this.multiline && key == 'Enter')) {
+            if (!(this.multiline && key == 'Enter' && !event.ctrlKey)) {
               this.setCaretIndex(this.div.firstChild, 0);
               this.div.scrollLeft = 0;
               this.div.blur();
