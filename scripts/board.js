@@ -129,8 +129,9 @@ class Board extends Proxy {
   }
 
   addNode(id = null, hue = null) {
-    id = id == null ? null : Number(id);
-    if (!id) id = ++Board.nodeIdxMax;
+    if (id != null) id = Number(id);
+
+    if (id == null) id = ++Board.nodeIdxMax;
     else if (id > Board.nodeIdxMax) Board.nodeIdxMax = id;
 
     const currentHue = this.selection.colorPicker.currentHue;
