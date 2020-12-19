@@ -68,6 +68,26 @@ class DivEdit {
           }
         }
         return !handled;
+      },
+      focus: (event) => {
+        let first = this.div.firstChild;
+        if (first == null) {
+          first = this.div.appendChild(this.createTextNode());
+        } else if (first.nodeName == 'EM') {
+          first = this.insertBefore(first, this.createTextNode());
+        }
+        this.setCaretIndex(first, 1);
+      },
+      blur: (event) => {
+        if (this.editEm) {
+          const emNode = $(event.target).find('em').filter(
+              (_, em) => em.textContent.startsWith('#'))[0];
+          if (emNode == undefined) return false;
+          const handled = this.finishEmphasis('Enter', emNode);
+          this.editEm = !handled;
+        }
+        this.div.scrollTop = 0;
+        this.div.scrollLeft = 0;
       }
     });
   }
@@ -84,7 +104,7 @@ class DivEdit {
       }
 
       if (emNode == null || emNode.nodeName != 'EM') {
-        return false;
+        return true;
       }
       let textNode = emNode.previousSibling;
       if (textNode == null || textNode.nodeName != '#text') {
@@ -94,9 +114,6 @@ class DivEdit {
         textNode.textContent = this.char.zeroSpace;
       }
       this.setCaretIndex(textNode, textNode.textContent.length);
-      if (node.textContent == this.char.zeroSpace) {
-        this.div.removeChild(node);
-      }
     } else if (key == 'ArrowRight') {
       let emNode;
       if (node.nodeName == '#text' && this.getCaretIndex(node) == node.nodeValue.length) {
@@ -118,9 +135,6 @@ class DivEdit {
         textNode.textContent = this.char.zeroSpace;
       }
       this.setCaretIndex(textNode, 1);
-      if (node.textContent == this.char.zeroSpace) {
-        this.div.removeChild(node);
-      }
     } else {
       return false;
     }
@@ -132,23 +146,17 @@ class DivEdit {
     const emNode = document.createElement('em');
     emNode.className = 'link';
     // setting the caret inside requires content
-    emNode.textContent = '#'; // alt: zero-width space '\u200B'
-
-    if (node == this.div) {
-      this.div.appendChild(emNode);
-      this.setCaretIndex(emNode, 1);
-      return true;
-    }
+    emNode.textContent = '#';
 
     const caretPosition = this.getCaretIndex(node);
 
-    if (caretPosition == 1) {
+    if (caretPosition == node.nodeValue.length) {
+      this.insertAfter(node, emNode);
+    } else if (caretPosition == 1) {
       this.insertBefore(node, emNode);
       if (!node.textContent.startsWith(this.char.zeroSpace)) {
         node.textContent = this.char.zeroSpace + node.textContent;
       }
-    } else if (caretPosition == node.nodeValue.length) {
-      this.insertAfter(node, emNode);
     } else {
       // split text node and insert between
       const leftOfCaret = node.textContent.slice(0, caretPosition);
@@ -202,12 +210,11 @@ class DivEdit {
       if (this.editEm && key == 'Backspace' && this.getCaretIndex(node) != 1) {
         return false;
       }
-      // node already is em
     } else if (node.nodeName == '#text' && key == 'Backspace' &&
                this.getCaretIndex(node) == 1) {
       node = node.previousSibling;
       if (node == null || node.nodeName != 'EM') {
-        return false;
+        return node == null;
       }
     } else if (node.nodeName == '#text' && key == 'Delete' &&
                this.getCaretIndex(node) == node.textContent.length) {
