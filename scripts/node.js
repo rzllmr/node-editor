@@ -251,7 +251,7 @@ class Node extends Proxy {
       width: element.offsetWidth,
       height: element.offsetHeight,
       hue: element.querySelector('.divider').style.getPropertyValue('--hue'),
-      label: element.querySelector('div.label').value,
+      label: element.querySelector('div.label').innerHTML.replace(/<br>/g, '\n'),
       details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n')
     };
     return object;
@@ -268,9 +268,9 @@ class Node extends Proxy {
       height: object.height
     });
     node.element.find('.divider')[0].style.setProperty('--hue', object.hue);
-    node.element.find('div.label').val(object.label);
+    node.element.find('div.label').html(object.label.replace(/\n/g, '<br>'));
     node.element.find('div.details').html(object.details.replace(/\n/g, '<br>'));
-    node.element.find('div.details em').on('click', (event) => {
+    node.element.find('div.label em, div.details em').on('click', (event) => {
       $('#board-tree').trigger('treeview:createFromLink', [event.target]);
     });
     node.minimap.trigger('node:update', [node.element[0].id]);
