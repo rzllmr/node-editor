@@ -6,18 +6,23 @@ class KeyBinding {
       'input': {
         'check': () => {
           return $(document.activeElement).is(
-              'div.head input, div.body div.details, div.sign div.details'
+              'div.head div.label, div.body div.details, div.sign div.details'
           );
         },
         'escape': 'hotkey:blurInput'
       },
-      'default': {
+      'window': {
         'check': () => {
-          return true;
+          return $(document.activeElement).is('body');
         },
         't': 'hotkey:toggleTheme',
         'delete': 'hotkey:deleteSelection',
         'insert': 'hotkey:createNode'
+      },
+      'default': {
+        'check': () => {
+          return true;
+        }
       }
     };
 
@@ -26,13 +31,19 @@ class KeyBinding {
       this.recognizedKeys = this.recognizedKeys.concat(Object.keys(this.binding[mode]));
     }
     this.recognizedKeys = Array.from(new Set(this.recognizedKeys));
+
+    this.ignoredKeys = ['home', 'end', 'pageup', 'pagedown'];
   }
 
-  handleKey(key, ctrl, shift) {
+  handleKey(key, ctrl, shift, alt) {
     key = key.toLowerCase();
-    if (shift) key = 'shift+' + key;
-    if (ctrl) key = 'ctrl+' + key;
-    if (!this.recognizedKeys.includes(key)) return;
+    if (key == 'control') key = 'ctrl';
+    if (alt && key != 'alt') key = 'alt+' + key;
+    if (shift && key != 'shift') key = 'shift+' + key;
+    if (ctrl && key != 'ctrl') key = 'ctrl+' + key;
+
+    if (this.ignoredKeys.includes(key)) return false;
+    if (!this.recognizedKeys.includes(key)) return true;
 
     // Pass key to top-most active mode
     for (const mode in this.binding) {
@@ -43,6 +54,7 @@ class KeyBinding {
         break;
       }
     }
+    return true;
   }
 
   callEvent(eventName) {
