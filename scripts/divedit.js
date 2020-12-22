@@ -191,7 +191,7 @@ class DivEdit {
 
     // remove link symbol and dir path for display
     const path = node.textContent.trim().substring(1);
-    node.dataset.path = path;
+    node.dataset.path = path.replace(/\/+/, '/');
     node.textContent = path.replace(/.*\//, '');
 
     // register click event for Node class

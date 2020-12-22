@@ -410,10 +410,9 @@ class TreeView extends Proxy {
   getItem(path, type = null) {
     const name = path.replace(/.*\//, '');
     const checkPath = name !== path;
-    if (path.startsWith('/')) path = path.substr(1);
     for (const item of this.items) {
       if (item.name === name && (type == null || item.type === type)) {
-        if (checkPath && this.getItemPath(item) !== path) {
+        if (checkPath && !this.getItemPath(item).endsWith(path)) {
           continue;
         }
         return item;
@@ -433,7 +432,7 @@ class TreeView extends Proxy {
       path.push(item.name);
       item = item.parent;
     }
-    return path.reverse().join('/');
+    return '/' + path.reverse().join('/');
   }
 
   updateBoardLinks(oldPath, newPath) {
