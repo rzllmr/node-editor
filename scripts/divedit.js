@@ -35,6 +35,18 @@ class DivEdit {
                   key == 'ArrowRight' && this.getCaretIndex(node) == node.textContent.length) {
                 handled = true;
               }
+            } else if (key == '/') {
+              // prevent multiple consecutive slashes
+              const caretIdx = this.getCaretIndex(node);
+              const surroundingChars = [
+                node.textContent.charAt(caretIdx-1),
+                node.textContent.charAt(caretIdx)
+              ];
+              handled = surroundingChars.includes('/');
+              handled = false;
+            } else {
+              const ignoredKeys = ['#'];
+              handled = ignoredKeys.includes(key);
             }
           } else {
             if (key.startsWith('Arrow')) {
