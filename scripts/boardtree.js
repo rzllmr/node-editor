@@ -3,10 +3,11 @@ const {TreeItem, TreeView} = require('./treeview.js');
 const Board = require('./board.js');
 
 class BoardItem extends TreeItem {
-  constructor(type, name) {
+  constructor(type, name, id = null) {
     super(type, name);
     if (type === 'leaf') {
-      this.data = new Board(this.toId(name));
+      if (id == null) id = 'b' + ++BoardItem.boardIdxMax;
+      this.data = new Board(id);
       // make new board invisible first
       this.select(false);
     }
@@ -17,15 +18,6 @@ class BoardItem extends TreeItem {
     super.delete();
   }
 
-  setName(name) {
-    super.setName(name);
-    if (this.data != null) this.data.element.attr('id', this.toId(name));
-  }
-
-  toId(name) {
-    return name.length > 0 ? name.replace(' ', '_') : 'null';
-  }
-
   select(doSelect) {
     super.select(doSelect);
     if (this.data != null) {
@@ -34,9 +26,11 @@ class BoardItem extends TreeItem {
   }
 }
 
+BoardItem.boardIdxMax = -1;
+
 class BoardTree extends TreeView {
   constructor() {
-    super('#board-tree');
+    super('board-tree');
     this.ItemType = BoardItem;
 
     this.createDefault();
@@ -54,7 +48,8 @@ class BoardTree extends TreeView {
       const board = {
         level: item.level,
         type: item.type,
-        name: item.name
+        name: item.name,
+        id: item.type == 'leaf' ? item.data.id : ''
       };
       itemList.push(board);
     }
@@ -64,8 +59,11 @@ class BoardTree extends TreeView {
   import(itemList) {
     this.selectItem(null);
     let lastItem = null;
+    BoardItem.boardIdxMax = -1;
     for (const entry of itemList) {
-      const item = new this.ItemType(entry.type, entry.name);
+      const id = entry.id == null ? -1 : parseInt(entry.id.slice(1));
+      if (id > BoardItem.boardIdxMax) BoardItem.boardIdxMax = id;
+      const item = new this.ItemType(entry.type, entry.name, entry.id);
       this.addItem([item], lastItem, entry.level);
       if (this.selected == null && entry.type == 'leaf' && entry.level == 1) {
         this.selectItem(item);

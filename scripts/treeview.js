@@ -22,7 +22,6 @@ class TreeItem {
 
   delete() {
     this.element.remove();
-    this.setName('');
     this.level = 0;
     this.element = null;
     this.icon = null;
@@ -74,10 +73,10 @@ class TreeItem {
 }
 
 class TreeView extends Proxy {
-  constructor(selector = null) {
-    super(selector);
+  constructor(id = null) {
+    super(id);
 
-    this.element = $(selector);
+    this.element = $('#' + id);
     this.nested = this.element.find('.treeview');
     this.level = 0;
     this.items = [];
