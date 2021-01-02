@@ -127,7 +127,7 @@ class TreeView extends Proxy {
     for (let itemIdx = 0; itemIdx < this.items.length - 1; itemIdx++) {
       const item = this.items[itemIdx];
       if (item.level == pathIdx + 1 && item.name == path[pathIdx] &&
-          item.type == (pathIdx < path.length-1 ? 'branch' : 'leaf')) {
+          item.type == (pathIdx < path.length-1 ? 'branch' : lastType)) {
         pathIdx++;
         if (pathIdx == path.length) {
           path[--pathIdx] = this.uniqueName(this.siblingItems(item, true), path[pathIdx]);
@@ -161,6 +161,7 @@ class TreeView extends Proxy {
       else if (currentItem.level < item.level) break;
       else items.push(currentItem);
     }
+    console.log('siblings:', items);
     return items;
   }
 
