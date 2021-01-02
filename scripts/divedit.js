@@ -43,7 +43,6 @@ class DivEdit {
                 node.textContent.charAt(caretIdx)
               ];
               handled = surroundingChars.includes('/');
-              handled = false;
             } else {
               const ignoredKeys = ['#'];
               handled = ignoredKeys.includes(key);
@@ -98,10 +97,21 @@ class DivEdit {
           const handled = this.finishEmphasis('Enter', emNode);
           this.editEm = !handled;
         }
+        if (DivEdit.isEmpty(this.div)) {
+          this.div.removeChild(this.div.firstChild);
+        }
         this.div.scrollTop = 0;
         this.div.scrollLeft = 0;
       }
     });
+  }
+
+  static isEmpty(div) {
+    if (div.childNodes.length == 1 &&
+      div.firstChild.textContent == '\u200B') {
+      return true;
+    }
+    return false;
   }
 
   handleNavigation(key, node) {
