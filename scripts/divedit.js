@@ -87,7 +87,6 @@ class DivEdit {
         } else if (first.nodeName == 'EM') {
           first = this.insertBefore(first, this.createTextNode());
         }
-        this.setCaretIndex(first, 1);
       },
       blur: (event) => {
         if (this.editEm) {
