@@ -9,7 +9,7 @@
 .color-presets {
   display: flex;
   flex-flow: row wrap;
-  padding: 3px;
+  padding: 5px 3px 3px 3px;
   width: calc(8 * 18px);
   float: left;
 }
@@ -22,13 +22,14 @@
   background: linear-gradient(to right, hsl(var(--hue), 100%, var(--divider-lf)), hsl(var(--hue), 96%, var(--divider-lt)));
 }
 .color-preset:hover {
-  outline: 2px solid var(--color-highlight);
+  outline: 1px solid var(--color-highlight);
 }
 #color-reset {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 13px;
   text-align: center;
   background: transparent;
+  color: var(--color-highlight);
 }
 #color-reset i {
   pointer-events: none;
@@ -56,11 +57,12 @@
   }
 
   .color-slider::-webkit-slider-thumb {
-    height: 8px;
-    width: 8px;
+    height: 9px;
+    width: 9px;
     border-radius: 50%;
     -webkit-appearance: none;
-    background: var(--color-text);
+    background: var(--color-node);
+    border: 1px solid var(--color-highlight);
     cursor: pointer;
     cursor: move;
     cursor: grab;
@@ -78,23 +80,17 @@
       box-shadow: 0 0.4em 1em rgba(0,0,0,0.15);
     }
 
-#remove.color-preset {
-  width: 14px;
-  height: 14px;
-  background: transparent;
-  line-height: 14px;
-  font-size: 14px;
-  text-align: center;
+#remove.tool.small {
+  border: none;
+  color: var(--color-text);
+  background: var(--color-button);
   float: right;
   margin: 5px;
-  cursor: pointer;
 }
-#remove.color-preset:hover {
+#remove.tool.small:hover {
   outline: none;
-  border-radius: 2px;
-  color: var(--color-lightest);
   background: var(--color-out);
 }
-#remove.color-preset i {
+#remove.tool.small i {
   line-height: inherit;
 }

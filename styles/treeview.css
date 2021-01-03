@@ -35,6 +35,7 @@ li.branch {
 
 li.leaf i {
   min-width: 15px;
+  color: var(--color-highlight);
 }
 
 li.leaf.selected {
@@ -74,6 +75,7 @@ li.leaf.insert, span.branch.insert {
   margin-right: 4px;
   line-height: 16px;
   width: 11px;
+  color: var(--color-highlight);
 }
 
 #tree-tools.toolbar {

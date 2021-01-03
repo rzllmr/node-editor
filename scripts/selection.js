@@ -14,7 +14,7 @@ class Selection {
     this.selection = new Set();
     this.nodeInfo = $('h1#node-info');
     this.nodeTools = $('#node-tools.toolbar');
-    this.removeButton = $('#remove.color-preset');
+    this.removeButton = $('#remove.tool.small');
     this.colorPicker = new ColorPicker(this.selection);
 
     this.rect = board.element.find('rect.selection');

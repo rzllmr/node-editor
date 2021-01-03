@@ -71,8 +71,9 @@ hr.seperator {
   height: 16px;
   font-size: 12px;
   margin: 2px 0;
+  border-radius: 3px;
   color: var(--color-lightest);
-  background: var(--color-highlight);
+  background: var(--color-highlight-faded);
 }
 .tool.small:hover {
   background: var(--color-highlight);
