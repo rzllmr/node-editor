@@ -17,15 +17,8 @@
       event.preventDefault();
       return false;
     });
-    $(document).keypress(function(event) {
-      if (event.key.length === 1) {
-        keybinding.handleKey(event.key, event.ctrlKey, event.shiftKey);
-      }
-    });
     $(document).keydown(function(event) {
-      if (event.key.length > 1) {
-        keybinding.handleKey(event.key, event.ctrlKey, event.shiftKey);
-      }
+      return keybinding.handleKey(event.key, event.ctrlKey, event.shiftKey, event.altKey);
     });
   });
 }(window.jQuery, window, document));

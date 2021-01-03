@@ -18,12 +18,12 @@ class Graph extends Proxy {
     this.element = $('#templates .graph').clone();
     this.element.removeClass('template');
     this.element.attr('id', id);
-    this.element.appendTo(`#${this.boardId()} .layer.graphs`);
+    this.element.appendTo(`#${this.boardId} .layer.graphs`);
 
     this.update(this.anchors.source, this.anchors.source.locate());
   }
 
-  boardId() {
+  get boardId() {
     return this.anchors.source.node.board[0].id;
   }
 
@@ -259,16 +259,18 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
     }
     otherAnchor.node.element[0].className = 'node' + direction;
 
-    $('#' + this.boardId()).find('.minimap').trigger('node:highlight', [otherAnchor.node.id]);
+    $('#' + this.boardId).find('.minimap').trigger('node:highlight', [otherAnchor.node.id]);
   }
 
   export() {
     const element = this.element[0];
+    const source = this.anchors.source;
+    const target = this.anchors.target;
     const object = {
-      board: this.boardId(),
+      board: this.boardId,
       type: element.className.baseVal.split(' ')[0],
-      source: element.id.split('-')[0],
-      target: element.id.split('-')[1]
+      source: source.id + '.' + source.end.charAt(0),
+      target: target.id + '.' + target.end.charAt(0)
     };
     return object;
   }
@@ -277,17 +279,19 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
     const sides = {'t': 'top', 'r': 'right', 'b': 'bottom', 'l': 'left'};
 
     // create source anchor
-    const sourceMatch = object.source.match(/(\d+)(\D)(\d+)/);
-    const source = {id: sourceMatch[1], side: sides[sourceMatch[2]], index: sourceMatch[3]};
+    const sourceMatch = object.source.match(/(\d+)(\w)(\d+)\.(\w)/);
+    const source = {id: sourceMatch[1], side: sides[sourceMatch[2]], index: sourceMatch[3],
+      end: sourceMatch[4] == 's' ? 'source' : 'target'};
     const sourceNode = this.proxy.resolve(source.id);
-    const sourceAnchor = sourceNode.addAnchorDirectly('source', source.side, source.index);
+    const sourceAnchor = sourceNode.addAnchorDirectly(source.end, source.side, source.index);
     sourceAnchor.registerDragOut();
 
     // create target anchor
-    const targetMatch = object.target.match(/(\d+)(\D)(\d+)/);
-    const target = {id: targetMatch[1], side: sides[targetMatch[2]], index: targetMatch[3]};
+    const targetMatch = object.target.match(/(\d+)(\w)(\d+)\.(\w)/);
+    const target = {id: targetMatch[1], side: sides[targetMatch[2]], index: targetMatch[3],
+      end: targetMatch[4] == 's' ? 'source' : 'target'};
     const targetNode = this.proxy.resolve(target.id);
-    const targetAnchor = targetNode.addAnchorDirectly('target', target.side, target.index);
+    const targetAnchor = targetNode.addAnchorDirectly(target.end, target.side, target.index);
     targetAnchor.registerDragOut();
 
     // connect source to target anchor

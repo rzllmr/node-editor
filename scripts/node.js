@@ -4,6 +4,7 @@
 const Proxy = require('./proxy.js');
 
 const Anchor = require('./anchor.js');
+const DivEdit = require('./divedit.js');
 
 /**
  * .node representative to handle content
@@ -72,8 +73,8 @@ class Node extends Proxy {
       }
     });
 
-    this.makeEditableOnDblClick(this.element.find('.label'), 'readonly', false);
-    this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true);
+    this.makeEditableOnDblClick(this.element.find('.label'), 'contentEditable', true, false);
+    this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true, true);
 
     this.element.find('.resizer').on({
       mousedown: (event) => {
@@ -164,7 +165,9 @@ class Node extends Proxy {
     return percentage;
   }
 
-  makeEditableOnDblClick(element, property, editable) {
+  makeEditableOnDblClick(element, property, editable, multiline) {
+    // works for input element with 'readonly' and false
+    this.emNode = null;
     element.on({
       mousedown: (event) => {
         let propertyValue = $(event.target).prop(property);
@@ -183,6 +186,10 @@ class Node extends Proxy {
         $(event.target).prop(property, !editable);
       }
     });
+    const onEmClick = (emNode) => {
+      $('#board-tree').trigger('treeview:createFromLink', [emNode]);
+    };
+    new DivEdit(element[0], multiline).registerKeys(onEmClick);
   }
 
   select() {
@@ -244,7 +251,7 @@ class Node extends Proxy {
       width: element.offsetWidth,
       height: element.offsetHeight,
       hue: element.querySelector('.divider').style.getPropertyValue('--hue'),
-      label: element.querySelector('input.label').value,
+      label: element.querySelector('div.label').innerHTML.replace(/<br>/g, '\n'),
       details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n')
     };
     return object;
@@ -261,8 +268,11 @@ class Node extends Proxy {
       height: object.height
     });
     node.element.find('.divider')[0].style.setProperty('--hue', object.hue);
-    node.element.find('input.label').val(object.label);
+    node.element.find('div.label').html(object.label.replace(/\n/g, '<br>'));
     node.element.find('div.details').html(object.details.replace(/\n/g, '<br>'));
+    node.element.find('div.label em, div.details em').on('click', (event) => {
+      $('#board-tree').trigger('treeview:createFromLink', [event.target]);
+    });
     node.minimap.trigger('node:update', [node.element[0].id]);
   }
 };
