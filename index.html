@@ -27,23 +27,19 @@
     <script>if (window.module) module = window.module;</script>
   </head>
   <body>
+    <div id="collapser">
     <div id="menu">
       <div class="overlay" style="display:none"></div>
-      <h1>board</h1><hr>
       <div id="board-tools" class="toolbar">
-        <button class="tool" id="new"><i class="fa fa-file"></i></button>
-        <button class="tool" id="save"><i class="fa fa-save"></i></button>
-        <button class="tool" id="save-as">
-          <span class="fa-stack" style="font-size: 8px; top: -1px;">
-            <i class="fa fa-save fa-stack-2x"></i>
-            <i class="fa fa-pencil fa-stack-1x" style="bottom: -1px; left: 2px"></i>
-          </span>
-        </button>
-        <button class="tool" id="load"><i class="fa fa-folder-open"></i></button>
-        <button class="tool" id="theme"><i class="fa fa-lightbulb-o"></i></button>
-        <button class="tool" id="help"><i class="fa fa-question"></i></button>
+        <button class="tool" id="collapse"><i class="fa fa-bars"></i></button><!--
+     --><button class="tool" id="new"><i class="fa fa-file"></i></button><!--
+     --><button class="tool" id="save"><i class="fa fa-save"></i></button><!--
+     --><button class="tool" id="load"><i class="fa fa-folder-open"></i></button><!--
+     --><button class="tool" id="theme"><i class="fa fa-lightbulb-o"></i></button><!--
+     --><button class="tool" id="help"><i class="fa fa-question"></i></button>
       </div>
-      <h1>tabs</h1><hr>
+      <h1 id="board-info">available boards</h1>
+      <hr class="line">
       <div id="board-tree">
         <div id="tree-tools" class="toolbar">
           <button class="tool small" id="new-board"><i class="fa fa-file-o"></i></button>
@@ -67,9 +63,9 @@
           <li class="leaf" id="leaf-template" style="display:none"><i class="fa fa-file-o"></i><span class="selector">leaf</span></li>
         </ul>
       </div>
-      <h1>node</h1><hr>
-      <div id="node-tools" class="toolbar">
-        <button class="tool" id="remove" disabled><i class="fa fa-times"></i></button>
+      <h1 id="node-info">node options</h1>
+      <div id="node-tools" class="toolbar collapsed">
+        <hr class="line">
         <div class="color-picker">
           <div class="divider"></div>
           <input class="color-slider" type="range" min="0" max="360" value="0">
@@ -77,8 +73,10 @@
             <div id="color-reset" class="color-preset"><i class="fa fa-undo"></i></div>
             <div id="color-preset-template" class="color-preset" style="display: none"></div>
           </div>
+          <div class="color-preset" id="remove"><i class="fa fa-times"></i></div>
         </div>
       </div>
+    </div>
     </div>
     <div id="help-panel" style="display: none">
       <h1>Used Terms</h1><hr>

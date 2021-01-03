@@ -128,7 +128,7 @@ class TreeView extends Proxy {
     // renaming items
     this.toolbar.find('#rnm-board').click(() => {
       // overlay renaming input
-      this.rnmInput.width(166 - this.hovered.label.offsetLeft);
+      this.rnmInput.width(180 - this.hovered.label.offsetLeft);
       this.rnmInput.val(this.hovered.name);
       this.rnmInput.show();
       this.rnmInput.focus();
@@ -147,6 +147,8 @@ class TreeView extends Proxy {
     this.toolbar.find('#del-board').click(() => {
       this.menuCover.show();
       this.toolbar.find('#rnm-board, #del-board').hide();
+      this.toolbar.find('#del-confirm span').css(
+          'margin-right', 60 - this.hovered.label.offsetLeft);
       this.toolbar.find('#del-confirm').show();
     });
     this.toolbar.find('#apply-del, #discard-del').click((event) => {

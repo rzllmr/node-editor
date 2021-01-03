@@ -41,22 +41,14 @@
   based on background pattern from Toptal Subtle Patterns */
   --color-text-faded: var(--color-neutral);
 
-  --color-tool-new: mediumorchid;
-  --color-tool-save: mediumorchid;
-  --color-tool-load: mediumorchid;
-  --color-tool-theme: orange;
-  --color-tool-remove: firebrick;
-  --color-tool-help: orange;
-
   --color-in: #3CC47C;
   --color-out: #FF3B3F;
   --color-same: #3AADFF;
 }
 
 :root.dark {
-  --color-highlight: rgba(229, 151, 0, 1.0);
-  --color-highlight-faded: rgba(229, 151, 0, 0.5);
-  --color-highlight-faded-o: rgb(135, 96, 20);
+  --color-highlight: rgb(229, 151, 0);
+  --color-highlight-faded: rgb(135, 96, 20);
   --divider-lf: 22%;
   --divider-lt: 34%;
 
@@ -69,8 +61,8 @@
 }
 
 :root.light {
-  --color-highlight: rgba(33, 136, 255, 1.0);
-  --color-highlight-faded: rgba(33, 136, 255, 0.5);
+  --color-highlight: rgb(33, 136, 255);
+  --color-highlight-faded: rgb(144, 193, 253);
   --divider-lf: 62%;
   --divider-lt: 74%;
 

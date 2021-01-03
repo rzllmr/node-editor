@@ -1,4 +1,13 @@
 
+:root.dark div#board-tree {
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+:root.light div#board-tree {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
 ul.treeview {
   margin: 0;
 }
@@ -71,7 +80,7 @@ li.leaf.insert, span.branch.insert {
   display: none;
   position: absolute;
   right: 0;
-  margin: 2px;
+  margin: 1px 2px;
   pointer-events: none;
 }
 #tree-tools.toolbar .tool {
@@ -83,9 +92,9 @@ li.leaf.insert, span.branch.insert {
 }
 #tree-tools.toolbar input.selector {
   position: absolute;
-  top: -2px;
+  top: -1px;
   right: 0;
-  background: var(--color-highlight-faded-o);
+  background: var(--color-highlight-faded);
   border: none;
   font: inherit;
   color: var(--color-text);
@@ -93,9 +102,9 @@ li.leaf.insert, span.branch.insert {
 }
 
 #tree-tools.toolbar #del-confirm {
-  background: var(--color-highlight-faded-o);
+  background: var(--color-highlight-faded);
   width: 100%;
 }
 #tree-tools.toolbar #del-confirm span {
-  margin-right: 26px;
+  margin-right: 46px;
 }

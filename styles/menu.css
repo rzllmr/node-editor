@@ -1,12 +1,25 @@
 
-#menu {
+#collapser {
   position: absolute;
   z-index: 1;
   margin: 10px;
+  display: grid;
+  overflow: hidden;
+  box-shadow: var(--shadow-ui);
+  max-width: 500px;
+  max-height: 500px;
+  border-radius: 5px;
+  transition: 0.3s ease-in;
+}
+#collapser.collapsed {
+  max-width: 34px;
+  max-height: 34px;
+  transition: 0.3s ease-out;
+}
+
+#menu {
   display: inline-block;
   background-color: var(--color-menu);
-  border-radius: 5px;
-  box-shadow: var(--shadow-ui);
   font-size: 12px;
 }
 .overlay {
@@ -20,12 +33,22 @@
   width: 100%;
   padding: 0 5px;
   color: var(--color-text-faded);
-  margin: 5px 0 0 0;
+  margin: 10px 0 2px 0;
 }
 
-hr {
+hr.line {
   border-color: var(--color-text-faded);
   margin: 0;
+}
+hr.seperator {
+  border-color: var(--color-text-faded);
+  margin-top: 5px 0;
+}
+
+#board-tools.toolbar {
+  width: calc(6 * 30px);
+  display: block;
+  padding: 2px;
 }
 
 .tool {
@@ -35,11 +58,11 @@ hr {
   width: 24px;
   text-align: center;
   border: none;
-  border-radius: 50%;
+  border-radius: 5px;
   cursor: pointer;
   padding: 0;
-  margin: 5px 0;
-  transition: background 0.3s;
+  margin: 3px;
+  transition: background 0.1s;
   font-size: 15px;
 }
 .tool.small {
@@ -49,44 +72,31 @@ hr {
   margin: 2px 0;
   background: var(--color-highlight);
 }
+.tool.small:hover {
+  background: var(--color-highlight);
+}
 
-.toolbar .tool:first-child {
-  margin-left: 5px;
-}
-.toolbar .tool:last-child {
-  margin-right: 5px;
-}
-.tool:focus {
-  outline: none;
-}
 .tool:hover {
-  box-shadow: inset 0 -1px 0 var(--color-neutral);
+  background: var(--color-highlight-faded);
 }
 .tool:active {
-  box-shadow: 0 -1px 0 var(--color-neutral);
+  background: var(--color-highlight);
 }
 .tool:disabled {
   color: var(--color-text-faded);
   pointer-events: none;
 }
-#new.tool:hover {
-  background: var(--color-tool-new);
+
+#collapse.tool:not(:hover) {
+  background: var(--color-menu);
 }
-#save.tool:hover {
-  background: var(--color-tool-save);
+
+#node-tools.toolbar {
+  display: grid;
+  overflow: hidden;
+  max-height: 80px;
+  transition: 0.3s ease;
 }
-#save-as.tool:hover {
-  background: var(--color-tool-save);
-}
-#load.tool:hover {
-  background: var(--color-tool-load);
-}
-#theme.tool:hover {
-  background: var(--color-tool-theme);
-}
-#remove.tool:hover {
-  background: var(--color-tool-remove);
-}
-#help.tool:hover {
-  background: var(--color-tool-help);
+#node-tools.toolbar.collapsed {
+  max-height: 0px;
 }

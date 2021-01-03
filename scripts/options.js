@@ -4,6 +4,8 @@ class Options {
     this.options = new Map([
       ['lightTheme', false]
     ]);
+    this.collapser = $('#collapser');
+    this.collapseButton = $('#collapse.tool');
     this.themeButton = $('#theme.tool');
     this.helpButton = $('#help.tool');
 
@@ -11,6 +13,9 @@ class Options {
   }
 
   register() {
+    this.collapseButton.click(() => {
+      this.collapser.toggleClass('collapsed');
+    });
     this.themeButton.click(() => {
       this.options.lightTheme = !this.options.lightTheme;
       const root = document.documentElement;

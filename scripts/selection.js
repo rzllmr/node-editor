@@ -12,7 +12,9 @@ class Selection {
 
     this.proxy = new Proxy();
     this.selection = new Set();
-    this.removeButton = $('#remove.tool');
+    this.nodeInfo = $('h1#node-info');
+    this.nodeTools = $('#node-tools.toolbar');
+    this.removeButton = $('#remove.color-preset');
     this.colorPicker = new ColorPicker(this.selection);
 
     this.rect = board.element.find('rect.selection');
@@ -23,6 +25,7 @@ class Selection {
     this.movingSelection = false;
 
     this.register();
+    this.updateButton();
   }
 
   register() {
@@ -144,11 +147,15 @@ class Selection {
   }
 
   updateButton() {
+    let newText = `${this.selection.size} nodes selected`;
     if (this.selection.size > 0) {
-      this.removeButton.prop('disabled', false);
+      if (this.selection.size == 1) newText = '1 node selected';
+      this.nodeTools.removeClass('collapsed');
     } else {
-      this.removeButton.prop('disabled', true);
+      newText = 'no node selected';
+      this.nodeTools.addClass('collapsed');
     }
+    this.nodeInfo.text(newText);
   }
 
   rectangleSelect(event) {

@@ -9,24 +9,26 @@
 .color-presets {
   display: flex;
   flex-flow: row wrap;
-  padding: 1px;
+  padding: 3px;
+  width: calc(8 * 18px);
+  float: left;
 }
 .color-preset {
-  width: 10px;
-  height: 10px;
-  margin: 1px;
+  width: 14px;
+  height: 14px;
+  margin: 2px;
   --hue: 0;
   background: linear-gradient(to right, hsl(var(--hue), 100%, var(--divider-lf)), hsl(var(--hue), 96%, var(--divider-lt)));
 }
 .color-preset:hover {
-  outline: 1px solid var(--color-highlight);
+  outline: 2px solid var(--color-highlight);
 }
 #color-reset {
-  font-size: 10px;
-  line-height: 10px;
+  font-size: 12px;
+  line-height: 13px;
   text-align: center;
   color: var(--color-lightest);
-  background: var(--color-dark);
+  background: transparent;
 }
 #color-reset i {
   pointer-events: none;
@@ -75,3 +77,24 @@
     .color-slider::-webkit-slider-thumb:hover {
       box-shadow: 0 0.4em 1em rgba(0,0,0,0.15);
     }
+
+#remove.color-preset {
+  width: 14px;
+  height: 14px;
+  color: var(--color-lightest);
+  background: transparent;
+  line-height: 14px;
+  font-size: 14px;
+  text-align: center;
+  float: right;
+  margin: 5px;
+  cursor: pointer;
+}
+#remove.color-preset:hover {
+  outline: none;
+  border-radius: 2px;
+  background: var(--color-out);
+}
+#remove.color-preset i {
+  line-height: inherit;
+}
