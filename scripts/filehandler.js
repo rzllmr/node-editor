@@ -10,7 +10,6 @@ class FileHandler {
     this.proxy = new Proxy();
     this.newButton = $('#new.tool');
     this.saveButton = $('#save.tool');
-    this.saveAsButton = $('#save-as.tool');
     this.loadButton = $('#load.tool');
 
     this.dialog = require('electron').remote.dialog;
@@ -26,8 +25,7 @@ class FileHandler {
 
   register() {
     this.newButton.click(this.new.bind(this));
-    this.saveButton.click(this.save.bind(this));
-    this.saveAsButton.click(this.saveAs.bind(this));
+    this.saveButton.click(this.saveAs.bind(this));
     this.loadButton.click(this.load.bind(this));
   }
 
