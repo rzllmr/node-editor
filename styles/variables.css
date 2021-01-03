@@ -58,6 +58,9 @@
   --color-graph: var(--color-light);
   --color-menu: var(--color-darkest);
   --color-button: var(--color-dark);
+
+  --color-minimap: var(--color-dark);
+  --color-minimap-window: var(--color-darkest);
 }
 
 :root.light {
@@ -73,6 +76,10 @@
   --color-graph: var(--color-dark);
   --color-menu: var(--color-lightest);
   --color-button: #dddddd;
+
+  --color-minimap: #a5a5a5;
+  --color-minimap-window: #5d5d5d;
+
   --background-color: #d6d6d6;
   --background-image: url("../data/worn-dots-light.png");
 }

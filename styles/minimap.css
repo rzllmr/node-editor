@@ -5,13 +5,13 @@
   right: 0;
   width: 240px;
   height: 160px;
-  background: #a5a5a5;
+  background: var(--color-minimap);
   opacity: 0.5;
 }
 
 .mini {
   position: absolute;
-  background: #5d5d5d;
+  background: var(--color-minimap-window);
 }
 
 .mini.mini-node {
