@@ -22,7 +22,6 @@ class TreeItem {
 
   delete() {
     this.element.remove();
-    this.setName('');
     this.level = 0;
     this.element = null;
     this.icon = null;
@@ -59,13 +58,25 @@ class TreeItem {
     else if (this.parent === parent) return true;
     else return this.parent.hasParent(parent);
   }
+
+  expand(toggle = true) {
+    if (this.type !== 'branch') return;
+    if (toggle) {
+      this.nested.show();
+      this.icon[0].className = 'fa fa-folder-open-o';
+    } else {
+      this.nested.hide();
+      this.icon[0].className = 'fa fa-folder';
+    }
+    this.expanded = toggle;
+  }
 }
 
 class TreeView extends Proxy {
-  constructor(selector = null) {
-    super(selector);
+  constructor(id = null) {
+    super(id);
 
-    this.element = $(selector);
+    this.element = $('#' + id);
     this.nested = this.element.find('.treeview');
     this.level = 0;
     this.items = [];
@@ -108,21 +119,81 @@ class TreeView extends Proxy {
     }
   }
 
-  createItem(type, name, level = 1) {
-    const item = new this.ItemType(type, name);
-    const lastItem = this.items[this.items.length - 2];
-    this.addItem([item], lastItem, level);
-    this.toolbar.find('#new-board, #new-folder').hide();
-    if (type === 'leaf') this.selectItem(item);
+  createItemAtPath(path, lastType) {
+    path = path.split('/').filter((str) => str != '');
+
+    let pathIdx = 0;
+    let lastBefore = null;
+    for (let itemIdx = 0; itemIdx < this.items.length - 1; itemIdx++) {
+      const item = this.items[itemIdx];
+      if (item.level == pathIdx + 1 && item.name == path[pathIdx] &&
+          item.type == (pathIdx < path.length-1 ? 'branch' : lastType)) {
+        pathIdx++;
+        if (pathIdx == path.length) {
+          path[--pathIdx] = this.uniqueName(this.siblingItems(item, true), path[pathIdx]);
+        }
+      } else if (item.level < pathIdx + 1) {
+        break;
+      }
+      lastBefore = item;
+    }
+
+    for (; pathIdx < path.length; pathIdx++) {
+      const level = pathIdx + 1;
+      const name = path[pathIdx];
+      const type = pathIdx == path.length-1 ? lastType : 'branch';
+      const newItem = new this.ItemType(type, name);
+      this.addItem([newItem], lastBefore, level);
+      lastBefore = newItem;
+    }
+    return lastBefore;
+  }
+
+  siblingItems(item, includeSelf = false) {
+    let itemIdx = item.parent instanceof TreeView ? 0 :
+      this.items.indexOf(item.parent) + 1;
+    const items = [];
+    for (; itemIdx < this.items.length; itemIdx++) {
+      const currentItem = this.items[itemIdx];
+      if (currentItem.level > item.level ||
+        currentItem.type != item.type ||
+        !includeSelf && currentItem == item) continue;
+      else if (currentItem.level < item.level) break;
+      else items.push(currentItem);
+    }
+    console.log('siblings:', items);
+    return items;
+  }
+
+  uniqueName(items, name) {
+    // generate names until unique
+    const itemNames = items.map((item) => item.name);
+    let changed;
+    do {
+      changed = false;
+      if (itemNames.includes(name)) {
+        const match = name.match(/\s*\(([0-9]+)\)$/);
+        if (match == null) {
+          name += ' (1)';
+        } else {
+          const increment = Number(match[1]) + 1;
+          name = name.replace(match[0], ` (${increment})`);
+        }
+        changed = true;
+      }
+    } while (changed);
+    return name;
   }
 
   registerTools() {
     // adding items
     this.toolbar.find('#new-board').click(() => {
-      this.createItem('leaf', 'new item');
+      this.createItemAtPath('/new item', 'leaf');
+      this.toolbar.find('#new-board, #new-folder').hide();
     });
     this.toolbar.find('#new-folder').click(() => {
-      this.createItem('branch', 'new item');
+      this.createItemAtPath('/new folder', 'branch');
+      this.toolbar.find('#new-board, #new-folder').hide();
     });
 
     // renaming items
@@ -136,8 +207,22 @@ class TreeView extends Proxy {
       this.menuCover.show();
       this.toolbar.find('#rnm-board, #del-board').hide();
     });
-    this.rnmInput.on('change blur', (event) => {
+    this.rnmInput.on('change blur keydown', (event) => {
+      if (event.type === 'keydown' && !['Enter', 'Escape'].includes(event.key)) return;
+
+      const newName = this.rnmInput.val();
+      const uniqueName = this.uniqueName(this.siblingItems(this.hovered), newName);
+      if (newName !== uniqueName) {
+        this.rnmInput.val(uniqueName);
+        this.rnmInput.select();
+        return false;
+      }
+
+      const oldPath = this.getItemPath(this.hovered);
       this.hovered.setName(this.rnmInput.val());
+      const newPath = this.getItemPath(this.hovered);
+      this.updateBoardLinks(oldPath, newPath);
+
       this.rnmInput.hide();
       this.menuCover.hide();
       this.toolbar.find('#rnm-board, #del-board').show();
@@ -169,6 +254,16 @@ class TreeView extends Proxy {
         this.hoverItem(null);
       }
     });
+
+    this.element.on('treeview:createFromLink', (event, emNode) => {
+      const path = emNode.dataset.path;
+      let item = this.getItem(path, 'leaf');
+      if (item == null || item.type == 'branch') {
+        item = this.createItemAtPath(path, 'leaf');
+      }
+      this.selectItem(item);
+      emNode.dataset.path = this.getItemPath(item);
+    });
   }
 
   registerItem(item) {
@@ -183,14 +278,7 @@ class TreeView extends Proxy {
       element = element.find('span.branch');
       element.off('click');
       element.click(() => {
-        if (item.expanded) {
-          item.nested.hide();
-          item.icon[0].className = 'fa fa-folder';
-        } else {
-          item.nested.show();
-          item.icon[0].className = 'fa fa-folder-open-o';
-        }
-        item.expanded = !item.expanded;
+        item.expand(!item.expanded);
       });
     }
     element.on({
@@ -239,7 +327,12 @@ class TreeView extends Proxy {
           }
         }
         const removed = this.removeItem(this.dragged);
+        const oldPaths = removed.filter((i) => i.type == 'leaf').map((i) => this.getItemPath(i));
         this.addItem(removed, itemBefore);
+        const uniqueName = this.uniqueName(this.siblingItems(removed[0]), removed[0].name);
+        removed[0].setName(uniqueName);
+        const newPaths = removed.filter((i) => i.type == 'leaf').map((i) => this.getItemPath(i));
+        oldPaths.forEach((_, idx) => this.updateBoardLinks(oldPaths[idx], newPaths[idx]));
         this.dragged = null;
       },
       'mouseover': (event) => {
@@ -318,9 +411,16 @@ class TreeView extends Proxy {
     this.insertLine.width(element.width() - ((level-1) * 15 + 5));
   }
 
-  getItem(name) {
+  getItem(path, type = null) {
+    const name = path.replace(/.*\//, '');
+    const checkPath = name !== path;
     for (const item of this.items) {
-      if (item.name === name) return item;
+      if (item.name === name && (type == null || item.type === type)) {
+        if (checkPath && !this.getItemPath(item).endsWith(path)) {
+          continue;
+        }
+        return item;
+      }
     }
     return null;
   }
@@ -330,11 +430,40 @@ class TreeView extends Proxy {
     return idx > 0 ? this.items[idx-1] : null;
   }
 
+  getItemPath(item) {
+    const path = [];
+    while (item instanceof TreeItem) {
+      path.push(item.name);
+      item = item.parent;
+    }
+    return '/' + path.reverse().join('/');
+  }
+
+  updateBoardLinks(oldPath, newPath) {
+    $('em.link').each((_, emNode) => {
+      if (emNode.dataset.path == oldPath) {
+        emNode.dataset.path = newPath;
+        emNode.textContent = newPath.replace(/.*\//, '');
+      }
+    });
+  }
+
   selectItem(item) {
     if (this.selected === item) return;
     if (this.selected !== null) this.selected.select(false);
     if (item !== null) item.select(true);
     this.selected = item;
+
+    this.expandPath(item);
+  }
+
+  expandPath(item, toggle = true) {
+    while (item instanceof TreeItem) {
+      if (item.type === 'branch') {
+        item.expand(toggle);
+      }
+      item = item.parent;
+    }
   }
 
   hoverItem(item) {

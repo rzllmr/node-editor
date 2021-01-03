@@ -63,18 +63,20 @@
   width: 100%;
   background: none;
 }
-.node .label[readonly], .node .details[contentEditable=false] {
+.node .label[contentEditable=false], .node .details[contentEditable=false] {
   cursor: default;
   user-select: none;
 }
 
 .node .label {
+  display: inline-block;
   font-size: 13pt;
-  border: none;
+  white-space: nowrap;
+  overflow-x: hidden;
 }
-.node .label::placeholder {
+.node .label:empty:before{
+  content: attr(data-text);
   color: var(--color-text-faded);
-  opacity: 1;
 }
 
 .node .details {

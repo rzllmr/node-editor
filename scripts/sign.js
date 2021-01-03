@@ -3,6 +3,8 @@
 // from HTML ids of .sign elements
 const Proxy = require('./proxy.js');
 
+const DivEdit = require('./divedit.js');
+
 /**
  * graph extension to monitor connected Anchors
  */
@@ -69,14 +71,22 @@ class Sign extends Proxy {
       dblclick: (event) => {
         $(event.target).prop(property, editable);
         $(event.target).focus();
+        this.position();
       },
       blur: (event, param) => {
         $(event.target).prop(property, !editable);
+        if (DivEdit.isEmpty(element[0])) {
+          this.destroy();
+        }
       },
       keyup: () => {
         this.position();
       }
     });
+    const onEmClick = (emNode) => {
+      $('#board-tree').trigger('treeview:createFromLink', [emNode]);
+    };
+    new DivEdit(element[0], true).registerKeys(onEmClick);
   }
 
   export() {

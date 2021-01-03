@@ -31,7 +31,7 @@ class FileHandler {
 
   new() {
     if (this.clear()) {
-      this.boardTree.createItem('leaf', 'main');
+      this.boardTree.createDefault();
     }
   }
 
@@ -113,7 +113,7 @@ class FileHandler {
       filters: [{name: 'Save File', extensions: ['json']}]
     });
     if (!filePaths) {
-      this.boardTree.createItem('leaf', 'main');
+      this.boardTree.createDefault();
       return;
     }
     fs.readFile(filePaths[0], 'utf8', (error, content) => {
