@@ -67,9 +67,12 @@
   --divider-lt: 74%;
 
   --color-node: var(--color-lightest);
-  --color-text: black;
+  --color-text: var(--color-darkest);
   --color-text-highlight: var(--color-highlight);
+  --color-dark: #717171;
   --color-graph: var(--color-dark);
   --color-menu: var(--color-lightest);
-  --color-button: var(--color-light);
+  --color-button: #dddddd;
+  --background-color: #d6d6d6;
+  --background-image: url("../data/worn-dots-light.png");
 }

@@ -18,6 +18,7 @@
   height: 14px;
   margin: 2px;
   --hue: 0;
+  color: var(--color-text);
   background: linear-gradient(to right, hsl(var(--hue), 100%, var(--divider-lf)), hsl(var(--hue), 96%, var(--divider-lt)));
 }
 .color-preset:hover {
@@ -27,7 +28,6 @@
   font-size: 12px;
   line-height: 13px;
   text-align: center;
-  color: var(--color-lightest);
   background: transparent;
 }
 #color-reset i {
@@ -60,7 +60,7 @@
     width: 8px;
     border-radius: 50%;
     -webkit-appearance: none;
-    background: white;
+    background: var(--color-text);
     cursor: pointer;
     cursor: move;
     cursor: grab;
@@ -81,7 +81,6 @@
 #remove.color-preset {
   width: 14px;
   height: 14px;
-  color: var(--color-lightest);
   background: transparent;
   line-height: 14px;
   font-size: 14px;
@@ -93,6 +92,7 @@
 #remove.color-preset:hover {
   outline: none;
   border-radius: 2px;
+  color: var(--color-lightest);
   background: var(--color-out);
 }
 #remove.color-preset i {

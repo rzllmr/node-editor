@@ -147,12 +147,11 @@ class Selection {
   }
 
   updateButton() {
-    let newText = `${this.selection.size} nodes selected`;
+    let newText = 'Node Options';
     if (this.selection.size > 0) {
-      if (this.selection.size == 1) newText = '1 node selected';
       this.nodeTools.removeClass('collapsed');
     } else {
-      newText = 'no node selected';
+      newText = 'No Node Selected';
       this.nodeTools.addClass('collapsed');
     }
     this.nodeInfo.text(newText);
