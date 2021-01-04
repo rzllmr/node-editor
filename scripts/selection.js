@@ -147,14 +147,11 @@ class Selection {
   }
 
   updateButton() {
-    let newText = 'Node Options';
     if (this.selection.size > 0) {
       this.nodeTools.removeClass('collapsed');
     } else {
-      newText = 'No Node Selected';
       this.nodeTools.addClass('collapsed');
     }
-    this.nodeInfo.text(newText);
   }
 
   rectangleSelect(event) {

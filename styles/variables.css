@@ -61,6 +61,12 @@
 
   --color-minimap: var(--color-dark);
   --color-minimap-window: var(--color-darkest);
+
+  --shadow-ui: 0 0 10px 5px rgba(0, 0, 0, 0.2);
+  --shadow-near: 0px 2px 4px 0 rgba(0, 0, 0, 0.3);
+
+  --background-color: var(--color-neutral);
+  --background-image: url("../data/worn-dots-dark.png");
 }
 
 :root.light {
@@ -79,6 +85,9 @@
 
   --color-minimap: #a5a5a5;
   --color-minimap-window: #5d5d5d;
+
+  --shadow-ui: 0 0 10px 5px rgba(0, 0, 0, 0.1);
+  --shadow-near: 0px 2px 4px 0 rgba(0, 0, 0, 0.2);
 
   --background-color: #d6d6d6;
   --background-image: url("../data/worn-dots-light.png");
