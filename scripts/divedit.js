@@ -80,12 +80,14 @@ class DivEdit {
         }
         return !handled;
       },
-      focus: (event) => {
-        let first = this.div.firstChild;
-        if (first == null) {
-          first = this.div.appendChild(this.createTextNode());
-        } else if (first.nodeName == 'EM') {
-          first = this.insertBefore(first, this.createTextNode());
+      focus: () => {
+        let node = document.getSelection().focusNode;
+        node = this.typeNode(node);
+        if (this.div.firstChild == null) {
+          node = this.div.appendChild(this.createTextNode());
+        }
+        if (this.getCaretIndex(node) == 0) {
+          this.setCaretIndex(node, 1);
         }
       },
       blur: (event) => {
