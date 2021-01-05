@@ -15,8 +15,9 @@ class KeyBinding {
         'check': () => {
           return $(document.activeElement).is('body');
         },
-        't': 'hotkey:toggleTheme',
+        'ctrl+t': 'hotkey:toggleTheme',
         'delete': 'hotkey:deleteSelection',
+        'backspace': 'hotkey:deleteSelection',
         'insert': 'hotkey:createNode'
       },
       'default': {
