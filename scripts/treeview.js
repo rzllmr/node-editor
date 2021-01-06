@@ -161,7 +161,6 @@ class TreeView extends Proxy {
       else if (currentItem.level < item.level) break;
       else items.push(currentItem);
     }
-    console.log('siblings:', items);
     return items;
   }
 
@@ -283,7 +282,7 @@ class TreeView extends Proxy {
     }
     element.on({
       'mouseenter': (event) => {
-        if (event.buttons === 1) {
+        if (event.buttons === 1 && this.dragged != null) {
           element.addClass('insert');
           this.drawInsertLine(item, event.offsetX);
           return;
@@ -303,6 +302,7 @@ class TreeView extends Proxy {
       },
       'mousedown': (event) => {
         if (event.buttons !== 1) return;
+        if (item == this.items[this.items.length-1]) return;
         this.dragged = item;
       },
       'mouseup': (event) => {
