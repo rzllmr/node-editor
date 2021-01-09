@@ -4,16 +4,16 @@ class DivEdit {
     this.div = divNode;
     this.multiline = multiline;
 
-    this.char = {
-      space: '\u00A0',
-      zeroSpace: '\u200B',
-      zeroAndSpace: '\u200B\u00A0'
-    };
+    // nodes require content, so we use
+    // the zero width space character
+    this.zeroSpace = '\u200B';
+    this.space = '\u00A0';
   }
 
   registerKeys(emClick) {
     this.emClick = emClick;
     this.editEm = false;
+
     $(this.div).on({
       keydown: (event) => {
         const key = event.key;
@@ -31,8 +31,8 @@ class DivEdit {
               this.editEm = !handled;
             } else if (key.startsWith('Arrow')) {
               if (['ArrowUp', 'ArrowDown'].includes(key) ||
-                  key == 'ArrowLeft' && this.getCaretIndex(node) == 1 ||
-                  key == 'ArrowRight' && this.getCaretIndex(node) == node.textContent.length) {
+                  key == 'ArrowLeft' && this.caretAt(node, 1) ||
+                  key == 'ArrowRight' && this.caretAt(node, -1)) {
                 handled = true;
               }
             } else if (key == '/') {
@@ -70,6 +70,8 @@ class DivEdit {
               this.div.scrollLeft = 0;
               this.div.blur();
               handled = true;
+            } else {
+              handled = this.insertBreak(key, node);
             }
           }
         } else if (node.nodeName == 'DIV') {
@@ -80,13 +82,53 @@ class DivEdit {
         }
         return !handled;
       },
+      keyup: (event) => {
+        const key = event.key;
+        let node = document.getSelection().focusNode;
+        node = this.typeNode(node);
+
+        if (['ArrowUp', 'ArrowDown'].includes(key)) {
+          if (this.caretAt(node, 0)) {
+            this.setCaretIndex(node, 1);
+          }
+        } else if (['Backspace', 'Delete'].includes(key)) {
+          if (node == this.div) {
+            let newNode;
+            if (this.div.firstChild == null) {
+              newNode = this.createTextNode();
+              this.div.appendChild(newNode);
+            } else {
+              const brNode = this.findDuplicate('BR');
+              if (brNode != null) {
+                newNode = this.createTextNode();
+                this.insertBefore(brNode, newNode);
+                if (brNode == this.div.lastChild) {
+                  this.div.removeChild(brNode);
+                }
+              }
+            }
+            this.setCaretIndex(newNode, 1);
+          } else if (this.caretAt(node, -1)) {
+            const nextNode = node.nextSibling;
+            if (nextNode != null && nextNode.nodeName == '#text') {
+              const caretIdx = this.getCaretIndex(node);
+              this.mergeInto(node, nextNode);
+              this.setCaretIndex(node, caretIdx);
+            }
+          } else if (this.caretAt(node, 0)) {
+            node.nodeValue = this.zeroSpace + node.nodeValue;
+            this.setCaretIndex(node, 1);
+          }
+        }
+      },
       focus: () => {
         let node = document.getSelection().focusNode;
         node = this.typeNode(node);
+
         if (this.div.firstChild == null) {
           node = this.div.appendChild(this.createTextNode());
         }
-        if (this.getCaretIndex(node) == 0) {
+        if (this.caretAt(node, 0)) {
           this.setCaretIndex(node, 1);
         }
       },
@@ -117,29 +159,27 @@ class DivEdit {
 
   handleNavigation(key, node) {
     if (key == 'ArrowLeft') {
-      let emNode;
-      if (node.nodeName == '#text' && this.getCaretIndex(node) == 1) {
-        emNode = node.previousSibling;
+      let prevNode;
+      if (node.nodeName == '#text' && this.caretAt(node, 1)) {
+        prevNode = node.previousSibling;
       } else if (node.nodeName == 'EM') {
-        emNode = node;
+        prevNode = node;
       } else {
         return false;
       }
 
-      if (emNode == null || emNode.nodeName != 'EM') {
+      if (prevNode == null || prevNode.nodeName == '#text') {
         return true;
       }
-      let textNode = emNode.previousSibling;
+      let textNode = prevNode.previousSibling;
       if (textNode == null || textNode.nodeName != '#text') {
         textNode = this.createTextNode();
-        this.insertBefore(emNode, textNode);
-      } else if (textNode.nodeValue.length == 0) {
-        textNode.textContent = this.char.zeroSpace;
+        this.insertBefore(prevNode, textNode);
       }
-      this.setCaretIndex(textNode, textNode.textContent.length);
+      this.setCaretIndex(textNode, -1);
     } else if (key == 'ArrowRight') {
       let emNode;
-      if (node.nodeName == '#text' && this.getCaretIndex(node) == node.nodeValue.length) {
+      if (node.nodeName == '#text' && this.caretAt(node, -1)) {
         emNode = node.nextSibling;
       } else if (node.nodeName == 'EM') {
         emNode = node;
@@ -147,15 +187,13 @@ class DivEdit {
         return false;
       }
 
-      if (emNode == null || emNode.nodeName != 'EM') {
+      if (emNode == null || emNode.nodeName == '#text') {
         return false;
       }
       let textNode = emNode.nextSibling;
       if (textNode == null || textNode.nodeName != '#text') {
         textNode = this.createTextNode();
         this.insertAfter(emNode, textNode);
-      } else if (textNode.nodeValue.length == 0) {
-        textNode.textContent = this.char.zeroSpace;
       }
       this.setCaretIndex(textNode, 1);
     } else {
@@ -165,29 +203,41 @@ class DivEdit {
     return true;
   }
 
+  insertBreak(key, node) {
+    const brNode = document.createElement('br');
+
+    let targetNode = node;
+    if (this.caretAt(node, -1)) {
+      targetNode = this.createTextNode();
+      this.insertAfter(node, targetNode);
+      this.insertAfter(node, brNode);
+    } else if (this.caretAt(node, 1)) {
+      const textNode = this.createTextNode();
+      this.insertBefore(node, textNode);
+      this.insertBefore(node, brNode);
+    } else {
+      const caretIdx = this.getCaretIndex(node);
+      this.insertWithin(node, brNode, caretIdx);
+      targetNode = brNode.nextSibling;
+    }
+    this.setCaretIndex(targetNode, 1);
+
+    return true;
+  }
+
   insertEmphasis(key, node) {
     const emNode = document.createElement('em');
     emNode.className = 'link';
-    // setting the caret inside requires content
     emNode.textContent = '#';
 
-    const caretPosition = this.getCaretIndex(node);
-
-    if (caretPosition == node.nodeValue.length) {
+    if (this.caretAt(node, -1)) {
       this.insertAfter(node, emNode);
-    } else if (caretPosition == 1) {
+    } else if (this.caretAt(node, 1)) {
+      this.insertBefore(node, this.createTextNode());
       this.insertBefore(node, emNode);
-      if (!node.textContent.startsWith(this.char.zeroSpace)) {
-        node.textContent = this.char.zeroSpace + node.textContent;
-      }
     } else {
-      // split text node and insert between
-      const leftOfCaret = node.textContent.slice(0, caretPosition);
-      const rightOfCaret = node.textContent.slice(caretPosition);
-      node.textContent = leftOfCaret;
-      const nextNode = this.createTextNode(rightOfCaret);
-      this.insertAfter(node, nextNode);
-      this.insertAfter(node, emNode);
+      const caretIdx = this.getCaretIndex(node);
+      this.insertWithin(node, emNode, caretIdx);
     }
     this.setCaretIndex(emNode, 1);
 
@@ -218,8 +268,8 @@ class DivEdit {
     }
 
     if (key == 'Tab') {
-      if (!nextNode.textContent.startsWith(this.char.zeroAndSpace)) {
-        nextNode.textContent = this.char.zeroAndSpace + nextNode.textContent.substring(1);
+      if (!nextNode.textContent.startsWith(this.zeroSpace + ' ')) {
+        nextNode.textContent = this.zeroSpace + this.space + nextNode.textContent.substring(1);
       }
       this.setCaretIndex(nextNode, 2);
     } else {
@@ -230,19 +280,17 @@ class DivEdit {
 
   removeEmphasis(key, node) {
     if (node.nodeName == 'EM') {
-      if (this.editEm && key == 'Backspace' && this.getCaretIndex(node) != 1) {
+      if (this.editEm && key == 'Backspace' && !this.caretAt(node, 1)) {
         return false;
       }
-    } else if (node.nodeName == '#text' && key == 'Backspace' &&
-               this.getCaretIndex(node) == 1) {
+    } else if (node.nodeName == '#text' && key == 'Backspace' && this.caretAt(node, 1)) {
       node = node.previousSibling;
-      if (node == null || node.nodeName != 'EM') {
+      if (node == null || node.nodeName == '#text') {
         return node == null;
       }
-    } else if (node.nodeName == '#text' && key == 'Delete' &&
-               this.getCaretIndex(node) == node.textContent.length) {
+    } else if (node.nodeName == '#text' && key == 'Delete' && this.caretAt(node, -1)) {
       node = node.nextSibling;
-      if (node == null || node.nodeName != 'EM') {
+      if (node == null || node.nodeName == '#text') {
         return false;
       }
     } else {
@@ -251,19 +299,16 @@ class DivEdit {
 
     const before = node.previousSibling;
     const after = node.nextSibling;
-
     this.div.removeChild(node);
 
     if (before != null && after != null) {
-      // merge node after into node before
-      const caretPosition = before.textContent.length;
-      before.nodeValue += after.nodeValue.substring(1);
-      this.div.removeChild(after);
-      this.setCaretIndex(before, caretPosition);
+      const caretIdx = before.textContent.length;
+      this.mergeInto(before, after);
+      this.setCaretIndex(before, caretIdx);
     } else if (after != null) {
       this.setCaretIndex(after, 0);
     } else if (before != null) {
-      this.setCaretIndex(before, before.textContent.length);
+      this.setCaretIndex(before, -1);
     }
     return true;
   }
@@ -285,32 +330,42 @@ class DivEdit {
   getCaretIndex(node) {
     node = this.textNode(node);
 
-    let position = 0;
+    let caretIdx = 0;
     const selection = window.getSelection();
     if (selection.rangeCount !== 0) {
       const range = window.getSelection().getRangeAt(0);
       const preCaretRange = range.cloneRange();
       preCaretRange.selectNodeContents(node);
       preCaretRange.setEnd(range.endContainer, range.endOffset);
-      position = preCaretRange.toString().length;
+      caretIdx = preCaretRange.toString().length;
     }
-    return position;
+    return caretIdx;
   }
 
-  setCaretIndex(node, position) {
+  setCaretIndex(node, caretIdx) {
     node = this.textNode(node);
+    if (caretIdx < 0) {
+      caretIdx += node.nodeValue.length + 1;
+    }
 
     const sel = window.getSelection();
     const range = document.createRange();
-    range.setStart(node, position);
+    range.setStart(node, caretIdx);
     range.collapse(true);
     sel.removeAllRanges();
     sel.addRange(range);
   }
 
+  caretAt(node, caretIdx) {
+    node = this.textNode(node);
+    if (caretIdx < 0) {
+      caretIdx += node.nodeValue.length + 1;
+    }
+    return this.getCaretIndex(node) == caretIdx;
+  }
+
   createTextNode(content = '') {
-    content = content.replace(' ', this.char.space);
-    return document.createTextNode(this.char.zeroSpace + content);
+    return document.createTextNode(this.zeroSpace + content);
   }
 
   insertBefore(node, before) {
@@ -324,6 +379,39 @@ class DivEdit {
     } else {
       return this.div.insertBefore(after, nextNode);
     }
+  }
+
+  insertWithin(node, newNode, caretIdx) {
+    if (node.nodeName != '#text') return null;
+
+    const leftOfCaret = node.textContent.slice(0, caretIdx);
+    const rightOfCaret = node.textContent.slice(caretIdx);
+    node.textContent = leftOfCaret;
+    const nextNode = this.createTextNode(rightOfCaret);
+    this.insertAfter(node, nextNode);
+    this.insertAfter(node, newNode);
+    return newNode;
+  }
+
+  mergeInto(leftNode, rightNode) {
+    if (leftNode.nodeName != '#text' ||
+        rightNode.nodeName != '#text') return null;
+
+    leftNode.nodeValue = leftNode.nodeValue.replace(/\s$/, ' ');
+    leftNode.nodeValue += rightNode.nodeValue.replace(this.zeroSpace, '');
+    this.div.removeChild(rightNode);
+    return leftNode;
+  }
+
+  findDuplicate(tagType) {
+    let lastNode = null;
+    for (const node of this.div.childNodes) {
+      if (lastNode != null &&
+          lastNode.nodeName == tagType &&
+          node.nodeName == tagType) break;
+      lastNode = node;
+    }
+    return lastNode.nextSibling;
   }
 }
 
