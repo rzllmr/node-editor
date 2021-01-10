@@ -26,20 +26,6 @@
 
 :root {
   --font-sans: 'NotoSans', Fallback, sans-serif;
-  --color-lightest: #fffafa;
-  --color-light: #c7c7c7;
-  --color-neutral: #777777;
-  --color-dark: #4b4b4b;
-  --color-darkest: #282828;
-
-  --shadow-ui: 0 0 10px 5px rgba(0, 0, 0, 0.2);
-  --shadow-near: 0px 2px 4px 0 rgba(0, 0, 0, 0.3);
-
-  --background-color: var(--color-neutral);
-  --background-image: url("../data/worn-dots.png");
-  /* Transparent variant from transparenttextures.com
-  based on background pattern from Toptal Subtle Patterns */
-  --color-text-faded: var(--color-neutral);
 
   --color-in: #3CC47C;
   --color-out: #FF3B3F;
@@ -47,17 +33,23 @@
 }
 
 :root.dark {
+  --color-lightest: #fefdfc;
+  --color-light: #d1ccc7;
+  --color-neutral: #817c77;
+  --color-dark: #55504b;
+  --color-darkest: #322d28;
   --color-highlight: rgb(229, 151, 0);
   --color-highlight-faded: rgb(135, 96, 20);
   --divider-lf: 22%;
   --divider-lt: 34%;
 
-  --color-node: var(--color-darkest);
-  --color-text: var(--color-lightest);
-  --color-text-highlight: var(--color-highlight);
-  --color-graph: var(--color-light);
   --color-menu: var(--color-darkest);
   --color-button: var(--color-dark);
+  --color-node: var(--color-darkest);
+  --color-graph: var(--color-light);
+  --color-text: var(--color-lightest);
+  --color-text-faded: var(--color-neutral);
+  --color-text-highlight: var(--color-highlight);
 
   --color-minimap: var(--color-dark);
   --color-minimap-window: var(--color-darkest);
@@ -67,28 +59,37 @@
 
   --background-color: var(--color-neutral);
   --background-image: url("../data/worn-dots-dark.png");
+  /* Transparent variant from transparenttextures.com
+  based on background pattern from Toptal Subtle Patterns */
 }
 
 :root.light {
+  --color-lightest: #fefdfc;
+  --color-light: #f0ebe6;
+  --color-neutral: #dad5d0;
+  --color-dark: #817c77;
+  --color-darkest: #322d28;
   --color-highlight: rgb(33, 136, 255);
   --color-highlight-faded: rgb(144, 193, 253);
   --divider-lf: 62%;
   --divider-lt: 74%;
 
-  --color-node: var(--color-lightest);
-  --color-text: var(--color-darkest);
-  --color-text-highlight: var(--color-highlight);
-  --color-dark: #717171;
-  --color-graph: var(--color-dark);
   --color-menu: var(--color-lightest);
-  --color-button: #dddddd;
+  --color-button: var(--color-light);
+  --color-node: var(--color-lightest);
+  --color-graph: var(--color-dark);
+  --color-text: var(--color-darkest);
+  --color-text-faded: var(--color-dark);
+  --color-text-highlight: var(--color-highlight);
 
-  --color-minimap: #a5a5a5;
-  --color-minimap-window: #5d5d5d;
+  --color-minimap: var(--color-dark);
+  --color-minimap-window: var(--color-darkest);
 
   --shadow-ui: 0 0 10px 5px rgba(0, 0, 0, 0.1);
   --shadow-near: 0px 2px 4px 0 rgba(0, 0, 0, 0.2);
 
-  --background-color: #d6d6d6;
+  --background-color: var(--color-neutral);
   --background-image: url("../data/worn-dots-light.png");
+  /* Transparent variant from transparenttextures.com
+  based on background pattern from Toptal Subtle Patterns */
 }
