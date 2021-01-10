@@ -33,11 +33,11 @@
 }
 
 :root.dark {
-  --color-lightest: #fefdfc;
-  --color-light: #d1ccc7;
-  --color-neutral: #817c77;
-  --color-dark: #55504b;
-  --color-darkest: #322d28;
+  --color-lightest: #FEFDFC;
+  --color-light: #CBC9C7;
+  --color-neutral: #7B7977;
+  --color-dark: #4F4D4B;
+  --color-darkest: #2C2A28;
   --color-highlight: rgb(229, 151, 0);
   --color-highlight-faded: rgb(135, 96, 20);
   --divider-lf: 22%;
@@ -64,11 +64,11 @@
 }
 
 :root.light {
-  --color-lightest: #fefdfc;
-  --color-light: #f0ebe6;
-  --color-neutral: #dad5d0;
-  --color-dark: #817c77;
-  --color-darkest: #322d28;
+  --color-lightest: #FEFDFC;
+  --color-light: #E4E2E0;
+  --color-neutral: #D4D2D0;
+  --color-dark: #7B7977;
+  --color-darkest: #2C2A28;
   --color-highlight: rgb(33, 136, 255);
   --color-highlight-faded: rgb(144, 193, 253);
   --divider-lf: 62%;
