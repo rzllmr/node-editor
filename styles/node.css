@@ -13,6 +13,16 @@
   background-clip: content-box;
 }
 
+.node.minimized {
+  max-height: 41px;
+}
+.node.minimized .body {
+  display: none;
+}
+.node.node.minimized .divider {
+  border-radius: 0 0 5px 5px;
+}
+
 .node.in {
   border: 1px solid var(--color-in);
   transform: translate(-1px, -1px);
@@ -113,14 +123,12 @@
   border-radius: 10px;
 }
 
-
 .node .resizer {
   position: absolute;
   bottom: 0;
   right: 0;
   color: var(--color-text-faded);
   font-size: 11px;
-  cursor: se-resize;
 }
 .node .resizer:hover {
   color: var(--color-text-highlight);
@@ -128,4 +136,13 @@
 .node .resizer i {
   transform: rotate(-45deg);
   pointer-events: none;
+}
+.node .resizer.resize-width {
+  bottom: 7px;
+  right: 3px;
+  font-size: 9px;
+  z-index: 1;
+}
+.node .resizer.resize-width i {
+  transform: rotate(90deg);
 }

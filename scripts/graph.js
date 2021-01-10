@@ -256,8 +256,10 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
       // check for other highlighted links before removing highlight of otherAnchor.node
       const highlighted = otherAnchor.node.element.find('.anchor.in, .anchor.out, .anchor.same');
       if (highlighted.length > 0) direction = ' ' + highlighted[0].className.split(' ').pop();
+      otherAnchor.node.element.removeClass('in out same');
+    } else {
+      otherAnchor.node.element.addClass(direction);
     }
-    otherAnchor.node.element[0].className = 'node' + direction;
 
     $('#' + this.boardId).find('.minimap').trigger('node:highlight', [otherAnchor.node.id]);
   }

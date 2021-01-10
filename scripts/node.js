@@ -24,9 +24,11 @@ class Node extends Proxy {
       this.element.attr('id', this.id);
     }
     this.element.appendTo(board.find('.layer.nodes'));
+    this.resizer = this.element.find('.resizer');
     this.registerElement();
 
     this.color = hue;
+    this.minimize(false);
 
     this.anchors = {
       top: [],
@@ -76,21 +78,17 @@ class Node extends Proxy {
     this.makeEditableOnDblClick(this.element.find('.label'), 'contentEditable', true, false);
     this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true, true);
 
-    this.element.find('.resizer').on({
+    this.resizer.on({
       mousedown: (event) => {
         $(window).on('mousemove', (event) => {
           event.pageX *= this.zoom.scale; event.pageY *= this.zoom.scale;
           const width = event.pageX - this.element.offset().left + 6;
-          const height = event.pageY - this.element.offset().top + 6;
-          this.element.css({
-            width: Math.max(width, this.minSize.x),
-            height: Math.max(height, this.minSize.y)
-          });
-          for (const side in this.anchors) {
-            for (const i in this.anchors[side]) {
-              this.anchors[side][i].link.update();
-            }
+          this.element.css('width', Math.max(width, this.minSize.x));
+          if (!this.minimized) {
+            const height = event.pageY - this.element.offset().top + 6;
+            this.element.css('height', Math.max(height, this.minSize.y));
           }
+          this.updateAnchors();
         });
         $(window).one('mouseup', (event) => {
           $(window).off('mousemove');
@@ -98,6 +96,9 @@ class Node extends Proxy {
         event.stopPropagation();
       }
     });
+
+    this.element.css('width', this.element[0].offsetWidth);
+    this.element.css('height', this.element[0].offsetHeight);
   }
 
   // add anchor at evenly distributed slot closest to mouse position
@@ -193,7 +194,7 @@ class Node extends Proxy {
   }
 
   select() {
-    this.element[0].className = 'node selected';
+    this.element.addClass('selected');
     for (const side in this.anchors) {
       for (const i in this.anchors[side]) {
         this.anchors[side][i].link.highlight(this.anchors[side][i], true);
@@ -202,7 +203,7 @@ class Node extends Proxy {
     this.minimap.trigger('node:highlight', [this.id]);
   }
   deselect() {
-    this.element[0].className = 'node';
+    this.element.removeClass('selected');
     for (const side in this.anchors) {
       for (const i in this.anchors[side]) {
         this.anchors[side][i].link.highlight(this.anchors[side][i], false);
@@ -223,12 +224,30 @@ class Node extends Proxy {
         top: offset.top - this.element[0].offsetHeight / 2
       });
     }
+    this.updateAnchors();
+    this.minimap.trigger('node:update', [this.id]);
+  }
+
+  minimize(toggle) {
+    if (toggle) {
+      this.resizer.addClass('resize-width');
+      this.resizer.find('i')[0].className = 'fa fa-align-justify';
+      this.element.addClass('minimized');
+    } else {
+      this.resizer.removeClass('resize-width');
+      this.resizer.find('i')[0].className = 'fa fa-wifi';
+      this.element.removeClass('minimized');
+    }
+    this.updateAnchors();
+    this.minimized = toggle;
+  }
+
+  updateAnchors() {
     for (const side in this.anchors) {
       for (const i in this.anchors[side]) {
         this.anchors[side][i].link.update();
       }
     }
-    this.minimap.trigger('node:update', [this.id]);
   }
 
   set color(hue) {
@@ -246,11 +265,12 @@ class Node extends Proxy {
       board: this.board[0].id,
       type: element.className.split(' ')[0],
       id: element.id,
-      posX: element.offsetLeft,
-      posY: element.offsetTop,
-      width: element.offsetWidth,
-      height: element.offsetHeight,
+      posX: element.style.left,
+      posY: element.style.top,
+      width: element.style.width,
+      height: element.style.height,
       hue: element.querySelector('.divider').style.getPropertyValue('--hue'),
+      minimized: this.minimized,
       label: element.querySelector('div.label').innerHTML.replace(/<br>/g, '\n'),
       details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n')
     };
@@ -273,6 +293,7 @@ class Node extends Proxy {
     node.element.find('div.label em, div.details em').on('click', (event) => {
       $('#board-tree').trigger('treeview:createFromLink', [event.target]);
     });
+    node.minimize(object.minimized);
     node.minimap.trigger('node:update', [node.element[0].id]);
   }
 };

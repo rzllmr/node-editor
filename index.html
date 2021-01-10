@@ -63,7 +63,7 @@
           <li class="leaf" id="leaf-template" style="display:none"><i class="fa fa-sticky-note-o"></i><span class="selector">leaf</span></li>
         </ul>
       </div>
-      <div id="node-tools" class="toolbar collapsed">
+      <div id="node-tools" class="collapsed">
         <h1 id="node-info">Node Options</h1>
         <hr class="line">
         <div class="color-picker">
@@ -73,8 +73,11 @@
             <div id="color-reset" class="color-preset"><i class="fa fa-undo"></i></div>
             <div id="color-preset-template" class="color-preset" style="display: none"></div>
           </div>
-          <button class="tool small" id="remove"><i class="fa fa-times"></i></button><!--
-          <div class="color-preset" id="remove"><i class="fa fa-times"></i></div>-->
+          <div class='toolbar'>
+            <button class="tool small" id="minimize"><i class="fa fa-window-minimize"></i></button><!--
+         --><button class="tool small" id="maximize"><i class="fa fa-window-maximize"></i></button><!--
+         --><button class="tool small" id="remove"><i class="fa fa-times"></i></button>
+          </div>
         </div>
       </div>
     </div>

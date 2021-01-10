@@ -10,7 +10,7 @@
   display: flex;
   flex-flow: row wrap;
   padding: 5px 3px 3px 3px;
-  width: calc(8 * 18px);
+  width: calc(6 * 18px);
   float: left;
 }
 .color-preset {
@@ -80,17 +80,28 @@
       box-shadow: 0 0.4em 1em rgba(0,0,0,0.15);
     }
 
-#remove.tool.small {
+#node-tools .toolbar {
+  float: right;
+}
+#node-tools .toolbar .tool.small {
   border: none;
   color: var(--color-text);
   background: var(--color-button);
-  float: right;
   margin: 5px;
 }
-#remove.tool.small:hover {
+#node-tools .toolbar .tool.small:hover {
   outline: none;
+  background: var(--color-highlight);
+}
+#node-tools .toolbar .tool.small i {
+  line-height: inherit;
+}
+#node-tools .toolbar #remove.tool.small:hover {
   background: var(--color-out);
 }
-#remove.tool.small i {
-  line-height: inherit;
+#node-tools .toolbar .tool.small:not(:last-of-type) {
+  margin-right: 0;
+}
+#node-tools .toolbar #minimize.tool.small i {
+  transform: translateY(-6px);
 }

@@ -97,12 +97,12 @@ hr.seperator {
   background: var(--color-menu);
 }
 
-#node-tools.toolbar {
+#node-tools {
   display: grid;
   overflow: hidden;
   max-height: 80px;
   transition: max-height 0.3s ease;
 }
-#node-tools.toolbar.collapsed {
+#node-tools.collapsed {
   max-height: 0px;
 }

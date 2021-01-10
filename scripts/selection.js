@@ -13,8 +13,10 @@ class Selection {
     this.proxy = new Proxy();
     this.selection = new Set();
     this.nodeInfo = $('h1#node-info');
-    this.nodeTools = $('#node-tools.toolbar');
+    this.nodeTools = $('#node-tools');
     this.removeButton = $('#remove.tool.small');
+    this.minimizeButton = $('#minimize.tool.small');
+    this.maximizeButton = $('#maximize.tool.small');
     this.colorPicker = new ColorPicker(this.selection);
 
     this.rect = board.element.find('rect.selection');
@@ -25,7 +27,7 @@ class Selection {
     this.movingSelection = false;
 
     this.register();
-    this.updateButton();
+    this.toggleNodeTools();
   }
 
   register() {
@@ -96,6 +98,8 @@ class Selection {
       }
     });
     this.removeButton.click(this.deleteSelection.bind(this));
+    this.minimizeButton.click(this.minimizeSelection.bind(this, true));
+    this.maximizeButton.click(this.minimizeSelection.bind(this, false));
 
     $(document).on('hotkey:blurInput', (event) => {
       document.activeElement.blur();
@@ -111,7 +115,7 @@ class Selection {
     object.select();
     this.selection.add(object);
     if (this.selection.size == 1) this.colorPicker.setSlider(object);
-    this.updateButton();
+    this.toggleNodeTools();
   }
 
   multiSelect(id) {
@@ -124,7 +128,7 @@ class Selection {
       this.selection.add(object);
       if (this.selection.size == 1) this.colorPicker.setSlider(object);
     }
-    this.updateButton();
+    this.toggleNodeTools();
   }
 
   clearSelection() {
@@ -132,7 +136,7 @@ class Selection {
       element.deselect();
     });
     this.selection.clear();
-    this.updateButton();
+    this.toggleNodeTools();
   }
 
   deleteSelection() {
@@ -143,10 +147,18 @@ class Selection {
       item.destroy();
     });
     this.selection.clear();
-    this.updateButton();
+    this.toggleNodeTools();
   }
 
-  updateButton() {
+  minimizeSelection(toggle) {
+    this.selection.forEach((_, item) => {
+      if (item.element[0].className.split(' ')[0] === 'node') {
+        item.minimize(toggle);
+      }
+    });
+  }
+
+  toggleNodeTools() {
     if (this.selection.size > 0) {
       this.nodeTools.removeClass('collapsed');
     } else {
