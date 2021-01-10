@@ -228,6 +228,7 @@ class TreeView extends Proxy {
     });
 
     // deleting items
+    this.toolbar.find('#del-board')[0].disabled = true;
     this.toolbar.find('#del-board').click(() => {
       this.menuCover.show();
       this.toolbar.find('#rnm-board, #del-board').hide();
@@ -362,6 +363,9 @@ class TreeView extends Proxy {
       this.items.splice(i, 1);
     }
 
+    if (this.items.length == 2) {
+      this.toolbar.find('#del-board')[0].disabled = true;
+    }
     return removed.reverse();
   }
 
@@ -387,6 +391,9 @@ class TreeView extends Proxy {
       this.items.splice(++idxBefore, 0, item);
       this.registerItem(item);
       itemBefore = item;
+    }
+    if (this.items.length > 2) {
+      this.toolbar.find('#del-board')[0].disabled = false;
     }
   }
 

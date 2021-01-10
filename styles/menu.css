@@ -77,6 +77,9 @@ hr.seperator {
 .tool.small:hover {
   background: var(--color-highlight);
 }
+.tool.small:disabled:hover {
+  background: var(--color-highlight-faded);
+}
 
 .tool:hover {
   background: var(--color-highlight-faded);
@@ -87,6 +90,7 @@ hr.seperator {
 .tool:disabled {
   color: var(--color-text-faded);
   pointer-events: none;
+  cursor: default;
 }
 
 #collapse.tool:not(:hover) {
