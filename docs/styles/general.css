@@ -1,0 +1,109 @@
+:root {
+  --font-sans: 'Noto Sans', sans-serif;
+  --font-sans: 'Roboto', sans-serif;
+  --font-sans: 'Ubuntu', sans-serif;
+
+  --color-text-light: #2C2A28;
+  --color-text-light-faded: #7B7977;
+  --color-panel-light: #FEFDFC;
+  --color-background-light: #D4D2D0;
+  --color-highlight-light: rgb(33, 136, 255);
+  --color-highlight-light-faded:  rgb(144, 193, 253);
+
+  --color-text-dark: #FEFDFC;
+  --color-text-dark-faded: #7B7977;
+  --color-panel-dark: #2C2A28;
+  --color-background-dark: #7B7977;
+  --color-highlight-dark: rgb(229, 151, 0);
+  --color-highlight-dark-faded:  rgb(135, 96, 20);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  background: var(--color-panel-light);
+}
+
+.section {
+  display: inline-block;
+  width: 100%;
+}
+
+#head.section {
+  background-image: url("../data/background.jpg");
+}
+.section.light {
+  color: var(--color-text-light);
+  background: var(--color-background-light);
+}
+.section.dark {
+  color: var(--color-text-dark);
+  background: var(--color-background-dark);
+}
+
+.zone img#window {
+  object-position: top;
+  height: 452px;
+  width: 790px;
+  box-shadow: 0 0 12px 2px var(--color-background-light);
+  margin: auto;
+  display: block;
+  float: none;
+}
+.zone h1 {
+  text-align: center;
+  font-weight: lighter;
+  font-size: 28pt;
+  margin-top: 305px;
+}
+
+.zone {
+  max-width: 900px;
+  padding: 0 100px;
+  margin: auto;
+}
+
+.zone h2 {
+  font-weight: lighter;
+  margin: 0 0 20px 0;
+  font-size: 24pt;
+}
+.section.light h2 {
+  color: var(--color-highlight-light);
+}
+.section.dark h2 {
+  color: var(--color-highlight-dark);
+}
+
+.zone p {
+  font-size: 11pt;
+  letter-spacing: 0.03em;
+  margin: 20px 0 0 0;
+}
+
+.zone img {
+  object-fit: none;
+  height: 228px;
+  width: 280px;
+  float: left;
+}
+.zone img#upper {
+  object-position: top;
+}
+.zone img#lower {
+  object-position: bottom;
+}
+
+.zone .description {
+  height: 228px;
+  display: flex;
+  align-items: center;
+}
+.zone .description.node {
+  width: calc(100% - 300px);
+}
+
+.zone .description .text {
+  margin: 20px 0 20px 20px;
+}
