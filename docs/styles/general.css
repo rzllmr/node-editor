@@ -3,6 +3,9 @@
   --font-sans: 'Roboto', sans-serif;
   --font-sans: 'Ubuntu', sans-serif;
 
+  --color-light: #E4E2E0;
+  --color-neutral: #D4D2D0;
+
   --color-text-light: #2C2A28;
   --color-text-light-faded: #7B7977;
   --color-panel-light: #FEFDFC;
@@ -16,6 +19,8 @@
   --color-background-dark: #7B7977;
   --color-highlight-dark: rgb(229, 151, 0);
   --color-highlight-dark-faded:  rgb(135, 96, 20);
+
+  --shadow-inset: 0 0 20px 0 rgba(0,0,0,0.6) inset;
 }
 
 body {
@@ -23,11 +28,16 @@ body {
   font-family: var(--font-sans);
   font-size: 14px;
   background: var(--color-panel-light);
+  display: grid;
 }
 
 .section {
   display: inline-block;
   width: 100%;
+}
+.section:not(:first-of-type) {
+  position: relative;
+  z-index: 4;
 }
 
 #head.section {
@@ -35,21 +45,45 @@ body {
 }
 .section.light {
   color: var(--color-text-light);
-  background: var(--color-background-light);
+  background: var(--color-light);
 }
 .section.dark {
-  color: var(--color-text-dark);
-  background: var(--color-background-dark);
+  color: var(--color-text-light);
+  background: var(--color-neutral);
 }
 
-.zone img#window {
+.zone div#previews {
+  position: relative;
+  height: 452px;
+}
+
+.zone #osx.window {
+  z-index: 2;
+  margin-top: 8px;
+  margin-left: 5px;
+  border-radius: 6px;
+}
+.zone #windows.window {
+  z-index: 1;
+  margin-left: 55px;
+  margin-top: 60px;
+}
+.zone #ubuntu.window {
+  z-index: 0;
+  margin-left: 105px;
+  margin-top: 100px;
+  border-radius: 6px;
+}
+
+.zone img.window {
   object-position: top;
   height: 452px;
   width: 790px;
-  box-shadow: 0 0 12px 2px var(--color-background-light);
+  box-shadow: 0 0 30px 0 rgba(0,0,0,0.2);
   margin: auto;
   display: block;
   float: none;
+  position: absolute;
 }
 .zone h1 {
   text-align: center;
@@ -62,6 +96,7 @@ body {
   max-width: 900px;
   padding: 0 100px;
   margin: auto;
+  overflow: hidden;
 }
 
 .zone h2 {
@@ -84,15 +119,23 @@ body {
 
 .zone img {
   object-fit: none;
-  height: 228px;
+  height: 248px;
   width: 280px;
   float: left;
 }
 .zone img#upper {
   object-position: top;
+  box-shadow: var(--shadow-inset);
+  border-radius: 10px 10px 0 0;
+  background: var(--color-background-light);
+  transform: translateY(20px);
 }
 .zone img#lower {
   object-position: bottom;
+  box-shadow: var(--shadow-inset);
+  border-radius: 0 0 10px 10px;
+  background: var(--color-background-dark);
+  transform: translateY(-20px);
 }
 
 .zone .description {
@@ -101,9 +144,9 @@ body {
   align-items: center;
 }
 .zone .description.node {
-  width: calc(100% - 300px);
+  width: calc(100% - 280px);
 }
 
 .zone .description .text {
-  margin: 20px 0 20px 20px;
+  margin: 30px 0 30px 30px;
 }
