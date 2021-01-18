@@ -24,14 +24,14 @@ class Minimap {
   registerMonitors() {
     // move window position with left click in minimap
     this.element.on({
-      mousedown: (event) => {
+      'mousedown': (event) => {
         if (event.button != 0) return;
         this.moveWindow(event.pageX, event.pageY);
         this.element.on('mousemove', (event) => {
           this.moveWindow(event.pageX, event.pageY);
         });
       },
-      mouseup: (event) => {
+      'mouseup mouseleave': (event) => {
         this.element.off('mousemove');
       }
     });

@@ -32,7 +32,7 @@ class Selection {
 
   register() {
     this.board.element.on({
-      mousedown: (event) => {
+      'mousedown': (event) => {
         if (event.button != 0 || event.altKey || event.ctrlKey) return;
         // left click alone
 
@@ -53,6 +53,7 @@ class Selection {
             this.rectSelection.set(element.id, $(element).hasClass('.selected'));
           });
 
+          this.onlyBoardEvents(true);
           this.drawingRectangle = true;
           $(window).on('mousemove', this.rectangleSelect.bind(this));
         } else if (target.hasClass('node')) {
@@ -63,16 +64,18 @@ class Selection {
 
           if (target.hasClass('selected')) {
             $(window).on('mousemove', (event) => {
+              this.onlyBoardEvents(true);
               this.moveSelection(target, {x: event.pageX, y: event.pageY});
             });
           } else {
             $(window).on('mousemove', (event) => {
+              this.onlyBoardEvents(true);
               this.moveNode(target, {x: event.pageX, y: event.pageY});
             });
           }
         }
       },
-      mouseup: (event) => {
+      'mouseup mouseleave': (event) => {
         if (event.button != 0 || event.altKey) return;
         // left click
 
@@ -82,11 +85,13 @@ class Selection {
         this.colorPicker.updatePresets();
 
         if (this.drawingRectangle) {
+          this.onlyBoardEvents(false);
           this.drawingRectangle = false;
 
           this.rect.hide();
           this.rect.attr({width: 0, height: 0});
         } else if (this.movingSelection) {
+          this.onlyBoardEvents(false);
           this.movingSelection = false;
 
           this.board.element.find('.minimap').trigger('node:update', [target[0].id]);
@@ -240,6 +245,12 @@ class Selection {
         top: node.element.offset().top + relOffset.top
       });
     });
+  }
+
+  onlyBoardEvents(toggle = true) {
+    const styleValue = toggle ? 'none' : '';
+    $('#collapser').css('pointer-events', styleValue);
+    this.board.minimap.element.css('pointer-events', styleValue);
   }
 }
 
