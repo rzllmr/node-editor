@@ -76,28 +76,48 @@ class Board extends Proxy {
         if (!(event.button == 1 || event.button == 0 && event.ctrlKey)) return;
         // middle click OR left click + ctrl
 
-        this.movePivot = null;
-        event.target.style.cursor = 'all-scroll';
-        this.element.on('mousemove', (event) => {
-          if (this.movePivot == null) this.movePivot = {x: event.clientX, y: event.clientY};
-          this.moveVector = {
-            x: (event.clientX - this.movePivot.x) / 20,
-            y: (event.clientY - this.movePivot.y) / 20
-          };
-        });
-        this.scrollLoop = setInterval(() => {
-          if (this.moveVector != undefined) {
-            this.element[0].scrollLeft += this.moveVector.x;
-            this.element[0].scrollTop += this.moveVector.y;
+        if (event.shiftKey) {
+          event.target.style.cursor = 'all-scroll';
+
+          this.movePivot = null;
+          this.element.on('mousemove', (event) => {
+            if (this.movePivot == null) this.movePivot = {x: event.clientX, y: event.clientY};
+            this.moveVector = {
+              x: (event.clientX - this.movePivot.x) / 20,
+              y: (event.clientY - this.movePivot.y) / 20
+            };
+          });
+
+          this.scrollLoop = setInterval(() => {
+            if (this.moveVector != undefined) {
+              this.element[0].scrollLeft += this.moveVector.x;
+              this.element[0].scrollTop += this.moveVector.y;
+              this.minimap.element.trigger('window:update');
+            }
+          }, 16);
+
+          this.element.one('mouseup mouseleave', (event) => {
+            event.target.style.cursor = 'default';
+            this.element.off('mousemove');
+            this.movePivot = undefined;
+            clearInterval(this.scrollLoop);
+          });
+        } else {
+          event.target.style.cursor = 'grabbing';
+
+          this.scrollPos = {x: event.clientX, y: event.clientY};
+          this.element.on('mousemove', (event) => {
+            this.element[0].scrollLeft += this.scrollPos.x - event.clientX;
+            this.element[0].scrollTop += this.scrollPos.y - event.clientY;
+            this.scrollPos = {x: event.clientX, y: event.clientY};
             this.minimap.element.trigger('window:update');
-          }
-        }, 16);
-        this.element.one('mouseup', (event) => {
-          this.movePivot = undefined;
-          event.target.style.cursor = 'default';
-          this.element.off('mousemove');
-          clearInterval(this.scrollLoop);
-        });
+          });
+
+          this.element.one('mouseup mouseleave', (event) => {
+            event.target.style.cursor = 'default';
+            this.element.off('mousemove');
+          });
+        }
         event.preventDefault();
         event.stopPropagation();
       },
