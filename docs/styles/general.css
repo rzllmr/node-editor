@@ -152,6 +152,7 @@ button p:last-child {
   margin: auto;
   color: var(--color-highlight-light);
   line-height: 1.5em;
+  padding-top: 10vh;
 }
 .zone h1 span {
   font-weight: normal;
