@@ -119,8 +119,8 @@ button p:last-child {
 }
 
 .zone div#preview {
-  margin: auto;
-  margin-bottom: 8vh;
+  margin: 0 auto;
+  margin-bottom: 5vh;
 }
 
 .zone #osx.window {
@@ -149,7 +149,7 @@ button p:last-child {
   text-align: center;
   font-weight: lighter;
   font-size: 28pt;
-  margin-top: 160px;
+  margin: auto;
   color: var(--color-highlight-light);
   line-height: 1.5em;
 }
