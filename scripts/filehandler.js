@@ -75,7 +75,8 @@ class FileHandler {
     let filePath = this.current;
     if (!filePath) {
       filePath = this.dialog.showSaveDialogSync({
-        filters: [{name: 'Save File', extensions: ['json']}]
+        filters: [{name: 'Project', extensions: ['json']}],
+        defaultPath: this.current || ''
       });
       if (!filePath) return;
     }
@@ -92,7 +93,8 @@ class FileHandler {
 
   saveAs() {
     const filePath = this.dialog.showSaveDialogSync({
-      filters: [{name: 'Save File', extensions: ['json']}]
+      filters: [{name: 'Project', extensions: ['json']}],
+      defaultPath: this.current || ''
     });
     if (!filePath) return;
     fs.writeFile(filePath, this.gatherContent(), 'utf8', (error) => {
@@ -110,7 +112,7 @@ class FileHandler {
 
     const filePaths = this.dialog.showOpenDialogSync({
       properties: ['openFile'],
-      filters: [{name: 'Save File', extensions: ['json']}]
+      filters: [{name: 'Project', extensions: ['json']}]
     });
     if (!filePaths) {
       this.boardTree.createDefault();
