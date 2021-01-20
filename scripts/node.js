@@ -16,7 +16,7 @@ class Node extends Proxy {
     this.board = board;
     this.minimap = board.find('.minimap');
     this.zoom = zoom;
-    this.minSize = {x: 180, y: 120};
+    this.minSize = {x: 75, y: 70};
 
     this.element = $('#templates .node').clone();
     this.element.removeClass('template');
