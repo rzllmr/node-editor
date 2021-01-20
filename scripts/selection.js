@@ -50,7 +50,7 @@ class Selection {
           this.rect.show();
 
           $('.layer.nodes .node:not(:first), .layer.nodes .sign:not(:first)').each((_, element) => {
-            this.rectSelection.set(element.id, $(element).hasClass('.selected'));
+            this.rectSelection.set(element.id, $(element).hasClass('selected'));
           });
 
           this.onlyBoardEvents(true);

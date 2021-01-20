@@ -194,7 +194,7 @@ class Node extends Proxy {
   }
 
   select() {
-    this.element.addClass('selected');
+    this.element.removeClass('in out same').addClass('selected');
     for (const side in this.anchors) {
       for (const i in this.anchors[side]) {
         this.anchors[side][i].link.highlight(this.anchors[side][i], true);
@@ -212,7 +212,7 @@ class Node extends Proxy {
     this.minimap.trigger('node:highlight', [this.id]);
   }
   get selected() {
-    return this.element[0].className.endsWith('selected');
+    return this.element.hasClass('selected');
   }
 
   move(offset, useOffset = true) {
