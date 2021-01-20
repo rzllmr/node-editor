@@ -423,7 +423,7 @@ class TreeView extends Proxy {
     const checkPath = name !== path;
     for (const item of this.items) {
       if (item.name === name && (type == null || item.type === type)) {
-        if (checkPath && !this.getItemPath(item).endsWith(path)) {
+        if (checkPath && !('/' + this.getItemPath(item)).endsWith('/' + path)) {
           continue;
         }
         return item;
