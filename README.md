@@ -1,13 +1,9 @@
 # Node Editor
 > An intuitive editor for layouts of nodes and graphs.
 
-The intention of this tool is to provide a free (meaning free to use, alter and distribute) editor for outlining mind-maps without hindering menus and configuration. That makes the waiver of hidden sub- and context-menus and a simple predefined style the main design principles of the project. Though customization of the look is still easily feasible through dedicated stylesheets.
+The intention of this tool is to provide a free (meaning free to use, alter and distribute) editor for creating mind-maps without impeding menus and configuration. That makes the waiver of hidden sub- and context-menus and a sleek predefined style the main design principles of the project. Every feature should be well-wrought and robust, enabling the user to put down their thoughts quickly. Another more user-oriented illustration you can find on the [homepage](https://rzllmr.github.io/node-editor/).
 
-Examples of the default layout and styling in a dark and light theme are:
-
-![Preview: dark theme](data/preview-dark.png)
-
-![Preview: light theme](data/preview-light.png)
+![Preview: window preview](data/preview.png)
 
 ## Build instructions
 
@@ -31,9 +27,15 @@ npm run dist
 
 ## Main features
 
-#### Unhindered handling
-#### Multiple boards
-#### Mini-map
+* __Windows__, __Mac__ and most __Linux__ distributions supported
+
+* __Tree-view__ of Boards to segment the multitude of Nodes
+
+* __Mini-map__ tracking all Nodes of the current Board
+
+* __Links__ to change to a different Board from a Node
+
+* __Colors__ to group Nodes on the same Board
 
 ## Third Party
 
