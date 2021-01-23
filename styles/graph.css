@@ -1,7 +1,7 @@
 
 .graph {
   stroke: var(--color-graph);
-  stroke-width: 2;
+  stroke-width: 3px;
   fill: none;
 }
 .graph-area {

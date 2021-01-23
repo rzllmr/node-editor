@@ -6,13 +6,18 @@
   height: 30px;
   line-height: 30px;
   text-align: center;
-  color: var(--color-node);
 }
 .anchor.source {
-  font-size: 11px;
+  font-size: 14px;
+  color: var(--color-node);
 }
 .anchor.target {
   font-size: 22px;
+  color: var(--color-graph);
+}
+.anchor.source i {
+  overflow: hidden;
+  line-height: 30px;
 }
 
 .anchor:hover {
@@ -37,38 +42,54 @@
   top: 0;
 }
 .anchor.top.source {
-  transform: translate(-50%, -50%);
+  transform: translate(-15px, -20px);
+}
+.anchor.top.source i {
+  height: 10px;
+  line-height: 0px;
+  transform: rotate(180deg);
 }
 .anchor.top.target {
-  transform: translate(-50%, -62%);
+  transform: translate(-15px, -18px);
 }
 .anchor.right {
   right: 0;
   top: 50%;
 }
 .anchor.right.source {
-  transform: translate(50%, -50%);
+  transform: translate(17.5px, -15px);
+}
+.anchor.right.source i {
+  width: 7px;
+  transform: rotate(180deg);
 }
 .anchor.right.target {
-  transform: translate(58%, -50%);
+  transform: translate(17px, -15px);
 }
 .anchor.bottom {
   left: 50%;
   bottom: 0;
 }
 .anchor.bottom.source {
-  transform: translate(-50%, 50%);
+  transform: translate(-15px, 19px);
+}
+.anchor.bottom.source i {
+  height: 10px;
+  line-height: 0px;
 }
 .anchor.bottom.target {
-  transform: translate(-50%, 52%);
+  transform: translate(-15px, 15px);
 }
 .anchor.left {
   left: 0;
   top: 50%;
 }
 .anchor.left.source {
-  transform: translate(-50%, -50%);
+  transform: translate(-18px, -15px);
+}
+.anchor.left.source i {
+  width: 7px;
 }
 .anchor.left.target {
-  transform: translate(-58%, -50%);
+  transform: translate(-17px, -16px);
 }
