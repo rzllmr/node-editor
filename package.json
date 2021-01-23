@@ -12,9 +12,9 @@
   "author": "rzllmr",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^9.1.1",
-    "electron-builder": "^22.7.0",
-    "eslint": "^7.5.0",
+    "electron": "^9.4.1",
+    "electron-builder": "^22.9.1",
+    "eslint": "^7.18.0",
     "eslint-config-google": "^0.14.0"
   },
   "dependencies": {
