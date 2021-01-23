@@ -24,16 +24,16 @@
   color: var(--color-highlight);
 }
 
-.anchor.selected {
+.anchor.target.selected {
   color: var(--color-highlight);
 }
-.anchor.in {
+.anchor.target.in {
   color: var(--color-in);
 }
-.anchor.out {
+.anchor.target.out {
   color: var(--color-out);
 }
-.anchor.same {
+.anchor.target.same {
   color: var(--color-same);
 }
 
