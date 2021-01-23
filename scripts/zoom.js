@@ -35,10 +35,11 @@ class Zoom {
   }
 
   check() {
-    this.limit.min = Math.max(
+    const possibleMin = Math.max(
         Math.ceil(this.window.width() / this.element.width() * 100 / this.step) * this.step,
         Math.ceil(this.window.height() / this.element.height() * 100 / this.step) * this.step
     );
+    this.limit.min = Math.max(this.limit.min, possibleMin);
     if (this.zoom < this.limit.min) {
       this.zoom = this.limit.min;
       this.element.css('zoom', this.zoom / 100);

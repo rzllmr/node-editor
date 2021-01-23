@@ -80,36 +80,34 @@
 
 .node .label {
   display: inline-block;
-  font-size: 13pt;
+  font-size: 18px;
   white-space: nowrap;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .node .label:empty:before{
   content: attr(data-text);
   color: var(--color-text-faded);
 }
 
+:root.dark div.label {
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+:root.light div.label {
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
 .node .details {
   display: inline-block; /* makes Enter create <br> */
   font-family: var(--font-sans);
-  font-size: 8pt;
+  font-size: 12px;
   line-height: 1.5em;
   overflow-y: auto;
 }
 .node .details:empty:before{
   content: attr(data-text);
   color: var(--color-text-faded);
-}
-:root.dark .node .details {
-  font-weight: 200;
-  letter-spacing: 0.1em;
-}
-:root.light .node .details {
-  font-weight: 500;
-  letter-spacing: 0.05em;
-}
-:root.light .node .label {
-  font-weight: 500;
 }
 
 .node .details::-webkit-scrollbar {
@@ -121,6 +119,15 @@
 .node .details::-webkit-scrollbar-thumb {
   background: var(--color-node-faded);
   border-radius: 10px;
+}
+
+:root.dark div.details {
+  font-weight: 200;
+  letter-spacing: 0.08em;
+}
+:root.light div.details {
+  font-weight: 500;
+  letter-spacing: 0.055em;
 }
 
 .node .resizer {
