@@ -83,10 +83,13 @@
   font-size: 18px;
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
-.node .label:empty:before{
+.node .label:empty {
+  color: var(--color-text-faded)
+}
+.node .label:empty:before {
   content: attr(data-text);
-  color: var(--color-text-faded);
 }
 
 :root.dark div.label {

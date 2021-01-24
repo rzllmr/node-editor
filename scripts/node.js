@@ -16,7 +16,7 @@ class Node extends Proxy {
     this.board = board;
     this.minimap = board.find('.minimap');
     this.zoom = zoom;
-    this.minSize = {x: 75, y: 70};
+    this.minSize = {x: 80, y: 70};
 
     this.element = $('#templates .node').clone();
     this.element.removeClass('template');
@@ -83,12 +83,8 @@ class Node extends Proxy {
         $(window).on('mousemove', (event) => {
           event.pageX *= this.zoom.scale; event.pageY *= this.zoom.scale;
           const width = event.pageX - this.element.offset().left + 6;
-          this.element.css('width', Math.max(width, this.minSize.x));
-          if (!this.minimized) {
-            const height = event.pageY - this.element.offset().top + 6;
-            this.element.css('height', Math.max(height, this.minSize.y));
-          }
-          this.updateAnchors();
+          const height = event.pageY - this.element.offset().top + 6;
+          this.resize(width, height);
         });
         $(window).one('mouseup', (event) => {
           $(window).off('mousemove');
@@ -168,7 +164,7 @@ class Node extends Proxy {
 
   makeEditableOnDblClick(element, property, editable, multiline) {
     // works for input element with 'readonly' and false
-    this.emNode = null;
+    const updateAnchors = this.updateAnchors.bind(this);
     element.on({
       mousedown: (event) => {
         let propertyValue = $(event.target).prop(property);
@@ -182,9 +178,25 @@ class Node extends Proxy {
       dblclick: (event) => {
         $(event.target).prop(property, editable);
         $(event.target).focus();
+        if (!multiline) {
+          this.element.css({
+            'width': 'auto',
+            'min-width': this.element[0].clientWidth
+          });
+          event.target.addEventListener('DOMCharacterDataModified', updateAnchors);
+          this.updateAnchors();
+        }
       },
       blur: (event, param) => {
+        const borderWidth = parseInt(this.element.css('border-width')) * 2;
         $(event.target).prop(property, !editable);
+        if (!multiline) {
+          this.element.css({
+            'width': Math.ceil(this.element[0].getBoundingClientRect().width - borderWidth),
+            'min-width': ''
+          });
+          event.target.removeEventListener('DOMCharacterDataModified', updateAnchors);
+        }
       }
     });
     const onEmClick = (emNode) => {
@@ -225,7 +237,14 @@ class Node extends Proxy {
       });
     }
     this.updateAnchors();
-    this.minimap.trigger('node:update', [this.id]);
+  }
+
+  resize(width, height) {
+    this.element.css('width', Math.max(width, this.minSize.x));
+    if (!this.minimized) {
+      this.element.css('height', Math.max(height, this.minSize.y));
+    }
+    this.updateAnchors();
   }
 
   minimize(toggle) {
@@ -248,6 +267,7 @@ class Node extends Proxy {
         this.anchors[side][i].link.update();
       }
     }
+    this.minimap.trigger('node:update', [this.id]);
   }
 
   set color(hue) {
