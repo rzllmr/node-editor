@@ -12,8 +12,8 @@
   transition: max-width 0.3s ease, max-height 0.3s ease;
 }
 #collapser.collapsed {
-  max-width: 34px;
-  max-height: 34px;
+  max-width: 38px;
+  max-height: 38px;
 }
 
 #menu {
@@ -30,9 +30,13 @@
 #menu h1 {
   font-size: 11px;
   width: 100%;
-  padding: 0 5px;
+  padding: 0 10px;
   color: var(--color-text-faded);
-  margin: 10px 0 2px 0;
+  margin: 12px 0 2px 0;
+  box-sizing: border-box;
+}
+h1#node-info {
+  margin-top: 6px;
 }
 
 hr.line {
@@ -46,29 +50,29 @@ hr.seperator {
 }
 
 #board-tools.toolbar {
-  width: calc(6 * 30px);
+  width: calc(6 * 33px);
   display: block;
-  padding: 2px;
+  padding-right: 5px;
 }
 
 .tool {
   color: var(--color-text);
   background: var(--color-button);
-  height: 24px;
-  width: 24px;
+  height: 28px;
+  width: 28px;
   text-align: center;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   padding: 0;
-  margin: 3px;
+  margin: 5px 0 5px 5px;
   transition: background 0.1s;
-  font-size: 15px;
+  font-size: 18px;
 }
 .tool.small {
-  width: 16px;
-  height: 16px;
-  font-size: 12px;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
   margin: 2px 0;
   border-radius: 3px;
   color: var(--color-lightest);
@@ -100,7 +104,7 @@ hr.seperator {
 #node-tools {
   display: grid;
   overflow: hidden;
-  max-height: 80px;
+  max-height: 200px;
   transition: max-height 0.3s ease;
 }
 #node-tools.collapsed {

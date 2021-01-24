@@ -1,9 +1,15 @@
 
-:root.dark div#board-tree {
+div#board-tree {
+  margin-bottom: 4px;
+}
+
+:root.dark div#board-tree,
+:root.dark #tree-tools input.selector {
   font-weight: 400;
   letter-spacing: 0.03em;
 }
-:root.light div#board-tree {
+:root.light div#board-tree,
+:root.light #tree-tools input.selector {
   font-weight: 600;
   letter-spacing: 0.01em;
 }
@@ -18,8 +24,8 @@ ul.treeview, .treeview ul {
 }
 
 li.leaf {
-  height: 20px;
-  line-height: 20px;
+  height: 22px;
+  line-height: 23px;
 }
 
 ul.nested.root {
@@ -34,8 +40,9 @@ li.branch {
 }
 
 li.leaf i {
-  min-width: 15px;
+  min-width: 20px;
   color: var(--color-highlight);
+  font-size: 13px;
 }
 
 li.leaf.selected {
@@ -57,8 +64,8 @@ li.leaf.insert, span.branch.insert {
 
 .branch.title {
   display: inline-block;
-  height: 20px;
-  line-height: 20px;
+  height: 22px;
+  line-height: 23px;
   padding: 0;
   margin: 0;
   width: 100%;
@@ -70,31 +77,28 @@ li.leaf.insert, span.branch.insert {
 }
 
 .branch.title i {
-  float: left;
-  margin-top: 2px;
-  margin-right: 4px;
-  line-height: 16px;
-  width: 11px;
+  width: 20px;
   color: var(--color-highlight);
+  font-size: 13px;
 }
 
 #tree-tools.toolbar {
   display: none;
   position: absolute;
   right: 0;
-  margin: 1px 2px;
+  margin-right: 5px;
   pointer-events: none;
 }
 #tree-tools.toolbar .tool {
   pointer-events: auto;
-  margin: 0;
+  margin: 1px 0 1px 5px;
 }
 #tree-tools.toolbar > .tool {
   display: none;
 }
 #tree-tools.toolbar input.selector {
   position: absolute;
-  top: -1px;
+  top: 1px;
   right: 0;
   background: var(--color-highlight-faded);
   border: none;

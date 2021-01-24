@@ -37,7 +37,7 @@ class TreeItem {
   }
 
   set level(level) {
-    this.icon.css('margin-left', ((level-1) * 15 + 5) +'px');
+    this.icon.css('margin-left', ((level-1) * 20 + 10) +'px');
     this._level = level;
   }
   get level() {
@@ -198,7 +198,7 @@ class TreeView extends Proxy {
     // renaming items
     this.toolbar.find('#rnm-board').click(() => {
       // overlay renaming input
-      this.rnmInput.width(180 - this.hovered.label.offsetLeft);
+      this.rnmInput.width(203 - this.hovered.label.offsetLeft);
       this.rnmInput.val(this.hovered.name);
       this.rnmInput.show();
       this.rnmInput.focus();
@@ -233,7 +233,7 @@ class TreeView extends Proxy {
       this.menuCover.show();
       this.toolbar.find('#rnm-board, #del-board').hide();
       this.toolbar.find('#del-confirm span').css(
-          'margin-right', 60 - this.hovered.label.offsetLeft);
+          'margin-right', 67 - this.hovered.label.offsetLeft);
       this.toolbar.find('#del-confirm').show();
     });
     this.toolbar.find('#apply-del, #discard-del').click((event) => {
@@ -405,7 +405,7 @@ class TreeView extends Proxy {
     const levelAfter = item.level;
     let level = levelAfter;
     if (levelBefore > levelAfter) {
-      const offsetLevel = Math.floor((offsetX - 5) / 15) + 1;
+      const offsetLevel = Math.floor((offsetX - 10) / 20) + 1;
       level = offsetLevel.clamp(levelAfter, levelBefore);
     }
     this.insertLevel = level;
@@ -415,7 +415,7 @@ class TreeView extends Proxy {
 
     this.insertLine.show();
     this.insertLine.offset({top: element.offset().top - 1});
-    this.insertLine.width(element.width() - ((level-1) * 15 + 5));
+    this.insertLine.width(element.width() - ((level-1) * 20 + 10));
   }
 
   getItem(path, type = null) {

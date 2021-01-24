@@ -9,13 +9,13 @@
 .color-presets {
   display: flex;
   flex-flow: row wrap;
-  padding: 5px 3px 3px 3px;
-  width: calc(6 * 18px);
+  padding: 5px 0px 5px 6px;
+  width: calc(5 * 20px);
   float: left;
 }
 .color-preset {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   margin: 2px;
   --hue: 0;
   color: var(--color-text);
@@ -25,8 +25,8 @@
   outline: 1px solid var(--color-highlight);
 }
 #color-reset {
-  font-size: 13px;
-  line-height: 13px;
+  font-size: 14px;
+  line-height: 15px;
   text-align: center;
   background: transparent;
   color: var(--color-highlight);
@@ -91,6 +91,9 @@
 }
 #node-tools .toolbar .tool.small:hover {
   outline: none;
+  background: var(--color-highlight-faded);
+}
+#node-tools .toolbar .tool.small:active {
   background: var(--color-highlight);
 }
 #node-tools .toolbar .tool.small i {
