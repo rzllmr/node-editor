@@ -45,6 +45,15 @@
   background-clip: content-box;
 }
 
+em {
+  color: var(--color-text-highlight);
+  font: inherit;
+  cursor: pointer;
+}
+em:hover {
+  text-decoration: underline;
+}
+
 .node > .head, .node > .body {
   background: var(--color-node);
   box-sizing: border-box;
