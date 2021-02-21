@@ -37,7 +37,7 @@ class BoardTree extends TreeView {
   }
 
   createDefault() {
-    const mainItem = this.createItemAtPath('/main', 'leaf');
+    const mainItem = this.createItemAtPath('/Untitled', 'leaf');
     this.selectItem(mainItem);
   }
 

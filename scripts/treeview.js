@@ -93,7 +93,7 @@ class TreeView extends Proxy {
 
     this.ItemType = TreeItem;
 
-    const lastItem = new TreeItem('leaf', 'add item...');
+    const lastItem = new TreeItem('leaf', 'add new...');
     lastItem.element.find('i')[0].className = 'fa fa-plus';
     this.addItem([lastItem], this, 1);
   }
