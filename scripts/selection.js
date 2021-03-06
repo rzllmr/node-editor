@@ -95,7 +95,7 @@ class Selection {
           this.movingSelection = false;
 
           this.board.element.find('.minimap').trigger('node:update', [target[0].id]);
-        } else if (target[0].tagName != 'svg') {
+        } else if (target[0].tagName != 'svg' && event.type != 'mouseleave') {
           if (event.ctrlKey) this.multiSelect(target[0].id);
           else this.singleSelect(target[0].id);
         }
@@ -146,6 +146,7 @@ class Selection {
 
   deleteSelection() {
     this.selection.forEach((_, item) => {
+      if (item.id == undefined) return;
       if (item.element[0].className.split(' ')[0] === 'node') {
         this.board.removeNode(item);
       }

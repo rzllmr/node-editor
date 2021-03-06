@@ -38,31 +38,27 @@ class Anchor extends Proxy {
 
   changeEnd(end) {
     if (end === this.end) return;
-    this.element.removeClass(this.end);
-    this.element.addClass(end);
+    this.element.removeClass(this.end).addClass(end);
+    this.element.find('i').first()[0].className = end === 'source' ?
+      'fa fa-circle' : 'fa fa-caret-' + this.caretSide(this.side);
     this.end = end;
-    if (this.end === 'source') {
-      this.element.find('i').first()[0].className = 'fa fa-circle';
-    } else {
-      this.element.find('i').first()[0].className = 'fa fa-caret-' + this.caretSide(this.side);
-    }
   }
 
-  destroy() {
+  destroy(clearLink = true) {
     this.node.removeAnchor(this.side, this);
-    this.node = undefined;
-    this.side = undefined;
 
-    if (this.link) {
+    if (this.link && clearLink) {
       const linkedAnchor = this.link.otherAnchor(this);
-      linkedAnchor.link = undefined;
-      linkedAnchor.destroy();
+      if (linkedAnchor != null) this.cutLink(this.link.otherAnchor(this));
       this.link.destroy();
     }
     this.link = undefined;
 
     this.element.remove();
     this.element = undefined;
+    this.side = undefined;
+    this.end = undefined;
+    this.node = undefined;
     super.destroy();
   }
 
@@ -70,13 +66,14 @@ class Anchor extends Proxy {
   connectLink(toAnchor) {
     if (!this.link) this.link = new Graph(this.id + '-', this);
     this.link.connect(toAnchor);
-    this.link.updateIdxs();
+    this.link.updateIds();
     if (toAnchor.link) toAnchor.link.destroy();
     toAnchor.link = this.link;
     if (toAnchor.end == 'target') {
       toAnchor.element.find('i').first()[0].className =
         'fa fa-caret-' + this.caretSide(toAnchor.side);
     }
+    this.link.highlight();
   }
 
   caretSide(side) {
@@ -88,16 +85,10 @@ class Anchor extends Proxy {
     }
   }
 
-  cutLink() {
-    const otherAnchor = this.link.otherAnchor(this);
-    this.link.disconnect(otherAnchor);
-    otherAnchor.removeLink();
-  }
-
-  removeLink() {
-    this.link = undefined;
-    this.node.removeAnchor(this.side, this);
-    this.destroy();
+  cutLink(toAnchor) {
+    this.link.highlight(false);
+    this.link.disconnect(toAnchor);
+    toAnchor.destroy(false);
   }
 
   position(side, percentage) {
@@ -130,7 +121,7 @@ class Anchor extends Proxy {
 
   // drag Graph to establish new Link
   dragNewLink(end = 'target') {
-    const thisNode = `#${this.node.id}.node`;
+    const thisNode = `.node#${this.node.id}`;
     const otherNodes = `.node:not(#${this.node.id})`;
 
     $(thisNode).css('pointer-events', 'none');
@@ -143,18 +134,15 @@ class Anchor extends Proxy {
       });
     });
 
-    // create and remove links when
-    // entering and leaving nodes
+    // create and remove links when entering and leaving nodes
     $(otherNodes).on({
       mouseenter: (event) => {
-        $(event.currentTarget).removeClass('selected');
-        $(event.currentTarget).addClass('target');
-
         const offset = {
           x: event.offsetX * this.node.zoom.scale,
           y: event.offsetY * this.node.zoom.scale
         };
         if (event.target != event.currentTarget) {
+          // add offset of sub-element of node
           offset.x += event.target.offsetLeft;
           offset.y += event.target.offsetTop;
         }
@@ -163,22 +151,20 @@ class Anchor extends Proxy {
         this.connectLink(targetAnchor);
       },
       mouseleave: (event) => {
-        $(event.currentTarget).removeClass('target');
-
-        this.cutLink();
+        const otherAnchor = this.link.otherAnchor(this);
+        this.cutLink(otherAnchor);
       }
     });
 
-    // check for hit on anchor of another node
+    // delete graph or finish link on mouseup
     this.node.board.find('.layer.graphs,' + otherNodes).one('mouseup', (event) => {
       this.node.board.find('.layer.graphs').off('mousemove mouseup');
-      $(event.currentTarget).removeClass('target');
       if (this.link.connected) {
         this.link.anchors.source.registerDragOut();
         this.link.anchors.target.registerDragOut();
       } else {
         this.link.destroy();
-        this.removeLink();
+        this.destroy(false);
       }
       $(thisNode).css('pointer-events', '');
       $(otherNodes).off('mouseenter mouseleave mouseup');

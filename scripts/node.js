@@ -41,8 +41,6 @@ class Node extends Proxy {
   }
 
   destroy() {
-    this.minimap.trigger('node:delete', [this.id]);
-
     for (const side in this.anchors) {
       // copy anchors[side] array to remove elements while iterating
       for (const anchor of this.anchors[side].slice()) {
@@ -50,6 +48,8 @@ class Node extends Proxy {
       }
     }
     this.anchors = undefined;
+
+    this.minimap.trigger('node:delete', [this.id]);
 
     this.element.remove();
     this.element = undefined;
@@ -154,7 +154,7 @@ class Node extends Proxy {
       this.anchors[side][i].changeIdx(offset);
       this.anchors[side][i].position(side, percentage * (parseInt(offset) + 1));
       if (this.anchors[side][i].link) {
-        this.anchors[side][i].link.updateIdxs();
+        this.anchors[side][i].link.updateIds();
         this.anchors[side][i].link.update();
       }
       offset++;
@@ -209,7 +209,7 @@ class Node extends Proxy {
     this.element.removeClass('in out same').addClass('selected');
     for (const side in this.anchors) {
       for (const i in this.anchors[side]) {
-        this.anchors[side][i].link.highlight(this.anchors[side][i], true);
+        this.anchors[side][i].link.highlight();
       }
     }
     this.minimap.trigger('node:highlight', [this.id]);
@@ -218,7 +218,7 @@ class Node extends Proxy {
     this.element.removeClass('selected');
     for (const side in this.anchors) {
       for (const i in this.anchors[side]) {
-        this.anchors[side][i].link.highlight(this.anchors[side][i], false);
+        this.anchors[side][i].link.highlight();
       }
     }
     this.minimap.trigger('node:highlight', [this.id]);
@@ -277,6 +277,17 @@ class Node extends Proxy {
 
   get color() {
     return this.hue;
+  }
+
+  updateHighlight() {
+    if (this.selected) return;
+    const highlightedAnchors = this.element.find('.anchor.in, .anchor.out, .anchor.same');
+    const directions = highlightedAnchors.toArray().map((anchor) => {
+      return anchor.className.split(' ').pop();
+    });
+    const majorDirection = Utils.arrayMode(directions, '');
+    this.element.removeClass('in out same').addClass(majorDirection);
+    this.minimap.trigger('node:highlight', [this.id]);
   }
 
   export() {

@@ -27,7 +27,7 @@ class Graph extends Proxy {
     return this.anchors.source.node.board[0].id;
   }
 
-  updateIdxs() {
+  updateIds() {
     const newId = this.anchors.source.id + '-' + this.anchors.target.id;
     this.change(newId);
     this.element.attr('id', this.id);
@@ -222,46 +222,29 @@ class Graph extends Proxy {
 C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
   }
 
-  highlight(anchor, enable = true) {
-    let otherAnchor = this.anchors.other(anchor);
-
+  highlight(linked = true) {
     let direction;
-    if (otherAnchor.node.selected) {
-      if (enable) {
-        // graphs between selected nodes are highlighted as selected
-        direction = ' selected';
-      } else {
-        // when one node gets deselected again the in/out/same highlighting is restored
-        anchor = otherAnchor;
-        otherAnchor = this.anchors.other(anchor);
-        direction = anchor.end == otherAnchor.end ? ' same' :
-                    anchor.end == 'target' ? ' in' : ' out';
-      }
+    const first = this.anchors.source;
+    const second = this.anchors.target;
+    if (first.node.selected == second.node.selected) {
+      direction = first.node.selected ? 'selected' : '';
     } else {
-      if (enable) {
-        // highlight according to direction of graphs linked to selected nodes
-        direction = anchor.end == otherAnchor.end ? ' same' :
-                    anchor.end == 'target' ? ' in' : ' out';
-      } else {
-        // remove highlight
-        direction = '';
-      }
+      const selected = first.node.selected ? first : second;
+      direction = first.end == second.end ? ' same' :
+                  selected.end == 'target' ? 'in' : 'out';
     }
 
-    anchor.element[0].className = `anchor ${anchor.end} ${anchor.side}` + direction;
-    this.element[0].className.baseVal = 'graph' + direction;
-    otherAnchor.element[0].className = `anchor ${otherAnchor.end} ${otherAnchor.side}` + direction;
-
-    if (direction == '') {
-      // check for other highlighted links before removing highlight of otherAnchor.node
-      const highlighted = otherAnchor.node.element.find('.anchor.in, .anchor.out, .anchor.same');
-      if (highlighted.length > 0) direction = ' ' + highlighted[0].className.split(' ').pop();
-      otherAnchor.node.element.removeClass('in out same');
-    } else {
-      otherAnchor.node.element.addClass(direction);
+    const highlights = 'in out same selected';
+    this.element.removeClass(highlights);
+    first.element.removeClass(highlights);
+    second.element.removeClass(highlights);
+    if (linked) {
+      this.element.addClass(direction);
+      first.element.addClass(direction);
+      second.element.addClass(direction);
     }
-
-    $('#' + this.boardId).find('.minimap').trigger('node:highlight', [otherAnchor.node.id]);
+    first.node.updateHighlight();
+    second.node.updateHighlight();
   }
 
   export() {
