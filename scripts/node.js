@@ -78,21 +78,6 @@ class Node extends Proxy {
     this.makeEditableOnDblClick(this.element.find('.label'), 'contentEditable', true, false);
     this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true, true);
 
-    this.resizer.on({
-      mousedown: (event) => {
-        $(window).on('mousemove', (event) => {
-          event.pageX *= this.zoom.scale; event.pageY *= this.zoom.scale;
-          const width = event.pageX - this.element.offset().left + 6;
-          const height = event.pageY - this.element.offset().top + 6;
-          this.resize(width, height);
-        });
-        $(window).one('mouseup', (event) => {
-          $(window).off('mousemove');
-        });
-        event.stopPropagation();
-      }
-    });
-
     this.element.css('width', this.element[0].offsetWidth);
     this.element.css('height', this.element[0].offsetHeight);
   }
@@ -227,13 +212,13 @@ class Node extends Proxy {
     return this.element.hasClass('selected');
   }
 
-  move(offset, useOffset = true) {
+  move(offsetX, offsetY, useOffset = true) {
     if (useOffset) {
-      this.element.offset(offset);
+      this.element.offset({left: offsetX, top: offsetY});
     } else {
       this.element.css({
-        left: offset.left - this.element[0].offsetWidth / 2,
-        top: offset.top - this.element[0].offsetHeight / 2
+        left: offsetX - this.element[0].offsetWidth / 2,
+        top: offsetY - this.element[0].offsetHeight / 2
       });
     }
     this.updateAnchors();

@@ -24,84 +24,74 @@ class Selection {
     this.rectSelection = new Map();
 
     this.drawingRectangle = false;
-    this.movingSelection = false;
+    this.draggingSelection = false;
 
     this.register();
     this.toggleNodeTools();
   }
 
   register() {
-    this.board.element.on({
-      'mousedown': (event) => {
-        if (event.button != 0 || event.altKey || event.ctrlKey) return;
-        // left click alone
+    this.board.element.on('mousedown', (event) => {
+      if (event.button != 0 || event.altKey || event.ctrlKey) return;
+      // left click alone
 
-        const target = $(event.target).closest('.layer, .node, .sign');
-        if (target.length == 0) return;
+      const target = $(event.target).closest('.layer, .node, .sign');
+      if (target.length == 0) return;
 
-        if (target[0].tagName == 'svg') {
-          if (!event.ctrlKey) this.clearSelection();
+      if (target[0].tagName == 'svg') {
+        if (!event.ctrlKey) this.clearSelection();
 
-          // rectangleSelect
-          this.rectOrigin = {
-            x: event.offsetX * this.zoom.scale,
-            y: event.offsetY * this.zoom.scale
-          };
-          this.rect.show();
+        // rectangleSelect
+        this.rectOrigin = {
+          x: event.offsetX * this.zoom.scale,
+          y: event.offsetY * this.zoom.scale
+        };
+        this.rect.show();
 
-          $('.layer.nodes .node:not(:first), .layer.nodes .sign:not(:first)').each((_, element) => {
-            this.rectSelection.set(element.id, $(element).hasClass('selected'));
-          });
+        $('.layer.nodes .node:not(:first), .layer.nodes .sign:not(:first)').each((_, element) => {
+          this.rectSelection.set(element.id, $(element).hasClass('selected'));
+        });
 
-          this.onlyBoardEvents(true);
-          this.drawingRectangle = true;
-          $(window).on('mousemove', this.rectangleSelect.bind(this));
-        } else if (target.hasClass('node')) {
-          this.cursorPosRel = {
-            x: event.offsetX * this.zoom.scale + event.target.offsetLeft,
-            y: event.offsetY * this.zoom.scale + event.target.offsetTop
-          };
-
-          if (target.hasClass('selected')) {
-            $(window).on('mousemove', (event) => {
-              this.onlyBoardEvents(true);
-              this.moveSelection(target, {x: event.pageX, y: event.pageY});
-            });
-          } else {
-            $(window).on('mousemove', (event) => {
-              this.onlyBoardEvents(true);
-              this.moveNode(target, {x: event.pageX, y: event.pageY});
-            });
-          }
+        this.onlyBoardEvents(true);
+        this.drawingRectangle = true;
+        $(window).on('mousemove', this.rectangleSelect.bind(this));
+      } else if (target.hasClass('node')) {
+        this.draggingSelection = true;
+        this.onlyBoardEvents(true);
+        if ($(event.target).hasClass('resizer')) {
+          this.resizeNodes(target);
+        } else {
+          this.moveNodes(target, event);
         }
-      },
-      'mouseup mouseleave': (event) => {
-        if (event.button != 0 || event.altKey) return;
-        // left click
-
-        const target = $(event.target).closest('.layer, .node, .sign');
-        if (target.length == 0) return;
-
-        this.colorPicker.updatePresets();
-
-        if (this.drawingRectangle) {
-          this.onlyBoardEvents(false);
-          this.drawingRectangle = false;
-
-          this.rect.hide();
-          this.rect.attr({width: 0, height: 0});
-        } else if (this.movingSelection) {
-          this.onlyBoardEvents(false);
-          this.movingSelection = false;
-
-          this.board.element.find('.minimap').trigger('node:update', [target[0].id]);
-        } else if (target[0].tagName != 'svg' && event.type != 'mouseleave') {
-          if (event.ctrlKey) this.multiSelect(target[0].id);
-          else this.singleSelect(target[0].id);
-        }
-        $(window).off('mousemove');
       }
     });
+
+    $([this.board.element, window]).on('mouseup', (event) => {
+      if (event.button != 0 || event.altKey) return;
+      // left click
+
+      const target = event.target.tagName == 'HTML' ? $(event.target) :
+        $(event.target).closest('.layer, .node, .sign');
+      if (target.length == 0) return;
+
+      this.colorPicker.updatePresets();
+
+      if (this.drawingRectangle) {
+        this.onlyBoardEvents(false);
+        this.drawingRectangle = false;
+
+        this.rect.hide();
+        this.rect.attr({width: 0, height: 0});
+      } else if (this.draggingSelection) {
+        this.onlyBoardEvents(false);
+        this.draggingSelection = false;
+      } else if (['svg', 'HTML'].includes(target[0].tagName) == false) {
+        if (event.ctrlKey) this.multiSelect(target[0].id);
+        else this.singleSelect(target[0].id);
+      }
+      $(window).off('mousemove');
+    });
+
     this.removeButton.click(this.deleteSelection.bind(this));
     this.minimizeButton.click(this.minimizeSelection.bind(this, true));
     this.maximizeButton.click(this.minimizeSelection.bind(this, false));
@@ -221,30 +211,52 @@ class Selection {
     );
   }
 
-  moveNode(target, newPos) {
-    this.movingSelection = true;
-
-    const node = this.proxy.resolve(target[0].id);
-    node.move({
-      left: (newPos.x * this.zoom.scale - this.cursorPosRel.x),
-      top: (newPos.y * this.zoom.scale - this.cursorPosRel.y)
+  resizeNodes(target) {
+    $(window).on('mousemove', (event) => {
+      const dim = {
+        width: event.pageX * this.zoom.scale - target.offset().left + 6,
+        height: event.pageY * this.zoom.scale - target.offset().top + 6
+      };
+      if (target.hasClass('selected')) {
+        // resize all selected nodes
+        this.selection.forEach((node) => {
+          if (node.constructor.name != 'Node') return;
+          node.resize(dim.width, dim.height);
+        });
+      } else {
+        // resize node
+        this.proxy.resolve(target.attr('id')).resize(dim.width, dim.height);
+      }
     });
   }
 
-  moveSelection(target, newPos) {
-    this.movingSelection = true;
-
-    const relOffset = {
-      left: (newPos.x * this.zoom.scale - this.cursorPosRel.x) - target.offset().left,
-      top: (newPos.y * this.zoom.scale - this.cursorPosRel.y) - target.offset().top
+  moveNodes(target, event) {
+    const cursorPosRel = {
+      left: event.offsetX * this.zoom.scale + event.target.offsetLeft,
+      top: event.offsetY * this.zoom.scale + event.target.offsetTop
     };
-
-    this.selection.forEach((_, node) => {
-      if (node.constructor.name != 'Node') return;
-      node.move({
-        left: node.element.offset().left + relOffset.left,
-        top: node.element.offset().top + relOffset.top
-      });
+    $(window).on('mousemove', (event) => {
+      const newPos = {
+        left: event.pageX * this.zoom.scale - cursorPosRel.left,
+        top: event.pageY * this.zoom.scale - cursorPosRel.top
+      };
+      if (target.hasClass('selected')) {
+        // move all selected nodes
+        const posDelta = {
+          left: newPos.left - target.offset().left,
+          top: newPos.top - target.offset().top
+        };
+        this.selection.forEach((node) => {
+          if (node.constructor.name != 'Node') return;
+          node.move(
+              node.element.offset().left + posDelta.left,
+              node.element.offset().top + posDelta.top
+          );
+        });
+      } else {
+        // move node
+        this.proxy.resolve(target.attr('id')).move(newPos.left, newPos.top);
+      }
     });
   }
 

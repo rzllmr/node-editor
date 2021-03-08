@@ -130,10 +130,10 @@ class Board extends Proxy {
       dblclick: (event) => {
         if (event.target !== this.element.find('.layer.graphs')[0]) return;
         const newNode = this.addNode();
-        newNode.move({
-          left: event.offsetX * this.zoom.scale,
-          top: event.offsetY * this.zoom.scale
-        }, false);
+        newNode.move(
+            event.offsetX * this.zoom.scale,
+            event.offsetY * this.zoom.scale, false
+        );
       }
     });
 
@@ -141,10 +141,10 @@ class Board extends Proxy {
       if (this.element.css('visibility') == 'hidden') return;
       // create Node in the middle of the window
       const newNode = this.addNode();
-      newNode.move({
-        left: this.element[0].scrollLeft + $(window).width() / 2 * this.zoom.scale,
-        top: this.element[0].scrollTop + $(window).height() / 2 * this.zoom.scale
-      }, false);
+      newNode.move(
+          this.element[0].scrollLeft + $(window).width() / 2 * this.zoom.scale,
+          this.element[0].scrollTop + $(window).height() / 2 * this.zoom.scale, false
+      );
     });
   }
 

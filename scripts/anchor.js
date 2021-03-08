@@ -127,10 +127,14 @@ class Anchor extends Proxy {
     $(thisNode).css('pointer-events', 'none');
 
     // drag target point of graph
-    this.node.board.find('.layer.graphs').on('mousemove', (event) => {
+    $(window).on('mousemove', (event) => {
+      const offset = {
+        x: event.pageX + this.node.board[0].scrollLeft,
+        y: event.pageY + this.node.board[0].scrollTop
+      };
       this.link.update(this, {
-        x: event.offsetX * this.node.zoom.scale,
-        y: event.offsetY * this.node.zoom.scale
+        x: offset.x * this.node.zoom.scale,
+        y: offset.y * this.node.zoom.scale
       });
     });
 
@@ -157,8 +161,8 @@ class Anchor extends Proxy {
     });
 
     // delete graph or finish link on mouseup
-    this.node.board.find('.layer.graphs,' + otherNodes).one('mouseup', (event) => {
-      this.node.board.find('.layer.graphs').off('mousemove mouseup');
+    $(window).one('mouseup', (event) => {
+      $(window).off('mousemove');
       if (this.link.connected) {
         this.link.anchors.source.registerDragOut();
         this.link.anchors.target.registerDragOut();
@@ -167,7 +171,7 @@ class Anchor extends Proxy {
         this.destroy(false);
       }
       $(thisNode).css('pointer-events', '');
-      $(otherNodes).off('mouseenter mouseleave mouseup');
+      $(otherNodes).off('mouseenter mouseleave');
     });
   }
 
