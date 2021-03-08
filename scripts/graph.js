@@ -55,15 +55,9 @@ class Graph extends Proxy {
     this.hoverArea = $('#templates .graph-area').clone();
     this.hoverArea.removeClass('template');
     this.hoverArea.attr('id', this.id + '_hover');
-    this.hoverArea.insertAfter(this.element);
+    this.hoverArea.insertBefore(this.element);
 
-    this.hoverArea.on({
-      mouseenter: () => {
-        this.element.addClass('selected');
-      },
-      mouseleave: () => {
-        this.element.removeClass('selected');
-      },
+    $([this.element[0], this.hoverArea[0]]).on({
       dblclick: () => {
         if (this.sign == undefined) {
           this.addSign();
