@@ -52,12 +52,9 @@ class Selection {
           this.rectSelection.set(element.id, $(element).hasClass('selected'));
         });
 
-        this.onlyBoardEvents(true);
         this.drawingRectangle = true;
         $(window).on('mousemove', this.rectangleSelect.bind(this));
       } else if (target.hasClass('node')) {
-        this.draggingSelection = true;
-        this.onlyBoardEvents(true);
         if ($(event.target).hasClass('resizer')) {
           this.resizeNodes(target);
         } else {
@@ -77,13 +74,11 @@ class Selection {
       this.colorPicker.updatePresets();
 
       if (this.drawingRectangle) {
-        this.onlyBoardEvents(false);
         this.drawingRectangle = false;
 
         this.rect.hide();
         this.rect.attr({width: 0, height: 0});
       } else if (this.draggingSelection) {
-        this.onlyBoardEvents(false);
         this.draggingSelection = false;
       } else if (['svg', 'HTML'].includes(target[0].tagName) == false) {
         if (event.ctrlKey) this.multiSelect(target[0].id);
@@ -213,6 +208,7 @@ class Selection {
 
   resizeNodes(target) {
     $(window).on('mousemove', (event) => {
+      this.draggingSelection = true;
       const dim = {
         width: event.pageX * this.zoom.scale - target.offset().left + 6,
         height: event.pageY * this.zoom.scale - target.offset().top + 6
@@ -236,6 +232,7 @@ class Selection {
       top: event.offsetY * this.zoom.scale + event.target.offsetTop
     };
     $(window).on('mousemove', (event) => {
+      this.draggingSelection = true;
       const newPos = {
         left: event.pageX * this.zoom.scale - cursorPosRel.left,
         top: event.pageY * this.zoom.scale - cursorPosRel.top
@@ -258,12 +255,6 @@ class Selection {
         this.proxy.resolve(target.attr('id')).move(newPos.left, newPos.top);
       }
     });
-  }
-
-  onlyBoardEvents(toggle = true) {
-    const styleValue = toggle ? 'none' : '';
-    $('#collapser').css('pointer-events', styleValue);
-    this.board.minimap.element.css('pointer-events', styleValue);
   }
 }
 

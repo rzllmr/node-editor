@@ -136,6 +136,14 @@ class Board extends Proxy {
         );
       }
     });
+    this.element.find('.layer.nodes, .layer.graphs').on({
+      mousedown: () => {
+        this.onlyBoardEvents(true);
+        $(window).one('mouseup', () => {
+          this.onlyBoardEvents(false);
+        });
+      }
+    });
 
     $(document).on('hotkey:createNode', (event) => {
       if (this.element.css('visibility') == 'hidden') return;
@@ -162,6 +170,12 @@ class Board extends Proxy {
   removeNode(node) {
     this.selection.colorPicker.removeNode(node.id);
     this.nodes.delete(Number(node.id));
+  }
+
+  onlyBoardEvents(toggle = true) {
+    const styleValue = toggle ? 'none' : '';
+    $('#collapser').css('pointer-events', styleValue);
+    this.minimap.element.css('pointer-events', styleValue);
   }
 }
 Board.nodeIdxMax = -1;
