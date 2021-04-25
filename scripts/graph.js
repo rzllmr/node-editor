@@ -255,13 +255,17 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
   }
 
   static import(object) {
+    if (!Proxy.setDefaults(object, {source: undefined, target: undefined})) return;
+    const proxy = new Proxy();
+
     const sides = {'t': 'top', 'r': 'right', 'b': 'bottom', 'l': 'left'};
 
     // create source anchor
     const sourceMatch = object.source.match(/(\d+)(\w)(\d+)\.(\w)/);
     const source = {id: sourceMatch[1], side: sides[sourceMatch[2]], index: sourceMatch[3],
       end: sourceMatch[4] == 's' ? 'source' : 'target'};
-    const sourceNode = this.proxy.resolve(source.id);
+    const sourceNode = proxy.resolve(source.id);
+    if (sourceNode == undefined) return;
     const sourceAnchor = sourceNode.addAnchorDirectly(source.end, source.side, source.index);
     sourceAnchor.registerDragOut();
 
@@ -269,7 +273,8 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
     const targetMatch = object.target.match(/(\d+)(\w)(\d+)\.(\w)/);
     const target = {id: targetMatch[1], side: sides[targetMatch[2]], index: targetMatch[3],
       end: targetMatch[4] == 's' ? 'source' : 'target'};
-    const targetNode = this.proxy.resolve(target.id);
+    const targetNode = proxy.resolve(target.id);
+    if (targetNode == undefined) return;
     const targetAnchor = targetNode.addAnchorDirectly(target.end, target.side, target.index);
     targetAnchor.registerDragOut();
 
@@ -277,7 +282,5 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
     sourceAnchor.connectLink(targetAnchor);
   }
 };
-
-Graph.proxy = new Proxy();
 
 module.exports = Graph;

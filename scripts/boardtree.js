@@ -61,6 +61,10 @@ class BoardTree extends TreeView {
     let lastItem = null;
     BoardItem.boardIdxMax = -1;
     for (const entry of itemList) {
+      if (!this.constructor.setDefaults(entry, {
+        level: 1, type: undefined, name: 'Untitled', id: null
+      })) return;
+
       const id = entry.id == null ? -1 : parseInt(entry.id.slice(1));
       if (id > BoardItem.boardIdxMax) BoardItem.boardIdxMax = id;
       const item = new this.ItemType(entry.type, entry.name, entry.id);

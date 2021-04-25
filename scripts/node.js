@@ -294,9 +294,16 @@ class Node extends Proxy {
   }
 
   static import(object, boardId) {
-    const board = this.proxy.resolve(boardId);
-    const node = board.addNode(object.id, object.hue);
+    if (!Proxy.setDefaults(object, {
+      id: null, hue: null, posX: null, posY: null, width: null, height: null,
+      label: '', details: '', minimized: false
+    })) return;
+    const proxy = new Proxy();
 
+    const board = proxy.resolve(boardId);
+    if (board == undefined) return;
+
+    const node = board.addNode(object.id, object.hue);
     node.element.css({
       left: object.posX,
       top: object.posY,
@@ -313,7 +320,5 @@ class Node extends Proxy {
     node.minimap.trigger('node:update', [node.element[0].id]);
   }
 };
-
-Node.proxy = new Proxy();
 
 module.exports = Node;

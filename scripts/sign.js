@@ -101,14 +101,16 @@ class Sign extends Proxy {
   }
 
   static import(object) {
-    const graph = this.proxy.resolve(object.graph);
-    const sign = graph.addSign();
+    if (!Proxy.setDefaults(object, {graph: undefined, details: ''})) return;
+    const proxy = new Proxy();
 
+    const graph = proxy.resolve(object.graph);
+    if (graph == undefined) return;
+
+    const sign = graph.addSign();
     sign.element.find('div.details').html(object.details.replace(/\n/g, '<br>'));
     sign.position();
   }
 };
-
-Sign.proxy = new Proxy();
 
 module.exports = Sign;

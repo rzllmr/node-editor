@@ -7,8 +7,8 @@ Static.prototype.domJsMap = new Map();
  * base class for representatives of document objects
  */
 class Proxy {
-  // associate DOM id with JS object
   constructor(id) {
+    // associate DOM id with JS object
     if (typeof id === 'number') id = id.toString();
     this.mapping = (new Static).domJsMap;
     this.mapping.set(id, this);
@@ -28,9 +28,22 @@ class Proxy {
     this.id = id;
   }
 
-  // resolve DOM id to JS object
   resolve(id) {
+    // resolve DOM id to JS object
     return this.mapping.get(id);
+  }
+
+  static setDefaults(object, defaults) {
+    let requiredsSet = true;
+    for (const key of Object.keys(defaults)) {
+      if (object[key] == undefined) {
+        object[key] = defaults[key];
+        if (defaults[key] == undefined) {
+          requiredsSet = false;
+        }
+      }
+    }
+    return requiredsSet;
   }
 }
 
