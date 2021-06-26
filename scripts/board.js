@@ -31,6 +31,7 @@ class Board extends Proxy {
     };
     this.element[0].scrollLeft = this.scrollPos.x;
     this.element[0].scrollTop = this.scrollPos.y;
+    this.mousePos = [0, 0];
 
     this.zoom = new Zoom(this.element.find('.layer'), 100, 10);
 
@@ -80,7 +81,7 @@ class Board extends Proxy {
           event.target.style.cursor = 'all-scroll';
 
           this.movePivot = null;
-          this.element.on('mousemove', (event) => {
+          this.element.on('mousemove.pan', (event) => {
             if (this.movePivot == null) this.movePivot = {x: event.clientX, y: event.clientY};
             this.moveVector = {
               x: (event.clientX - this.movePivot.x) / 20,
@@ -98,7 +99,7 @@ class Board extends Proxy {
 
           this.element.one('mouseup mouseleave', (event) => {
             event.target.style.cursor = 'default';
-            this.element.off('mousemove');
+            this.element.off('mousemove.pan');
             this.movePivot = undefined;
             clearInterval(this.scrollLoop);
           });
@@ -106,7 +107,7 @@ class Board extends Proxy {
           event.target.style.cursor = 'grabbing';
 
           this.scrollPos = {x: event.clientX, y: event.clientY};
-          this.element.on('mousemove', (event) => {
+          this.element.on('mousemove.pan', (event) => {
             this.element[0].scrollLeft += this.scrollPos.x - event.clientX;
             this.element[0].scrollTop += this.scrollPos.y - event.clientY;
             this.scrollPos = {x: event.clientX, y: event.clientY};
@@ -115,7 +116,7 @@ class Board extends Proxy {
 
           this.element.one('mouseup mouseleave', (event) => {
             event.target.style.cursor = 'default';
-            this.element.off('mousemove');
+            this.element.off('mousemove.pan');
           });
         }
         event.preventDefault();
@@ -124,6 +125,12 @@ class Board extends Proxy {
       resize: (event) => {
         this.zoom.check();
         this.minimap.element.trigger('window:update');
+      },
+      mousemove: (event) => {
+        this.mousePos = {
+          x: this.element[0].scrollLeft + event.pageX,
+          y: this.element[0].scrollTop + event.pageY
+        };
       }
     });
     this.element.find('.layer.graphs').on({
@@ -145,14 +152,22 @@ class Board extends Proxy {
       }
     });
 
-    $(document).on('hotkey:createNode', (event) => {
-      if (this.element.css('visibility') == 'hidden') return;
-      // create Node in the middle of the window
-      const newNode = this.addNode();
-      newNode.move(
-          this.element[0].scrollLeft + $(window).width() / 2 * this.zoom.scale,
-          this.element[0].scrollTop + $(window).height() / 2 * this.zoom.scale, false
-      );
+    $(document).on({
+      'hotkey:createNode': (event) => {
+        if (this.element.css('visibility') == 'hidden') return;
+        // create Node in the middle of the window
+        const newNode = this.addNode();
+        newNode.move(
+            this.element[0].scrollLeft + $(window).width() / 2 * this.zoom.scale,
+            this.element[0].scrollTop + $(window).height() / 2 * this.zoom.scale, false
+        );
+      },
+      'hotkey:insertNode': (event) => {
+        if (this.element.css('visibility') == 'hidden') return;
+        // create Node at mouse position
+        const newNode = this.addNode();
+        newNode.move(this.mousePos.x * this.zoom.scale, this.mousePos.y * this.zoom.scale, false);
+      }
     });
   }
 

@@ -18,7 +18,8 @@ class KeyBinding {
         'ctrl+t': 'hotkey:toggleTheme',
         'delete': 'hotkey:deleteSelection',
         'backspace': 'hotkey:deleteSelection',
-        'insert': 'hotkey:createNode'
+        'insert': 'hotkey:createNode',
+        'ctrl+v': 'hotkey:insertNode'
       },
       'default': {
         'check': () => {
