@@ -157,10 +157,8 @@ class Board extends Proxy {
         if (this.element.css('visibility') == 'hidden') return;
         // create Node in the middle of the window
         const newNode = this.addNode();
-        newNode.move(
-            this.element[0].scrollLeft + $(window).width() / 2 * this.zoom.scale,
-            this.element[0].scrollTop + $(window).height() / 2 * this.zoom.scale, false
-        );
+        const windowCenter = this.windowCenter();
+        newNode.move(windowCenter.x, windowCenter.y, false);
       },
       'hotkey:insertNode': (event) => {
         if (this.element.css('visibility') == 'hidden') return;
@@ -191,6 +189,24 @@ class Board extends Proxy {
     const styleValue = toggle ? 'none' : '';
     $('#collapser').css('pointer-events', styleValue);
     this.minimap.element.css('pointer-events', styleValue);
+  }
+
+  visible() {
+    return this.element.css('visibility') == 'visible';
+  }
+
+  windowCenter() {
+    return {
+      x: (this.element[0].scrollLeft + $(window).width() / 2) * this.zoom.scale,
+      y: (this.element[0].scrollTop + $(window).height() / 2) * this.zoom.scale
+    };
+  }
+
+  mousePosition() {
+    return {
+      x: this.mousePos.x * this.zoom.scale,
+      y: this.mousePos.y * this.zoom.scale
+    };
   }
 }
 Board.nodeIdxMax = -1;

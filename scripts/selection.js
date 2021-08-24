@@ -1,6 +1,7 @@
 
 const Proxy = require('./proxy.js');
 const ColorPicker = require('./colorpicker.js');
+const Clipboard = require('./clipboard.js');
 
 /**
  * handle selection for the board element
@@ -25,6 +26,8 @@ class Selection {
 
     this.drawingRectangle = false;
     this.draggingSelection = false;
+
+    this.clipboard = new Clipboard();
 
     this.register();
     this.toggleNodeTools();
@@ -64,7 +67,7 @@ class Selection {
     });
 
     $([this.board.element, window]).on('mouseup', (event) => {
-      if (event.button != 0 || event.altKey) return;
+      if (event.button != 0 || event.altKey || !this.board.visible()) return;
       // left click
 
       const target = event.target.tagName == 'HTML' ? $(event.target) :
@@ -87,16 +90,20 @@ class Selection {
       $(window).off('mousemove');
     });
 
-    this.removeButton.click(this.deleteSelection.bind(this));
-    this.minimizeButton.click(this.minimizeSelection.bind(this, true));
-    this.maximizeButton.click(this.minimizeSelection.bind(this, false));
+    this.removeButton.on('click', this.deleteSelection.bind(this));
+    this.minimizeButton.on('click', this.minimizeSelection.bind(this, true));
+    this.maximizeButton.on('click', this.minimizeSelection.bind(this, false));
 
-    $(document).on('hotkey:blurInput', (event) => {
-      document.activeElement.blur();
-    });
-    $(document).on('hotkey:deleteSelection', (event) => {
-      this.deleteSelection();
-    });
+    const eventCallback = (eventName, callback) => {
+      $(document).on(eventName, () => {
+        if (this.board.visible()) callback();
+      });
+    }
+    eventCallback('hotkey:clearSelection', this.clearSelection.bind(this));
+    eventCallback('hotkey:deleteSelection', this.deleteSelection.bind(this));
+    eventCallback('hotkey:copySelection', this.copySelection.bind(this));
+    eventCallback('hotkey:cutSelection', this.cutSelection.bind(this));
+    eventCallback('hotkey:insertSelection', this.insertSelection.bind(this));
   }
 
   singleSelect(id) {
@@ -139,6 +146,132 @@ class Selection {
     });
     this.selection.clear();
     this.toggleNodeTools();
+  }
+
+  copySelection() {
+    if (this.selection.size == 0) return;
+
+    // collect properties of nodes, graphs and signs
+    const nodes = new Map();
+    let allGraphs = new Map();
+    const signs = [];
+    this.selection.forEach((_, item) => {
+      if (item.id == undefined) return;
+      const className = item.element[0].className.split(' ')[0];
+      if (className === 'node') {
+        nodes.set(item.id, item.export());
+        allGraphs = new Map([...allGraphs, ...item.connections()]);
+      } else if (className == 'sign') {
+        signs.push(item.export());
+      }
+    });
+
+    // keep only graphs between included nodes
+    const graphs = [];
+    for (const graph of allGraphs.values()) {
+      const sourceId = graph.anchors.source.node.id;
+      const targetId = graph.anchors.target.node.id;
+      if (nodes.has(sourceId) && nodes.has(targetId)) {
+        graphs.push(graph.export());
+      }
+    }
+
+    // store elements in order best for creation
+    const sortedNodes = Array.from(nodes.values()).sort(
+      (a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
+    const propertiesList = sortedNodes.concat(graphs).concat(signs);
+    this.clipboard.set(propertiesList);
+  }
+
+  cutSelection() {
+    this.copySelection();
+    this.deleteSelection();
+  }
+
+  insertSelection() {
+    const propertiesList = this.clipboard.get();
+
+    // allot new node ids
+    let nodeIds = propertiesList.
+      filter((props) => props.type == 'node').
+      map((props) => parseInt(props.id, 10)).
+      sort((a, b) => a - b);
+
+    let firstFreeId = this.board.constructor.nodeIdxMax + 1;
+    const newNodeIds = new Map();
+    for (const nodeId of nodeIds) {
+      newNodeIds.set(nodeId.toString(), (firstFreeId++).toString());
+    }
+    
+    // calculate position correction
+    const posCorrection = this.posCorrection(propertiesList);
+
+    // change properties
+    const classes = new Map();
+    for (const properties of propertiesList) {
+      if (!classes.has(properties.type)) {
+        classes.set(properties.type, require(`./${properties.type}.js`));
+      }
+      const class_ = classes.get(properties.type);
+
+      switch(properties.type) {
+        case 'node':
+          properties.id = newNodeIds.get(properties.id);
+          properties.posX = (parseInt(properties.posX, 10) + posCorrection.x) + 'px';
+          properties.posY = (parseInt(properties.posY, 10) + posCorrection.y) + 'px';
+          break;
+        case 'graph':
+          let parsedGraphId = class_.parseId(properties.source);
+          parsedGraphId.nodeId = newNodeIds.get(parsedGraphId.nodeId);
+          properties.source = class_.createId(parsedGraphId);
+          parsedGraphId = class_.parseId(properties.target);
+          parsedGraphId.nodeId = newNodeIds.get(parsedGraphId.nodeId);
+          properties.target = class_.createId(parsedGraphId);
+          break;
+        case 'sign':
+          let parsedSignId = class_.parseId(properties.graph);
+          parsedSignId.sNodeId = newNodeIds.get(parsedSignId.sNodeId);
+          parsedSignId.tNodeId = newNodeIds.get(parsedSignId.tNodeId);
+          properties.graph = class_.createId(parsedSignId);
+          break;
+      }
+
+      // create new elements
+      class_.import(properties, this.board.id);
+    }
+  }
+
+  posCorrection(propertiesList) {
+    let outerRect = { l: 1e4, t: 1e4, r:0, b: 0 };
+    for (const props of propertiesList) {
+      if (props.type != 'node') continue;
+      outerRect.l = Math.min(outerRect.l, parseInt(props.posX, 10));
+      outerRect.t = Math.min(outerRect.t, parseInt(props.posY, 10));
+      outerRect.r = Math.max(outerRect.r, parseInt(props.posX, 10) + parseInt(props.width, 10));
+      outerRect.b = Math.max(outerRect.b, parseInt(props.posY, 10) + parseInt(props.height, 10));
+    }
+    const windowCenter = this.board.windowCenter();
+    const mousePosition = this.board.mousePosition();
+    const outerRectCenter = {
+      x: outerRect.l + (outerRect.r - outerRect.l) / 2,
+      y: outerRect.t + (outerRect.b - outerRect.t) / 2
+    };
+
+    const correctionVariants = new Map();
+    correctionVariants.set('window:center', {
+      x: windowCenter.x - outerRectCenter.x,
+      y: windowCenter.y - outerRectCenter.y
+    });
+    correctionVariants.set('mouse:center', {
+      x: mousePosition.x - outerRectCenter.x,
+      y: mousePosition.y - outerRectCenter.y
+    });
+    correctionVariants.set('mouse:corner', {
+      x: mousePosition.x - outerRect.l,
+      y: mousePosition.y - outerRect.t
+    });
+
+    return correctionVariants.get('mouse:center');
   }
 
   minimizeSelection(toggle) {

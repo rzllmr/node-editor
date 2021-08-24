@@ -241,6 +241,24 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
     second.node.updateHighlight();
   }
 
+  static parseId(id) {
+    const pattern = /(\d+)([trbl])(\d+)\.([st])/;
+    const match = id.match(pattern);
+    const idParts = {
+      nodeId: match[1],
+      anchorSide: match[2],
+      anchorId: match[3],
+      endType: match[4]
+    };
+    return idParts;
+  }
+
+  static createId(parsedId) {
+    return Utils.stringFormat('{0}{1}{2}.{3}',
+      parsedId.nodeId, parsedId.anchorSide, parsedId.anchorId, parsedId.endType
+    );
+  }
+
   export() {
     const element = this.element[0];
     const source = this.anchors.source;

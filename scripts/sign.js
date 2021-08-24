@@ -89,6 +89,27 @@ class Sign extends Proxy {
     new DivEdit(element[0], true).registerKeys(onEmClick);
   }
 
+  static parseId(id) {
+    const pattern = /(\d+)([trbl])(\d+)-(\d+)([trbl])(\d+)/;
+    const match = id.match(pattern);
+    const idParts = {
+      sNodeId: match[1],
+      sAnchorSide: match[2],
+      sAnchorId: match[3],
+      tNodeId: match[4],
+      tAnchorSide: match[5],
+      tAnchorId: match[6]
+    };
+    return idParts;
+  }
+
+  static createId(parsedId) {
+    return Utils.stringFormat('{0}{1}{2}-{3}{4}{5}',
+      parsedId.sNodeId, parsedId.sAnchorSide, parsedId.sAnchorId,
+      parsedId.tNodeId, parsedId.tAnchorSide, parsedId.tAnchorId
+    );
+  }
+
   export() {
     const element = this.element[0];
     const properties = {

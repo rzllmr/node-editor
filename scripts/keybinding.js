@@ -1,4 +1,4 @@
-﻿
+
 class KeyBinding {
   constructor() {
     // table of mode's key reactions in priority order
@@ -16,10 +16,13 @@ class KeyBinding {
           return $(document.activeElement).is('body');
         },
         'ctrl+t': 'hotkey:toggleTheme',
+        'escape': 'hotkey:clearSelection',
         'delete': 'hotkey:deleteSelection',
         'backspace': 'hotkey:deleteSelection',
-        'insert': 'hotkey:createNode',
-        'ctrl+v': 'hotkey:insertNode'
+        'ctrl+i': 'hotkey:createNode',
+        'ctrl+c': 'hotkey:copySelection',
+        'ctrl+x': 'hotkey:cutSelection',
+        'ctrl+v': 'hotkey:insertSelection'
       },
       'default': {
         'check': () => {

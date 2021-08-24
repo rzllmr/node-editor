@@ -147,6 +147,16 @@ class Node extends Proxy {
     return percentage;
   }
 
+  connections() {
+    const connections = new Map();
+    for (const side in this.anchors) {
+      for (const anchor of this.anchors[side]) {
+        connections.set(anchor.link.id, anchor.link);
+      }
+    }
+    return connections;
+  }
+
   makeEditableOnDblClick(element, property, editable, multiline) {
     // works for input element with 'readonly' and false
     const updateAnchors = this.updateAnchors.bind(this);
