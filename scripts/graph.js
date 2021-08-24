@@ -245,23 +245,23 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
     const element = this.element[0];
     const source = this.anchors.source;
     const target = this.anchors.target;
-    const object = {
+    const properties = {
       board: this.boardId,
       type: element.className.baseVal.split(' ')[0],
       source: source.id + '.' + source.end.charAt(0),
       target: target.id + '.' + target.end.charAt(0)
     };
-    return object;
+    return properties;
   }
 
-  static import(object) {
-    if (!Proxy.setDefaults(object, {source: undefined, target: undefined})) return;
+  static import(properties) {
+    if (!Proxy.setDefaults(properties, {source: undefined, target: undefined})) return;
     const proxy = new Proxy();
 
     const sides = {'t': 'top', 'r': 'right', 'b': 'bottom', 'l': 'left'};
 
     // create source anchor
-    const sourceMatch = object.source.match(/(\d+)(\w)(\d+)\.(\w)/);
+    const sourceMatch = properties.source.match(/(\d+)(\w)(\d+)\.(\w)/);
     const source = {id: sourceMatch[1], side: sides[sourceMatch[2]], index: sourceMatch[3],
       end: sourceMatch[4] == 's' ? 'source' : 'target'};
     const sourceNode = proxy.resolve(source.id);
@@ -270,7 +270,7 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
     sourceAnchor.registerDragOut();
 
     // create target anchor
-    const targetMatch = object.target.match(/(\d+)(\w)(\d+)\.(\w)/);
+    const targetMatch = properties.target.match(/(\d+)(\w)(\d+)\.(\w)/);
     const target = {id: targetMatch[1], side: sides[targetMatch[2]], index: targetMatch[3],
       end: targetMatch[4] == 's' ? 'source' : 'target'};
     const targetNode = proxy.resolve(target.id);

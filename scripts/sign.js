@@ -91,24 +91,24 @@ class Sign extends Proxy {
 
   export() {
     const element = this.element[0];
-    const object = {
+    const properties = {
       board: this.graph.boardId,
       type: element.className.split(' ')[0],
       graph: element.id.replace('_sign', ''),
       details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n')
     };
-    return object;
+    return properties;
   }
 
-  static import(object) {
-    if (!Proxy.setDefaults(object, {graph: undefined, details: ''})) return;
+  static import(properties) {
+    if (!Proxy.setDefaults(properties, {graph: undefined, details: ''})) return;
     const proxy = new Proxy();
 
-    const graph = proxy.resolve(object.graph);
+    const graph = proxy.resolve(properties.graph);
     if (graph == undefined) return;
 
     const sign = graph.addSign();
-    sign.element.find('div.details').html(object.details.replace(/\n/g, '<br>'));
+    sign.element.find('div.details').html(properties.details.replace(/\n/g, '<br>'));
     sign.position();
   }
 };

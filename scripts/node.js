@@ -277,7 +277,7 @@ class Node extends Proxy {
 
   export() {
     const element = this.element[0];
-    const object = {
+    const properties = {
       board: this.board[0].id,
       type: element.className.split(' ')[0],
       id: element.id,
@@ -290,11 +290,11 @@ class Node extends Proxy {
       label: element.querySelector('div.label').innerHTML.replace(/<br>/g, '\n'),
       details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n')
     };
-    return object;
+    return properties;
   }
 
-  static import(object, boardId) {
-    if (!Proxy.setDefaults(object, {
+  static import(properties, boardId) {
+    if (!Proxy.setDefaults(properties, {
       id: null, hue: null, posX: null, posY: null, width: null, height: null,
       label: '', details: '', minimized: false
     })) return;
@@ -303,20 +303,22 @@ class Node extends Proxy {
     const board = proxy.resolve(boardId);
     if (board == undefined) return;
 
-    const node = board.addNode(object.id, object.hue);
+    const node = board.addNode(properties.id, properties.hue);
+
     node.element.css({
-      left: object.posX,
-      top: object.posY,
-      width: object.width,
-      height: object.height
+      left: properties.posX,
+      top: properties.posY,
+      width: properties.width,
+      height: properties.height
     });
-    node.element.find('.divider')[0].style.setProperty('--hue', object.hue);
-    node.element.find('div.label').html(object.label.replace(/\n/g, '<br>'));
-    node.element.find('div.details').html(object.details.replace(/\n/g, '<br>'));
+    node.element.find('.divider')[0].style.setProperty('--hue', properties.hue);
+    node.element.find('div.label').html(properties.label.replace(/\n/g, '<br>'));
+    node.element.find('div.details').html(properties.details.replace(/\n/g, '<br>'));
     node.element.find('div.label em, div.details em').on('click', (event) => {
       $('#board-tree').trigger('treeview:createFromLink', [event.target]);
     });
-    node.minimize(object.minimized);
+    node.minimize(properties.minimized);
+
     node.minimap.trigger('node:update', [node.element[0].id]);
   }
 };
