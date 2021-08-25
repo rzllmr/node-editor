@@ -19,7 +19,7 @@ class KeyBinding {
         'escape': 'hotkey:clearSelection',
         'delete': 'hotkey:deleteSelection',
         'backspace': 'hotkey:deleteSelection',
-        'ctrl+i': 'hotkey:createNode',
+        'ctrl+n': 'hotkey:createNode',
         'ctrl+c': 'hotkey:copySelection',
         'ctrl+x': 'hotkey:cutSelection',
         'ctrl+v': 'hotkey:insertSelection'

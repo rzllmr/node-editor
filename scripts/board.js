@@ -157,14 +157,8 @@ class Board extends Proxy {
         if (this.element.css('visibility') == 'hidden') return;
         // create Node in the middle of the window
         const newNode = this.addNode();
-        const windowCenter = this.windowCenter();
-        newNode.move(windowCenter.x, windowCenter.y, false);
-      },
-      'hotkey:insertNode': (event) => {
-        if (this.element.css('visibility') == 'hidden') return;
-        // create Node at mouse position
-        const newNode = this.addNode();
-        newNode.move(this.mousePos.x * this.zoom.scale, this.mousePos.y * this.zoom.scale, false);
+        const mousePos = this.mousePosition();
+        newNode.move(mousePos.x, mousePos.y, false);
       }
     });
   }
