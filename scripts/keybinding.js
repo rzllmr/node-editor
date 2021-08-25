@@ -40,9 +40,10 @@ class KeyBinding {
     this.ignoredKeys = ['home', 'end', 'pageup', 'pagedown'];
   }
 
-  handleKey(key, ctrl, shift, alt) {
+  handleKey(key, ctrl, shift, alt, meta) {
     key = key.toLowerCase();
     if (key == 'control') key = 'ctrl';
+    if (meta && key != 'meta') key = 'ctrl+' + key;
     if (alt && key != 'alt') key = 'alt+' + key;
     if (shift && key != 'shift') key = 'shift+' + key;
     if (ctrl && key != 'ctrl') key = 'ctrl+' + key;
