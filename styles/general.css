@@ -37,6 +37,10 @@ rect.selection {
   stroke: var(--color-highlight);
 }
 
+::selection {
+  background-color: var(--color-highlight-faded);
+}
+
 .template {
   display: none;
 }
