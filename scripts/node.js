@@ -1,3 +1,4 @@
+const { clipboard } = require('electron');
 
 // allow for Node objects to be resolved
 // from HTML ids of .node elements
@@ -159,6 +160,12 @@ class Node extends Proxy {
 
   makeEditableOnDblClick(element, property, editable, multiline) {
     // works for input element with 'readonly' and false
+
+    const onEmClick = (emNode) => {
+      $('#board-tree').trigger('treeview:createFromLink', [emNode]);
+    };
+    const divEdit = new DivEdit(element[0], multiline).registerKeys(onEmClick);
+
     const updateAnchors = this.updateAnchors.bind(this);
     element.on({
       mousedown: (event) => {
@@ -192,12 +199,30 @@ class Node extends Proxy {
           });
           event.target.removeEventListener('DOMCharacterDataModified', updateAnchors);
         }
+      },
+      copy: (event) => {
+        const selectedText = divEdit.getSelected();
+        clipboard.writeText(selectedText);
+
+        event.preventDefault();
+        return false;
+      },
+      cut: (event) => {
+        const selectedText = divEdit.getSelected();
+        clipboard.writeText(selectedText);
+        divEdit.deleteSelected();
+
+        event.preventDefault();
+        return false;
+      },
+      paste: (event) => {
+        const clipboardText = clipboard.readText();
+        divEdit.insertText(clipboardText);
+
+        event.preventDefault();
+        return false;
       }
     });
-    const onEmClick = (emNode) => {
-      $('#board-tree').trigger('treeview:createFromLink', [emNode]);
-    };
-    new DivEdit(element[0], multiline).registerKeys(onEmClick);
   }
 
   select() {

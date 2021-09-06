@@ -145,6 +145,8 @@ class DivEdit {
         this.div.scrollLeft = 0;
       }
     });
+
+    return this;
   }
 
   static isEmpty(div) {
@@ -238,6 +240,28 @@ class DivEdit {
       this.insertWithin(node, emNode, caretIdx);
     }
     this.setCaretIndex(emNode, 1);
+
+    return true;
+  }
+
+  insertText(text) {
+    let node = document.getSelection().focusNode;
+    if (!this.multiline) text = text.replace(/\n/g, ' ');
+
+    if (node.nodeName == '#text') {
+      const caretIdx = this.getCaretIndex(node);
+      const leftOfCaret = node.textContent.slice(0, caretIdx);
+      const rightOfCaret = node.textContent.slice(caretIdx);
+      node.nodeValue = leftOfCaret + text + rightOfCaret;
+
+      while(node.nodeValue.includes('\n')) {
+        const breakIdx = node.nodeValue.indexOf('\n');
+        this.setCaretIndex(node, breakIdx);
+        this.insertBreak('', node);
+        node = document.getSelection().focusNode;
+        node.nodeValue = node.nodeValue.replace('\n', '');
+      }
+    }
 
     return true;
   }
@@ -410,6 +434,26 @@ class DivEdit {
       lastNode = node;
     }
     return lastNode.nextSibling;
+  }
+
+  getSelected() {
+    let selectedText = window.getSelection().toString();
+    selectedText = selectedText.replace(new RegExp(this.zeroSpace, 'g'), '');
+    selectedText = selectedText.replace(new RegExp(this.space, 'g'), ' ');
+    return selectedText;
+  }
+
+  deleteSelected() {
+    window.getSelection().deleteFromDocument();
+    let node = document.getSelection().focusNode;
+    node = this.textNode(node);
+    
+    const nextNode = node.nextSibling;
+    if (this.caretAt(node, -1) && nextNode != null && nextNode.nodeName == '#text') {
+      const caretIdx = this.getCaretIndex(node);
+      this.mergeInto(node, nextNode);
+      this.setCaretIndex(node, caretIdx);
+    }
   }
 }
 

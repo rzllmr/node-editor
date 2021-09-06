@@ -6,7 +6,7 @@ class KeyBinding {
       'input': {
         'check': () => {
           return $(document.activeElement).is(
-              'div.head div.label, div.body div.details, div.sign div.details'
+            'div.head div.label, div.body div.details, div.sign div.details'
           );
         },
         'escape': 'hotkey:blurInput'
