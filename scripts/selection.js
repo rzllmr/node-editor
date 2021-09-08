@@ -101,9 +101,19 @@ class Selection {
     }
     eventCallback('hotkey:clearSelection', this.clearSelection.bind(this));
     eventCallback('hotkey:deleteSelection', this.deleteSelection.bind(this));
+    eventCallback('hotkey:deleteSelection', this.deleteHoveredGraph.bind(this));
     eventCallback('hotkey:copySelection', this.copySelection.bind(this));
     eventCallback('hotkey:cutSelection', this.cutSelection.bind(this));
     eventCallback('hotkey:insertSelection', this.insertSelection.bind(this));
+  }
+
+  deleteHoveredGraph() {
+    const hoveredGraph = $('path.graph-area:hover')[0];
+    if (hoveredGraph == undefined) return; 
+
+    const graphId = hoveredGraph.id.replace('_hover', '');
+    const graph = this.proxy.resolve(graphId);
+    graph.anchors.source.destroy();
   }
 
   singleSelect(id) {
@@ -137,6 +147,8 @@ class Selection {
   }
 
   deleteSelection() {
+    if (this.selection.size == 0) return;
+
     this.selection.forEach((_, item) => {
       if (item.id == undefined) return;
       if (item.element[0].className.split(' ')[0] === 'node') {
