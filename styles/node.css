@@ -116,6 +116,8 @@ em:hover {
   font-size: 12px;
   line-height: 1.5em;
   overflow-y: auto;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 .node .details:empty:before{
   content: attr(data-text);
