@@ -109,6 +109,7 @@ class TreeView extends Proxy {
         branches.push(item);
       }
     }
+    this.hoverItem(null);
     this.selectItem(null);
     for (const item of leaves) {
       this.removeItem(item);

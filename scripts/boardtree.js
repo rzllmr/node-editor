@@ -57,7 +57,6 @@ class BoardTree extends TreeView {
   }
 
   import(itemList) {
-    this.selectItem(null);
     let lastItem = null;
     BoardItem.boardIdxMax = -1;
     for (const entry of itemList) {
