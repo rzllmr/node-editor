@@ -30,6 +30,10 @@
       "target": "portable",
       "icon": "data/icon.ico"
     },
+    "mac": {
+      "target": "dir",
+      "icon": "data/icon.png"
+    },
     "linux": {
       "target": "AppImage"
     },
