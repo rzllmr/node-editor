@@ -30,6 +30,7 @@ class Node extends Proxy {
 
     this.color = hue;
     this.minimize(false);
+    this.imageDim = null;
 
     this.anchors = {
       top: [],
@@ -76,11 +77,105 @@ class Node extends Proxy {
       }
     });
 
+    this.registerImageHandling();
+
     this.makeEditableOnDblClick(this.element.find('.label'), 'contentEditable', true, false);
     this.makeEditableOnDblClick(this.element.find('.details'), 'contentEditable', true, true);
 
     this.element.css('width', this.element[0].offsetWidth);
     this.element.css('height', this.element[0].offsetHeight);
+  }
+
+  registerImageHandling() {
+    const details = this.element.find('.details');
+    const image = this.element.find('.image');
+    const imageX = this.element.find('.image-x');
+    
+    $(document).on('dragover', (event) => { event.preventDefault(); event.stopPropagation(); });
+    $(document).on('drop', (event) => { event.preventDefault(); event.stopPropagation(); });
+
+    details.on('dragenter', () => {
+      details.addClass('hover');
+    });
+
+    details.on('dragleave', () => {
+      details.removeClass('hover');
+    });
+
+    details.on('drop', (event) => {
+      details.removeClass('hover');
+
+      var file = event.originalEvent.dataTransfer.files[0];
+      if (!file.type.startsWith('image')) return;
+
+      this.setImage(file.path);
+    });
+
+    image.on('load', () => {
+      const dim = {};
+      dim.x = image[0].naturalWidth;
+      dim.y = image[0].naturalHeight;
+      dim.ratio = dim.x / dim.y;
+      if (dim.ratio > 1) {
+        dim.minY = this.minSize.y;
+        dim.minX = dim.minY * dim.ratio;
+      } else {
+        dim.minX = this.minSize.x;
+        dim.minY = dim.minX / dim.ratio;
+      }
+      this.imageDim = dim;
+      this.resize(
+        parseInt(this.element.css('width')),
+        parseInt(this.element.css('height'))
+      );
+    });
+
+    imageX.on('click', () => {
+      this.unsetImage();
+    });
+
+    const bodyResizer = this.element.find('.body, .resizer');
+    bodyResizer.on({
+      mouseenter: () => {
+        if (image.attr('src')) {
+          imageX.css('display', 'block');
+        }
+      },
+      mouseleave: (event) => {
+        const toElement = $(event.originalEvent.toElement);
+        if (image.attr('src') && !toElement.is(bodyResizer)) {
+          imageX.css('display', 'none');
+        }
+      }
+    });
+  }
+
+  setImage(filePath) {
+    if (filePath == '') return;
+
+    const details = this.element.find('.details');
+    const image = this.element.find('.image');
+
+    image.on('error', () => {
+      details.attr('class', 'details missing');
+      details.attr('data-text', filePath);
+    });
+    details.attr('class', 'details none');
+    image.attr('src', filePath);
+  }
+
+  unsetImage() {
+    const details = this.element.find('.details');
+    const detailsPlaceholder = details.attr('data-text');
+    const image = this.element.find('.image');
+    const imageX = this.element.find('.image-x');
+
+    details.removeClass('none missing');
+    details.attr('data-text', detailsPlaceholder);
+    image.off('error');
+    image.removeAttr('src');
+    imageX.css('display', 'none');
+    this.imageDim = null;
   }
 
   // add anchor at evenly distributed slot closest to mouse position
@@ -260,8 +355,26 @@ class Node extends Proxy {
   }
 
   resize(width, height) {
+    if (this.imageDim != null) {
+      // scale with constant aspect ratio
+      const headHeight = 41;
+      if (this.minimized) {
+        if (width < this.imageDim.minX) width = this.imageDim.minX;
+        height = width / this.imageDim.ratio + headHeight;
+      } else if (width < this.imageDim.minX || height < this.imageDim.minY + headHeight) {
+        width = this.imageDim.minX;
+        height = this.imageDim.minY + headHeight;
+      } else {
+        if (width / (height - headHeight) > this.imageDim.ratio) {
+          width = (height - headHeight) * this.imageDim.ratio;
+        } else {
+          height = width / this.imageDim.ratio + headHeight;
+        }
+      }
+    }
+    
     this.element.css('width', Math.max(width, this.minSize.x));
-    if (!this.minimized) {
+    if (!this.minimized || this.imageDim) {
       this.element.css('height', Math.max(height, this.minSize.y));
     }
     this.updateAnchors();
@@ -323,7 +436,8 @@ class Node extends Proxy {
       hue: element.querySelector('.divider').style.getPropertyValue('--hue'),
       minimized: this.minimized,
       label: element.querySelector('div.label').innerHTML.replace(/<br>/g, '\n'),
-      details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n')
+      details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n'),
+      image: element.querySelector('img.image').src
     };
     return properties;
   }
@@ -352,6 +466,7 @@ class Node extends Proxy {
     node.element.find('div.label em, div.details em').on('click', (event) => {
       $('#board-tree').trigger('treeview:createFromLink', [event.target]);
     });
+    node.setImage(properties.image);
     node.minimize(properties.minimized);
 
     node.minimap.trigger('node:update', [node.element[0].id]);

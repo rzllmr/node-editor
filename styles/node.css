@@ -56,8 +56,6 @@ em:hover {
 
 .node > .head, .node > .body {
   background: var(--color-node);
-  box-sizing: border-box;
-  padding: 6px 10px;
 }
 
 .node .head {
@@ -81,6 +79,8 @@ em:hover {
   height: 100%;
   width: 100%;
   background: none;
+  padding: 6px 10px;
+  box-sizing: border-box;
 }
 .node .label[contentEditable=false], .node .details[contentEditable=false] {
   cursor: default;
@@ -123,6 +123,15 @@ em:hover {
   content: attr(data-text);
   color: var(--color-text-faded);
 }
+.node .details:empty {
+  background-image: var(--image-icon);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 50px;
+}
+.node .details.hover:empty {
+  background-image: var(--image-icon-highlight);
+}
 
 .node .details::-webkit-scrollbar {
   width: 5px;
@@ -144,14 +153,61 @@ em:hover {
   letter-spacing: 0.055em;
 }
 
+.node .details.none {
+  background-image: none;
+}
+.node .details.none:before {
+  content: '';
+}
+.node .details.missing {
+  background-image: var(--image-missing);
+}
+.node .details.missing:before {
+  content: attr(data-text);
+}
+
+.node .image {
+  position: absolute;
+  pointer-events: none;
+  width: 100%;
+  border-radius: 0 0 5px 5px;
+  left: 0;
+}
+
+.node .image-x {
+  position: absolute;
+  color: var(--color-text-faded);
+  font-family: 'FontAwesome';
+  content: '\f00d';
+  font-size: 15px;
+  right: 0;
+  top: 41px;
+  cursor: pointer;
+  background-color: var(--color-node);
+  border-radius: 5px;
+  padding: 0px 2px 2px 2px;
+}
+.node .image-x i {
+  pointer-events: none;
+}
+.node .image-x:hover {
+  color: var(--color-text-highlight);
+}
+
 .node .resizer {
   position: absolute;
   bottom: 0;
   right: 0;
   color: var(--color-text-faded);
   font-size: 11px;
+  border-radius: 5px;
+  padding: 1px 0 0 3px;
+}
+.node .body:hover ~ .resizer {
+  background-color: var(--color-node);
 }
 .node .resizer:hover {
+  background-color: var(--color-node);
   color: var(--color-text-highlight);
 }
 .node .resizer i {

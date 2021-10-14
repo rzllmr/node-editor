@@ -1,6 +1,7 @@
 
 const Proxy = require('./proxy.js');
 const fs = require('fs');
+const path = require('path');
 
 
 class FileHandler {
@@ -54,7 +55,33 @@ class FileHandler {
     return !cancel;
   }
 
-  gatherContent() {
+  relativePaths(data, filePath) {
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof(value) == 'string' && value.startsWith('file://')) {
+        const fileDir = path.dirname(filePath);
+        const imagePath = value.replace('file://', '');
+        let relativePath = path.relative(fileDir, imagePath);
+        if (!relativePath.startsWith('.')) relativePath = './' + relativePath;
+        data[key] = 'file://' + relativePath;
+        console.log('save', data[key]);
+      }
+    }
+    return data;
+  }
+
+  absolutePaths(data, filePath) {
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof(value) == 'string' && value.startsWith('file://')) {
+        const fileDir = path.dirname(filePath);
+        const imagePath = value.replace('file://', '');
+        data[key] = path.resolve(fileDir, imagePath);
+        console.log('load', data[key]);
+      }
+    }
+    return data;
+  }
+
+  gatherContent(filePath) {
     const boards = {};
 
     boards['TOC'] = this.boardTree.export();
@@ -62,7 +89,8 @@ class FileHandler {
     for (const entry of this.proxy.mapping) {
       if (entry[0] == undefined || entry[1].export == undefined ||
         entry[1].constructor.name === 'BoardTree') continue;
-      const data = entry[1].export();
+      let data = entry[1].export();
+      data = this.relativePaths(data, filePath);
       const boardId = data.board;
       delete data.board;
       if (!boards[boardId]) boards[boardId] = [];
@@ -81,7 +109,7 @@ class FileHandler {
       if (!filePath) return;
     }
 
-    fs.writeFile(filePath, this.gatherContent(), 'utf8', (error) => {
+    fs.writeFile(filePath, this.gatherContent(filePath), 'utf8', (error) => {
       if (error) {
         alert(`An error ocurred creating the file ${filePath}:\n${error.message}`);
       } else {
@@ -97,7 +125,7 @@ class FileHandler {
       defaultPath: this.current || ''
     });
     if (!filePath) return;
-    fs.writeFile(filePath, this.gatherContent(), 'utf8', (error) => {
+    fs.writeFile(filePath, this.gatherContent(filePath), 'utf8', (error) => {
       if (error) {
         alert(`An error ocurred creating the file ${filePath}:\n${error.message}`);
       } else {
@@ -129,7 +157,8 @@ class FileHandler {
           delete boards.TOC;
         }
         for (const [boardId, entries] of Object.entries(boards)) {
-          for (const entry of entries) {
+          for (let entry of entries) {
+            entry = this.absolutePaths(entry, filePaths[0]);
             if (!classes.has(entry.type)) classes.set(entry.type, require(`./${entry.type}.js`));
             classes.get(entry.type).import(entry, boardId);
           }
