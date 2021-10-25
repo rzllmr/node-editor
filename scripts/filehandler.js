@@ -59,11 +59,10 @@ class FileHandler {
     for (const [key, value] of Object.entries(data)) {
       if (typeof(value) == 'string' && value.startsWith('file://')) {
         const fileDir = path.dirname(filePath);
-        const imagePath = value.replace('file://', '');
+        const imagePath = value.replace(/^file:\/\/(\/(\w:))?/, '$2');
         let relativePath = path.relative(fileDir, imagePath);
         if (!relativePath.startsWith('.')) relativePath = './' + relativePath;
         data[key] = 'file://' + relativePath;
-        console.log('save', data[key]);
       }
     }
     return data;
@@ -75,7 +74,6 @@ class FileHandler {
         const fileDir = path.dirname(filePath);
         const imagePath = value.replace('file://', '');
         data[key] = path.resolve(fileDir, imagePath);
-        console.log('load', data[key]);
       }
     }
     return data;
