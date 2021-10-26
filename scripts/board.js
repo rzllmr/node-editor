@@ -138,9 +138,20 @@ class Board extends Proxy {
         if (event.target !== this.element.find('.layer.graphs')[0]) return;
         const newNode = this.addNode();
         newNode.move(
-            event.offsetX * this.zoom.scale,
-            event.offsetY * this.zoom.scale, false
+          event.offsetX * this.zoom.scale,
+          event.offsetY * this.zoom.scale, false
         );
+      },
+      drop: (event) => {
+        var file = event.originalEvent.dataTransfer.files[0];
+        if (!file.type.startsWith('image')) return;
+  
+        const newNode = this.addNode();
+        newNode.move(
+          event.offsetX * this.zoom.scale,
+          event.offsetY * this.zoom.scale, false
+        );
+        newNode.setImage(file.path);
       }
     });
     this.element.find('.layer.nodes, .layer.graphs').on({
