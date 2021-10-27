@@ -262,6 +262,7 @@ class Node extends Proxy {
     const divEdit = new DivEdit(element[0], multiline).registerKeys(onEmClick);
 
     const updateAnchors = this.updateAnchors.bind(this);
+    const updateHeight = this.updateHeight.bind(this);
     element.on({
       mousedown: (event) => {
         let propertyValue = $(event.target).prop(property);
@@ -280,11 +281,13 @@ class Node extends Proxy {
             'width': 'auto',
             'min-width': this.element[0].clientWidth
           });
+          event.target.addEventListener('DOMCharacterDataModified', updateHeight);
           event.target.addEventListener('DOMCharacterDataModified', updateAnchors);
+          this.updateHeight();
           this.updateAnchors();
         }
       },
-      blur: (event, param) => {
+      blur: (event) => {
         const borderWidth = parseInt(this.element.css('border-width')) * 2;
         $(event.target).prop(property, !editable);
         if (!multiline) {
@@ -292,7 +295,10 @@ class Node extends Proxy {
             'width': Math.ceil(this.element[0].getBoundingClientRect().width - borderWidth),
             'min-width': ''
           });
+          this.updateHeight();
+          this.updateAnchors();
           event.target.removeEventListener('DOMCharacterDataModified', updateAnchors);
+          event.target.removeEventListener('DOMCharacterDataModified', updateHeight);
         }
       },
       copy: (event) => {
@@ -378,6 +384,15 @@ class Node extends Proxy {
       this.element.css('height', Math.max(height, this.minSize.y));
     }
     this.updateAnchors();
+  }
+
+  updateHeight() {
+    if (this.imageDim == null) return;
+
+    const headHeight = 41;
+    const width = parseInt(this.element.css('width'));
+    const height = width / this.imageDim.ratio + headHeight;
+    this.element.css('height', Math.max(height, this.minSize.y))
   }
 
   minimize(toggle) {
