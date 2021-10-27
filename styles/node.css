@@ -172,6 +172,7 @@ em:hover {
   width: 100%;
   border-radius: 0 0 5px 5px;
   left: 0;
+  z-index: 1;
 }
 
 .node .image-x {
@@ -186,6 +187,7 @@ em:hover {
   background-color: var(--color-node);
   border-radius: 5px;
   padding: 0px 2px 2px 2px;
+  z-index: 2;
 }
 .node .image-x i {
   pointer-events: none;
@@ -202,6 +204,7 @@ em:hover {
   font-size: 11px;
   border-radius: 5px;
   padding: 1px 0 0 3px;
+  z-index: 2;
 }
 .node .body:hover ~ .resizer {
   background-color: var(--color-node);
