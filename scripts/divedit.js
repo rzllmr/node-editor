@@ -1,4 +1,151 @@
 
+class DomNode {
+  constructor(node) {
+    this.typeNode = DomNode.typeNode(node);
+    this.textNode = DomNode.textNode(node);
+    this.type = DomNode.type(node);
+  }
+
+  static typeNode(node) {
+    if (node.nodeName === '#text' &&
+        node.parentNode != null &&
+        node.parentNode.nodeName !== 'DIV') {
+      node = node.parentNode;
+    }
+    return node;
+  }
+
+  static textNode(node) {
+    if (node.nodeName !== '#text') {
+      node = node.firstChild;
+    }
+    return node;
+  }
+
+  static type(node) {
+    node = DomNode.typeNode(node);
+    return {
+      text: node.nodeName === '#text',
+      em: node.nodeName === 'EM'
+    };
+  }
+
+  static create(type, content = '') {
+    let newNode;
+    switch (type) {
+      case 'text':
+        const zeroSpace = '\u200B';
+        newNode = document.createTextNode(zeroSpace + content);
+        break;
+      case 'em':
+        newNode = document.createElement('em');
+        newNode.className = 'link';
+        newNode.textContent = '#' + content;
+        break;
+    }
+    return new DomNode(newNode);
+  }
+
+  insertNode(other) {
+    if (this.caretAt(-1)) {
+      this.insertAfter(other);
+    } else if (this.caretAt(1)) {
+      this.insertBefore(other);
+    } else {
+      this.insertWithin(other);
+    }
+  }
+
+  insertBefore(other) {
+    $(other.typeNode).insertBefore(this.typeNode);
+  }
+
+  insertAfter(other) {
+    $(other.typeNode).insertAfter(this.typeNode);
+  }
+
+  insertWithin(other, caretIdx = null) {
+    if (!this.type.text) return;
+    if (caretIdx == null) caretIdx = this.caretIndex;
+
+    const leftOfCaret = this.content.slice(0, caretIdx);
+    const rightOfCaret = this.content.slice(caretIdx);
+    this.content = leftOfCaret;
+    const rightNode = DomNode.create('text', rightOfCaret);
+    $(rightNode.typeNode).insertAfter(this.typeNode);
+    $(other.typeNode).insertAfter(this.typeNode);
+  }
+
+  get content() {
+    return this.textNode.textContent;
+  }
+
+  set content(text) {
+    this.textNode.textContent = text;
+  }
+
+  get caretIndex() {
+    let caretIdx = 0;
+    const selection = window.getSelection();
+    if (selection.rangeCount !== 0) {
+      const range = window.getSelection().getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(this.textNode);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      caretIdx = preCaretRange.toString().length;
+    }
+    return caretIdx;
+  }
+
+  set caretIndex(caretIdx) {
+    if (caretIdx < 0) {
+      caretIdx += this.textNode.nodeValue.length + 1;
+    }
+
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.setStart(this.textNode, caretIdx);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  caretAt(caretIdx) {
+    if (caretIdx < 0) {
+      caretIdx += this.textNode.nodeValue.length + 1;
+    }
+    return this.caretIndex == caretIdx;
+  }
+
+  next() {
+    const nextNode = this.typeNode.nextSibling;
+    if (nextNode == null) return null;
+
+    return new DomNode(nextNode);
+  }
+
+  previous() {
+    const nextNode = this.typeNode.previousSibling;
+    if (nextNode == null) return null;
+
+    return new DomNode(nextNode);
+  }
+
+  get link() {
+    if (this.type.em == false) {
+      throw new StandardError('link only available to \'em\' nodes');
+    }
+    return this.typeNode.dataset.path;
+  }
+
+  set link(path) {
+    if (this.type.em == false) {
+      throw new StandardError('link only available to \'em\' nodes');
+    }
+    this.typeNode.dataset.path = path;
+  }
+}
+
 class DivEdit {
   constructor(divNode, multiline = true) {
     this.div = divNode;
@@ -10,124 +157,85 @@ class DivEdit {
     this.space = '\u00A0';
   }
 
+  handle(key) {
+    const domNode = this.currentDomNode();
+
+    let mode = '';
+    if (this.editEm) {
+      mode = 'editEm';
+    } else {
+      if (domNode.type.text) {
+        mode = 'text';
+      } else {
+        mode = 'em';
+      }
+    }
+
+    console.log(mode, key);
+    let handled = false;
+    if (mode in this.bindings && key in this.bindings[mode]) {
+      handled = this.bindings[mode][key].bind(this)(domNode, key);
+    }
+    return handled;
+  }
+
+  currentDomNode() {
+    return new DomNode(document.getSelection().focusNode);
+  }
+
+  modifiedKey(event) {
+    let key = event.key;
+    key = key.toLowerCase();
+    if (event.ctrlKey && key != 'control') key = 'ctrl+' + key;
+    if (event.metaKey && key != 'meta') key = 'ctrl+' + key;
+    if (event.altKey && key != 'alt') key = 'alt+' + key;
+    return key;
+  }
+
   registerKeys(emClick) {
     this.emClick = emClick;
     this.editEm = false;
 
+    this.bindings = {
+      'text': {
+        'escape': this.exitEdit,
+        '#': this.insertEm
+      },
+      'em': {
+
+      },
+      'editEm': {
+        'escape|enter|tab': this.finishEm
+      }
+    };
+    for (const mode of Object.values(this.bindings)) {
+      for (const [keys, func] of Object.entries(mode)) {
+        if (!keys.includes('|')) continue;
+
+        for (const key of keys.split('|')) {
+          mode[key] = func;
+        }
+        delete mode[keys];
+      }
+    }
+
     $(this.div).on({
       keydown: (event) => {
-        const key = event.key;
-        let node = document.getSelection().focusNode;
-        node = this.typeNode(node);
-
-        let handled = false;
-        if (node.nodeName == 'EM') {
-          if (this.editEm) {
-            if (['Tab', 'Enter'].includes(key)) {
-              handled = this.finishEmphasis(key, node);
-              this.editEm = !handled;
-            } else if (['Escape', 'Backspace'].includes(key)) {
-              handled = this.removeEmphasis(key, node);
-              this.editEm = !handled;
-            } else if (key.startsWith('Arrow')) {
-              if (['ArrowUp', 'ArrowDown'].includes(key) ||
-                  key == 'ArrowLeft' && this.caretAt(node, 1) ||
-                  key == 'ArrowRight' && this.caretAt(node, -1)) {
-                handled = true;
-              }
-            } else if (key == '/') {
-              // prevent multiple consecutive slashes
-              const caretIdx = this.getCaretIndex(node);
-              const surroundingChars = [
-                node.textContent.charAt(caretIdx-1),
-                node.textContent.charAt(caretIdx)
-              ];
-              handled = surroundingChars.includes('/');
-            } else {
-              const ignoredKeys = ['#'];
-              handled = ignoredKeys.includes(key);
-            }
-          } else {
-            if (key.startsWith('Arrow')) {
-              handled = this.handleNavigation(key, node);
-            } else if (['Backspace', 'Delete'].includes(key)) {
-              handled = this.removeEmphasis(key, node);
-            } else {
-              handled = true;
-            }
-          }
-        } else if (node.nodeName == '#text') {
-          if (['ArrowLeft', 'ArrowRight'].includes(key)) {
-            handled = this.handleNavigation(key, node);
-          } else if (key == '#') {
-            handled = this.insertEmphasis(key, node);
-            this.editEm = handled;
-          } else if (['Backspace', 'Delete'].includes(key)) {
-            handled = this.removeEmphasis(key, node);
-          } else if (['Enter', 'Escape'].includes(key)) {
-            if (!(this.multiline && key == 'Enter' && !event.ctrlKey)) {
-              this.div.blur();
-              handled = true;
-            } else {
-              handled = this.insertBreak(key, node);
-            }
-          }
-        } else if (node.nodeName == 'DIV') {
-          if (key == '#') {
-            handled = this.insertEmphasis(key, node);
-            this.editEm = true;
-          }
-        }
-        return !handled;
+        return !this.handle(this.modifiedKey(event), 'down');
       },
       keyup: (event) => {
-        const key = event.key;
-        let node = document.getSelection().focusNode;
-        node = this.typeNode(node);
-
-        if (['ArrowUp', 'ArrowDown'].includes(key)) {
-          if (this.caretAt(node, 0)) {
-            this.setCaretIndex(node, 1);
-          }
-        } else if (['Backspace', 'Delete'].includes(key)) {
-          if (node == this.div) {
-            let newNode;
-            if (this.div.firstChild == null) {
-              newNode = this.createTextNode();
-              this.div.appendChild(newNode);
-            } else {
-              const brNode = this.findDuplicate('BR');
-              if (brNode != null) {
-                newNode = this.createTextNode();
-                this.insertBefore(brNode, newNode);
-                if (brNode == this.div.lastChild) {
-                  this.div.removeChild(brNode);
-                }
-              }
-            }
-            this.setCaretIndex(newNode, 1);
-          } else if (this.caretAt(node, -1)) {
-            const nextNode = node.nextSibling;
-            if (nextNode != null && nextNode.nodeName == '#text') {
-              const caretIdx = this.getCaretIndex(node);
-              this.mergeInto(node, nextNode);
-              this.setCaretIndex(node, caretIdx);
-            }
-          } else if (this.caretAt(node, 0)) {
-            node.nodeValue = this.zeroSpace + node.nodeValue;
-            this.setCaretIndex(node, 1);
-          }
-        }
+        return !this.handle(this.modifiedKey(event), 'up');
       },
       focus: () => {
-        let node = document.getSelection().focusNode;
-        node = this.typeNode(node);
-
+        let domNode;
         if (this.div.firstChild == null) {
-          node = this.div.appendChild(this.createTextNode());
+          const newNode = this.div.appendChild(this.createTextNode());
+          domNode = new DomNode(newNode);
+        } else {
+          domNode = this.currentDomNode();
         }
-        if (this.caretAt(node, 0)) {
-          this.setCaretIndex(node, 1);
+        if (domNode.caretAt(0)) {
+          domNode.caretIndex = 1;
         }
       },
       blur: (event) => {
@@ -145,7 +253,6 @@ class DivEdit {
         this.div.scrollLeft = 0;
       }
     });
-
     return this;
   }
 
@@ -155,6 +262,65 @@ class DivEdit {
       return true;
     }
     return false;
+  }
+
+  exitEdit(domNode) {
+    this.div.blur();
+    return true;
+  }
+
+  insertEm(domNode) {
+    const emNode = DomNode.create('em');
+
+    if (domNode.caretAt(-1)) {
+      domNode.insertAfter(emNode);
+    } else if (domNode.caretAt(1)) {
+      domNode.insertBefore(DomNode.create('text'));
+      domNode.insertBefore(emNode);
+    } else {
+      domNode.insertWithin(emNode, domNode.caretIndex);
+    }
+    emNode.caretIndex = 1;
+    this.editEm = true;
+
+    return true;
+  }
+
+  finishEm(domNode, key) {
+    console.log(key);
+
+    this.editEm = false;
+    if (domNode.content == '#') {
+      this.removeEmphasis(node);
+      return true;
+    }
+
+    // remove link symbol and dir path for display
+    const path = domNode.content.trim().substring(1);
+    domNode.link = path.replace(/\/+/, '/');
+    domNode.content = path.replace(/.*\//, '');
+
+    // register click event for Node class
+    $(domNode.typeNode).on('click', (event) => {
+      this.emClick(event.target);
+    });
+
+    let nextNode = domNode.next();
+    if (nextNode == null || nextNode.type.text == false) {
+      const newNode = DomNode.create('text');
+      domNode.insertAfter(newNode);
+      nextNode = newNode;
+    }
+
+    if (key == 'Tab') {
+      if (!nextNode.content.startsWith(this.zeroSpace + ' ')) {
+        nextNode.content = this.zeroSpace + this.space + nextNode.content.substring(1);
+      }
+      nextNode.caretIndex = 2;
+    } else {
+      nextNode.caretIndex = 1;
+    }
+    return true;
   }
 
   handleNavigation(key, node) {
@@ -254,7 +420,7 @@ class DivEdit {
       const rightOfCaret = node.textContent.slice(caretIdx);
       node.nodeValue = leftOfCaret + text + rightOfCaret;
 
-      while(node.nodeValue.includes('\n')) {
+      while (node.nodeValue.includes('\n')) {
         const breakIdx = node.nodeValue.indexOf('\n');
         this.setCaretIndex(node, breakIdx);
         this.insertBreak('', node);
@@ -264,6 +430,27 @@ class DivEdit {
     }
 
     return true;
+  }
+
+  insertTextAtCursor(text) {
+    if (window.getSelection) {
+      const selection = window.getSelection();
+      if (selection.getRangeAt && selection.rangeCount) {
+        const range = selection.getRangeAt(0).cloneRange();
+        range.deleteContents();
+        const textNode = document.createTextNode(text);
+        range.insertNode(textNode);
+
+        // move caret to the end of the newly inserted text node
+        range.setStart(textNode, textNode.length);
+        range.setEnd(textNode, textNode.length);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    } else if (document.selection && document.selection.createRange) {
+      const range = document.selection.createRange();
+      range.pasteHTML(text);
+    }
   }
 
   finishEmphasis(key, node) {
@@ -447,7 +634,7 @@ class DivEdit {
     window.getSelection().deleteFromDocument();
     let node = document.getSelection().focusNode;
     node = this.textNode(node);
-    
+
     const nextNode = node.nextSibling;
     if (this.caretAt(node, -1) && nextNode != null && nextNode.nodeName == '#text') {
       const caretIdx = this.getCaretIndex(node);
