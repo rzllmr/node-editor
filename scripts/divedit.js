@@ -312,7 +312,7 @@ class DivEdit {
       nextNode = newNode;
     }
 
-    if (key == 'Tab') {
+    if (key == 'tab') {
       if (!nextNode.content.startsWith(this.zeroSpace + ' ')) {
         nextNode.content = this.zeroSpace + this.space + nextNode.content.substring(1);
       }
