@@ -46,6 +46,10 @@ class DomNode {
     return new DomNode(newNode);
   }
 
+  static current() {
+    return new DomNode(document.getSelection().focusNode);
+  }
+
   insertNode(other) {
     if (this.caretAt(-1)) {
       this.insertAfter(other);
@@ -179,10 +183,6 @@ class DivEdit {
     return handled;
   }
 
-  currentDomNode() {
-    return new DomNode(document.getSelection().focusNode);
-  }
-
   modifiedKey(event) {
     let key = event.key;
     key = key.toLowerCase();
@@ -219,20 +219,21 @@ class DivEdit {
       }
     }
 
+    // classify control events for handle()
     $(this.div).on({
       keydown: (event) => {
         return !this.handle(this.modifiedKey(event), 'down');
       },
       keyup: (event) => {
-        return !this.handle(this.modifiedKey(event), 'up');
+        // pass
       },
       focus: () => {
         let domNode;
         if (this.div.firstChild == null) {
-          const newNode = this.div.appendChild(this.createTextNode());
-          domNode = new DomNode(newNode);
+          domNode = DomNode.create('text')
+          this.div.appendChild(domNode.typeNode);
         } else {
-          domNode = this.currentDomNode();
+          domNode = DomNode.current();
         }
         if (domNode.caretAt(0)) {
           domNode.caretIndex = 1;
