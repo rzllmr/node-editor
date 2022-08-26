@@ -4,6 +4,13 @@ class DomNode {
     this.typeNode = DomNode.typeNode(node);
     this.textNode = DomNode.textNode(node);
     this.type = DomNode.type(node);
+    
+    this.char = {
+      spaceZeroWidth: '\u200B',
+      spaceNoBreak: '\u00A0',
+      space: '\u0020'
+    };
+  }
 
   destroy(div) {
     div.removeChild(this.typeNode);
@@ -40,8 +47,7 @@ class DomNode {
     let newNode;
     switch (type) {
       case 'text':
-        const zeroSpace = '\u200B';
-        newNode = document.createTextNode(zeroSpace + content);
+        newNode = document.createTextNode(this.char.spaceZeroWidth + content);
         break;
       case 'em':
         newNode = document.createElement('em');
@@ -84,6 +90,23 @@ class DomNode {
     const rightNode = DomNode.create('text', rightOfCaret);
     $(rightNode.typeNode).insertAfter(this.typeNode);
     $(other.typeNode).insertAfter(this.typeNode);
+  }
+
+  mergeInto(other, div) {
+    if (!this.type.text || !other.type.text) return;
+
+    let mergedContent = this.content;
+    mergedContent += other.content.replace(this.char.spaceZeroWidth, '');
+    mergedContent = this.fixSpaces(mergedContent);
+    this.content = mergedContent;
+
+    other.destroy(div);
+  }
+
+  fixSpaces(text) {
+    return text.replace(/\s\s+/g, (match) => {
+      return ''.padStart(match.length, this.char.spaceNoBreak + this.char.space)
+    })
   }
 
   get content() {
@@ -300,11 +323,12 @@ class DivEdit {
   }
 
   finishEm(domNode, key) {
-    console.log(key);
+    if (key == 'backspace' && domNode.content != '#') return false;
 
     this.editEm = false;
+
     if (domNode.content == '#') {
-      this.removeEmphasis(node);
+      this.removeEm(domNode, key);
       return true;
     }
 
@@ -332,6 +356,25 @@ class DivEdit {
       nextNode.caretIndex = 2;
     } else {
       nextNode.caretIndex = 1;
+    }
+    return true;
+  }
+
+  removeEm(domNode, key) {
+    if (domNode.type.em == false) return false;
+
+    const before = domNode.previous();
+    const after = domNode.next();
+    domNode.destroy(this.div);
+
+    if (before != null && after != null) {
+      const caretIdx = before.content.length;
+      before.mergeInto(after, this.div);
+      before.caretIndex = caretIdx;
+    } else if (after != null) {
+      after.caretIndex = 0;
+    } else if (before != null) {
+      before.caretIndex = -1;
     }
     return true;
   }
