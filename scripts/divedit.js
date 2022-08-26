@@ -167,37 +167,6 @@ class DivEdit {
     this.space = '\u00A0';
   }
 
-  handle(key) {
-    const domNode = this.currentDomNode();
-
-    let mode = '';
-    if (this.editEm) {
-      mode = 'editEm';
-    } else {
-      if (domNode.type.text) {
-        mode = 'text';
-      } else {
-        mode = 'em';
-      }
-    }
-
-    console.log(mode, key);
-    let handled = false;
-    if (mode in this.bindings && key in this.bindings[mode]) {
-      handled = this.bindings[mode][key].bind(this)(domNode, key);
-    }
-    return handled;
-  }
-
-  modifiedKey(event) {
-    let key = event.key;
-    key = key.toLowerCase();
-    if (event.ctrlKey && key != 'control') key = 'ctrl+' + key;
-    if (event.metaKey && key != 'meta') key = 'ctrl+' + key;
-    if (event.altKey && key != 'alt') key = 'alt+' + key;
-    return key;
-  }
-
   bindings() {
     return {
       'text': {
@@ -267,6 +236,37 @@ class DivEdit {
       }
     });
     return this;
+  }
+  
+  modifiedKey(event) {
+    let key = event.key;
+    key = key.toLowerCase();
+    if (event.ctrlKey && key != 'control') key = 'ctrl+' + key;
+    if (event.metaKey && key != 'meta') key = 'ctrl+' + key;
+    if (event.altKey && key != 'alt') key = 'alt+' + key;
+    return key;
+  }
+
+  handle(key) {
+    const domNode = DomNode.current();
+
+    let mode = '';
+    if (this.editEm) {
+      mode = 'editEm';
+    } else {
+      if (domNode.type.text) {
+        mode = 'text';
+      } else {
+        mode = 'em';
+      }
+    }
+
+    console.log(mode, key);
+    let handled = false;
+    if (mode in this.bindings && key in this.bindings[mode]) {
+      handled = this.bindings[mode][key].bind(this)(domNode, key);
+    }
+    return handled;
   }
 
   static isEmpty(div) {
