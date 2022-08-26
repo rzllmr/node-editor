@@ -192,11 +192,8 @@ class DivEdit {
     return key;
   }
 
-  registerKeys(emClick) {
-    this.emClick = emClick;
-    this.editEm = false;
-
-    this.bindings = {
+  bindings() {
+    return {
       'text': {
         'escape': this.exitEdit,
         '#': this.insertEm
@@ -205,9 +202,18 @@ class DivEdit {
 
       },
       'editEm': {
-        'escape|enter|tab': this.finishEm
+        'escape|enter|tab|backspace': this.finishEm
       }
     };
+  }
+
+  registerKeys(emClick) {
+    this.emClick = emClick;
+    this.editEm = false;
+
+    this.bindings = this.bindings();
+
+    // split key alternatives to multiple entries
     for (const mode of Object.values(this.bindings)) {
       for (const [keys, func] of Object.entries(mode)) {
         if (!keys.includes('|')) continue;
