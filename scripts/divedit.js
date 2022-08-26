@@ -4,6 +4,12 @@ class DomNode {
     this.typeNode = DomNode.typeNode(node);
     this.textNode = DomNode.textNode(node);
     this.type = DomNode.type(node);
+
+  destroy(div) {
+    div.removeChild(this.typeNode);
+    this.typeNode = null;
+    this.textNode = null;
+    this.type = null;
   }
 
   static typeNode(node) {
