@@ -4,12 +4,6 @@ class DomNode {
     this.typeNode = DomNode.typeNode(node);
     this.textNode = DomNode.textNode(node);
     this.type = DomNode.type(node);
-    
-    this.char = {
-      spaceZeroWidth: '\u200B',
-      spaceNoBreak: '\u00A0',
-      space: '\u0020'
-    };
   }
 
   destroy(div) {
@@ -17,6 +11,14 @@ class DomNode {
     this.typeNode = null;
     this.textNode = null;
     this.type = null;
+  }
+
+  static get char() {
+    return {
+      spaceZeroWidth: '\u200B',
+      spaceNoBreak: '\u00A0',
+      space: '\u0020'
+    };
   }
 
   static typeNode(node) {
@@ -47,7 +49,7 @@ class DomNode {
     let newNode;
     switch (type) {
       case 'text':
-        newNode = document.createTextNode(this.char.spaceZeroWidth + content);
+        newNode = document.createTextNode(DomNode.char.spaceZeroWidth + content);
         break;
       case 'em':
         newNode = document.createElement('em');
@@ -105,8 +107,8 @@ class DomNode {
 
   fixSpaces(text) {
     return text.replace(/\s\s+/g, (match) => {
-      return ''.padStart(match.length, this.char.spaceNoBreak + this.char.space)
-    })
+      return ''.padStart(match.length, DomNode.char.spaceNoBreak + DomNode.char.space)
+    });
   }
 
   get content() {
