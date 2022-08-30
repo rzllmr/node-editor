@@ -381,6 +381,8 @@ class DivEdit {
     return true;
   }
 
+////////////////////////////////////////////////////////////////////////////////
+
   handleNavigation(key, node) {
     if (key == 'ArrowLeft') {
       let prevNode;
@@ -449,25 +451,6 @@ class DivEdit {
     return true;
   }
 
-  insertEmphasis(key, node) {
-    const emNode = document.createElement('em');
-    emNode.className = 'link';
-    emNode.textContent = '#';
-
-    if (this.caretAt(node, -1)) {
-      this.insertAfter(node, emNode);
-    } else if (this.caretAt(node, 1)) {
-      this.insertBefore(node, this.createTextNode());
-      this.insertBefore(node, emNode);
-    } else {
-      const caretIdx = this.getCaretIndex(node);
-      this.insertWithin(node, emNode, caretIdx);
-    }
-    this.setCaretIndex(emNode, 1);
-
-    return true;
-  }
-
   insertText(text) {
     let node = document.getSelection().focusNode;
     if (!this.multiline) text = text.replace(/\n/g, ' ');
@@ -509,165 +492,6 @@ class DivEdit {
       const range = document.selection.createRange();
       range.pasteHTML(text);
     }
-  }
-
-  finishEmphasis(key, node) {
-    if (node.nodeValue == '#') {
-      this.removeEmphasis(node);
-      return true;
-    }
-
-    // remove link symbol and dir path for display
-    const path = node.textContent.trim().substring(1);
-    node.dataset.path = path.replace(/\/+/, '/');
-    node.textContent = path.replace(/.*\//, '');
-
-    // register click event for Node class
-    $(node).on('click', (event) => {
-      this.emClick(event.target);
-    });
-
-    let nextNode = node.nextSibling;
-    if (nextNode == null || nextNode.nodeName != '#text') {
-      const newNode = this.createTextNode();
-      this.insertAfter(node, newNode);
-      nextNode = newNode;
-    }
-
-    if (key == 'Tab') {
-      if (!nextNode.textContent.startsWith(this.zeroSpace + ' ')) {
-        nextNode.textContent = this.zeroSpace + this.space + nextNode.textContent.substring(1);
-      }
-      this.setCaretIndex(nextNode, 2);
-    } else {
-      this.setCaretIndex(nextNode, 1);
-    }
-    return true;
-  }
-
-  removeEmphasis(key, node) {
-    if (node.nodeName == 'EM') {
-      if (this.editEm && key == 'Backspace' && !this.caretAt(node, 1)) {
-        return false;
-      }
-    } else if (node.nodeName == '#text' && key == 'Backspace' && this.caretAt(node, 1)) {
-      node = node.previousSibling;
-      if (node == null || node.nodeName == '#text') {
-        return node == null;
-      }
-    } else if (node.nodeName == '#text' && key == 'Delete' && this.caretAt(node, -1)) {
-      node = node.nextSibling;
-      if (node == null || node.nodeName == '#text') {
-        return false;
-      }
-    } else {
-      return false;
-    }
-
-    const before = node.previousSibling;
-    const after = node.nextSibling;
-    this.div.removeChild(node);
-
-    if (before != null && after != null) {
-      const caretIdx = before.textContent.length;
-      this.mergeInto(before, after);
-      this.setCaretIndex(before, caretIdx);
-    } else if (after != null) {
-      this.setCaretIndex(after, 0);
-    } else if (before != null) {
-      this.setCaretIndex(before, -1);
-    }
-    return true;
-  }
-
-  typeNode(node) {
-    if (node.nodeName === '#text' && node.parentNode.nodeName !== 'DIV') {
-      node = node.parentNode;
-    }
-    return node;
-  }
-
-  textNode(node) {
-    if (node.nodeName !== '#text') {
-      node = node.firstChild;
-    }
-    return node;
-  }
-
-  getCaretIndex(node) {
-    node = this.textNode(node);
-
-    let caretIdx = 0;
-    const selection = window.getSelection();
-    if (selection.rangeCount !== 0) {
-      const range = window.getSelection().getRangeAt(0);
-      const preCaretRange = range.cloneRange();
-      preCaretRange.selectNodeContents(node);
-      preCaretRange.setEnd(range.endContainer, range.endOffset);
-      caretIdx = preCaretRange.toString().length;
-    }
-    return caretIdx;
-  }
-
-  setCaretIndex(node, caretIdx) {
-    node = this.textNode(node);
-    if (caretIdx < 0) {
-      caretIdx += node.nodeValue.length + 1;
-    }
-
-    const sel = window.getSelection();
-    const range = document.createRange();
-    range.setStart(node, caretIdx);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
-  }
-
-  caretAt(node, caretIdx) {
-    node = this.textNode(node);
-    if (caretIdx < 0) {
-      caretIdx += node.nodeValue.length + 1;
-    }
-    return this.getCaretIndex(node) == caretIdx;
-  }
-
-  createTextNode(content = '') {
-    return document.createTextNode(this.zeroSpace + content);
-  }
-
-  insertBefore(node, before) {
-    return this.div.insertBefore(before, node);
-  }
-
-  insertAfter(node, after) {
-    const nextNode = node.nextSibling;
-    if (nextNode == null) {
-      return this.div.appendChild(after);
-    } else {
-      return this.div.insertBefore(after, nextNode);
-    }
-  }
-
-  insertWithin(node, newNode, caretIdx) {
-    if (node.nodeName != '#text') return null;
-
-    const leftOfCaret = node.textContent.slice(0, caretIdx);
-    const rightOfCaret = node.textContent.slice(caretIdx);
-    node.textContent = leftOfCaret;
-    const nextNode = this.createTextNode(rightOfCaret);
-    this.insertAfter(node, nextNode);
-    this.insertAfter(node, newNode);
-    return newNode;
-  }
-
-  mergeInto(leftNode, rightNode) {
-    if (leftNode.nodeName != '#text' ||
-        rightNode.nodeName != '#text') return null;
-
-    leftNode.nodeValue = leftNode.nodeValue.replace(/\s$/, ' ');
-    leftNode.nodeValue += rightNode.nodeValue.replace(this.zeroSpace, '');
-    this.div.removeChild(rightNode);
-    return leftNode;
   }
 
   findDuplicate(tagType) {
