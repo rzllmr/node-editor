@@ -98,7 +98,7 @@ class DomNode {
     if (!this.type.text || !other.type.text) return;
 
     let mergedContent = this.content;
-    mergedContent += other.content.replace(this.char.spaceZeroWidth, '');
+    mergedContent += other.content;
     mergedContent = this.fixSpaces(mergedContent);
     this.content = mergedContent;
 
@@ -111,15 +111,29 @@ class DomNode {
     });
   }
 
-  get content() {
+  // private
+  get realContent() {
     return this.textNode.textContent;
   }
 
-  set content(text) {
+  get content() {
+    let content = this.realContent;
+    if (this.hasZeroSpace()) content = content.slice(1);
+    return content;
+  }
+
+  // private
+  set realContent(text) {
     this.textNode.textContent = text;
   }
 
-  get caretIndex() {
+  set content(text) {
+    if (this.hasZeroSpace()) text = DomNode.char.spaceZeroWidth + text;
+    this.realContent = text;
+  }
+
+  // private
+  get realCaretIndex() {
     let caretIdx = 0;
     const selection = window.getSelection();
     if (selection.rangeCount !== 0) {
@@ -132,9 +146,16 @@ class DomNode {
     return caretIdx;
   }
 
-  set caretIndex(caretIdx) {
+  get caretIndex() {
+    let caretIdx = this.realCaretIndex;
+    if (this.hasZeroSpace()) caretIdx--;
+    return caretIdx;
+  }
+
+  // private
+  set realCaretIndex(caretIdx) {
     if (caretIdx < 0) {
-      caretIdx += this.textNode.nodeValue.length + 1;
+      caretIdx += this.realContent.length + 1;
     }
 
     const sel = window.getSelection();
@@ -145,11 +166,33 @@ class DomNode {
     sel.addRange(range);
   }
 
+  set caretIndex(caretIdx) {
+    if (caretIdx > 0 && this.hasZeroSpace()) caretIdx++;
+    this.realCaretIndex = caretIdx;
+  }
+
+  // private
+  realCaretAt(caretIdx) {
+    if (caretIdx < 0) {
+      caretIdx += this.realContent.length + 1;
+    }
+    return this.realCaretIndex == caretIdx;
+  }
+
   caretAt(caretIdx) {
     if (caretIdx < 0) {
-      caretIdx += this.textNode.nodeValue.length + 1;
+      caretIdx += this.content.length + 1;
     }
     return this.caretIndex == caretIdx;
+  }
+
+  fixCaret() {
+    if (this.hasZeroSpace() && this.realCaretAt(0)) this.realCaretIndex = 1;
+  }
+
+  hasZeroSpace() {
+    const zeroSpaceAtStart = new RegExp(`^${DomNode.char.spaceZeroWidth}`);
+    return zeroSpaceAtStart.test(this.realContent);
   }
 
   next() {
@@ -241,16 +284,14 @@ class DivEdit {
         } else {
           domNode = DomNode.current();
         }
-        if (domNode.caretAt(0)) {
-          domNode.caretIndex = 1;
-        }
+        domNode.fixCaret();
       },
       blur: (event) => {
         if (this.editEm) {
           const emNode = $(event.target).find('em').filter(
               (_, em) => em.textContent.startsWith('#'))[0];
           if (emNode == undefined) return false;
-          const handled = this.finishEmphasis('Enter', emNode);
+          const handled = this.finishEm(new DomNode(emNode), 'Enter');
           this.editEm = !handled;
         }
         if (DivEdit.isEmpty(this.div)) {
@@ -312,7 +353,7 @@ class DivEdit {
 
     if (domNode.caretAt(-1)) {
       domNode.insertAfter(emNode);
-    } else if (domNode.caretAt(1)) {
+    } else if (domNode.caretAt(0)) {
       domNode.insertBefore(DomNode.create('text'));
       domNode.insertBefore(emNode);
     } else {
@@ -352,12 +393,12 @@ class DivEdit {
     }
 
     if (key == 'tab') {
-      if (!nextNode.content.startsWith(this.zeroSpace + ' ')) {
-        nextNode.content = this.zeroSpace + this.space + nextNode.content.substring(1);
+      if (!nextNode.content.startsWith(' ')) {
+        nextNode.content = DomNode.char.spaceNoBreak + nextNode.content;
       }
-      nextNode.caretIndex = 2;
-    } else {
       nextNode.caretIndex = 1;
+    } else {
+      nextNode.caretIndex = 0;
     }
     return true;
   }
