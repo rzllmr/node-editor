@@ -374,7 +374,7 @@ class DivEdit {
     }
 
     // remove link symbol and dir path for display
-    const path = domNode.content.trim().substring(1);
+    const path = domNode.content.trim().slice(1);
     domNode.link = path.replace(/\/+/, '/');
     domNode.content = path.replace(/.*\//, '');
 
