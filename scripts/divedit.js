@@ -64,6 +64,20 @@ class DomNode {
     return new DomNode(document.getSelection().focusNode);
   }
 
+  next() {
+    const nextNode = this.typeNode.nextSibling;
+    if (nextNode == null) return null;
+
+    return new DomNode(nextNode);
+  }
+
+  previous() {
+    const nextNode = this.typeNode.previousSibling;
+    if (nextNode == null) return null;
+
+    return new DomNode(nextNode);
+  }
+
   insertNode(other) {
     if (this.caretAt(-1)) {
       this.insertAfter(other);
@@ -99,41 +113,55 @@ class DomNode {
 
     let mergedContent = this.content;
     mergedContent += other.content;
-    mergedContent = this.fixSpaces(mergedContent);
+    mergedContent = DomNode.fixSpaces(mergedContent);
     this.content = mergedContent;
 
     other.destroy(div);
   }
+  
+  get link() {
+    if (this.type.em == false) {
+      throw new StandardError('link only available to \'em\' nodes');
+    }
+    return this.typeNode.dataset.path;
+  }
 
-  fixSpaces(text) {
+  set link(path) {
+    if (this.type.em == false) {
+      throw new StandardError('link only available to \'em\' nodes');
+    }
+    this.typeNode.dataset.path = path;
+  }
+
+// content handling ////////////////////////////////////////////////////////////
+
+  static fixSpaces(text) {
     return text.replace(/\s\s+/g, (match) => {
       return ''.padStart(match.length, DomNode.char.spaceNoBreak + DomNode.char.space)
     });
   }
 
   // private
-  get realContent() {
+  get _realContent() {
     return this.textNode.textContent;
   }
 
   get content() {
-    let content = this.realContent;
+    let content = this._realContent;
     if (this.hasZeroSpace()) content = content.slice(1);
     return content;
   }
 
-  // private
-  set realContent(text) {
+  set _realContent(text) {
     this.textNode.textContent = text;
   }
 
   set content(text) {
     if (this.hasZeroSpace()) text = DomNode.char.spaceZeroWidth + text;
-    this.realContent = text;
+    this._realContent = text;
   }
 
-  // private
-  get realCaretIndex() {
+  get _realCaretIndex() {
     let caretIdx = 0;
     const selection = window.getSelection();
     if (selection.rangeCount !== 0) {
@@ -147,15 +175,14 @@ class DomNode {
   }
 
   get caretIndex() {
-    let caretIdx = this.realCaretIndex;
+    let caretIdx = this._realCaretIndex;
     if (this.hasZeroSpace()) caretIdx--;
     return caretIdx;
   }
 
-  // private
-  set realCaretIndex(caretIdx) {
+  set _realCaretIndex(caretIdx) {
     if (caretIdx < 0) {
-      caretIdx += this.realContent.length + 1;
+      caretIdx += this._realContent.length + 1;
     }
 
     const sel = window.getSelection();
@@ -168,15 +195,14 @@ class DomNode {
 
   set caretIndex(caretIdx) {
     if (caretIdx > 0 && this.hasZeroSpace()) caretIdx++;
-    this.realCaretIndex = caretIdx;
+    this._realCaretIndex = caretIdx;
   }
 
-  // private
-  realCaretAt(caretIdx) {
+  _realCaretAt(caretIdx) {
     if (caretIdx < 0) {
-      caretIdx += this.realContent.length + 1;
+      caretIdx += this._realContent.length + 1;
     }
-    return this.realCaretIndex == caretIdx;
+    return this._realCaretIndex == caretIdx;
   }
 
   caretAt(caretIdx) {
@@ -187,40 +213,12 @@ class DomNode {
   }
 
   fixCaret() {
-    if (this.hasZeroSpace() && this.realCaretAt(0)) this.realCaretIndex = 1;
+    if (this.hasZeroSpace() && this._realCaretAt(0)) this._realCaretIndex = 1;
   }
 
   hasZeroSpace() {
     const zeroSpaceAtStart = new RegExp(`^${DomNode.char.spaceZeroWidth}`);
-    return zeroSpaceAtStart.test(this.realContent);
-  }
-
-  next() {
-    const nextNode = this.typeNode.nextSibling;
-    if (nextNode == null) return null;
-
-    return new DomNode(nextNode);
-  }
-
-  previous() {
-    const nextNode = this.typeNode.previousSibling;
-    if (nextNode == null) return null;
-
-    return new DomNode(nextNode);
-  }
-
-  get link() {
-    if (this.type.em == false) {
-      throw new StandardError('link only available to \'em\' nodes');
-    }
-    return this.typeNode.dataset.path;
-  }
-
-  set link(path) {
-    if (this.type.em == false) {
-      throw new StandardError('link only available to \'em\' nodes');
-    }
-    this.typeNode.dataset.path = path;
+    return zeroSpaceAtStart.test(this._realContent);
   }
 }
 
