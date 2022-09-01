@@ -194,7 +194,7 @@ class DomNode {
   }
 
   set caretIndex(caretIdx) {
-    if (caretIdx > 0 && this.hasZeroSpace()) caretIdx++;
+    if (caretIdx >= 0 && this.hasZeroSpace()) caretIdx++;
     this._realCaretIndex = caretIdx;
   }
 
