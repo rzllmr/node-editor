@@ -424,41 +424,39 @@ class DivEdit {
 
   navigate(domNode, key) {
     if (key == 'arrowleft') {
-      let prevNode;
-      if (domNode.type.text && domNode.caretAt(0)) {
-        prevNode = domNode.previous();
-      } else if (domNode.type.em) {
-        prevNode = domNode;
-      } else {
-        return false;
-      }
-
-      if (prevNode == null || prevNode.type.text) return true;
-
-      let textNode = prevNode.previous();
-      if (textNode == null || !textNode.type.text) {
-        textNode = DomNode.create('text');
-        prevNode.insertBefore(textNode);
-      }
-      textNode.caretIndex = -1;
-    } else if (key == 'arrowright') {
       let emNode;
-      if (domNode.type.text && domNode.caretAt(-1)) {
-        emNode = domNode.next();
+      if (domNode.type.text && domNode.caretAt(0)) {
+        emNode = domNode.previous();
+        if (emNode == null) return true;
       } else if (domNode.type.em) {
         emNode = domNode;
       } else {
         return false;
       }
 
-      if (emNode == null || emNode.type.text) return false;
-
-      let textNode = emNode.next();
-      if (textNode == null || !textNode.type.text) {
-        textNode = DomNode.create('text');
-        emNode.insertAfter(textNode);
+      let prevTextNode = emNode.previous();
+      if (prevTextNode == null) {
+        prevTextNode = DomNode.create('text');
+        prevNode.insertBefore(prevTextNode);
       }
-      textNode.caretIndex = 0;
+      prevTextNode.caretIndex = -1;
+    } else if (key == 'arrowright') {
+      let emNode;
+      if (domNode.type.text && domNode.caretAt(-1)) {
+        emNode = domNode.next();
+        if (emNode == null) return true;
+      } else if (domNode.type.em) {
+        emNode = domNode;
+      } else {
+        return false;
+      }
+
+      let nextTextNode = emNode.next();
+      if (nextTextNode == null) {
+        nextTextNode = DomNode.create('text');
+        emNode.insertAfter(nextTextNode);
+      }
+      nextTextNode.caretIndex = 0;
     } else {
       return false;
     }
