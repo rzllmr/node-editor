@@ -237,10 +237,12 @@ class DivEdit {
     return {
       'text': {
         'escape': this.exitEdit,
-        '#': this.insertEm
+        '#': this.insertEm,
+        'arrowleft|arrowright': this.navigate
       },
       'em': {
-
+        'delete|backspace': this.removeEm,
+        'arrowleft|arrowright': this.navigate
       },
       'editEm': {
         'escape|enter|tab|backspace': this.finishEm
@@ -420,53 +422,51 @@ class DivEdit {
     return true;
   }
 
-////////////////////////////////////////////////////////////////////////////////
-
-  handleNavigation(key, node) {
-    if (key == 'ArrowLeft') {
+  navigate(domNode, key) {
+    if (key == 'arrowleft') {
       let prevNode;
-      if (node.nodeName == '#text' && this.caretAt(node, 1)) {
-        prevNode = node.previousSibling;
-      } else if (node.nodeName == 'EM') {
-        prevNode = node;
+      if (domNode.type.text && domNode.caretAt(0)) {
+        prevNode = domNode.previous();
+      } else if (domNode.type.em) {
+        prevNode = domNode;
       } else {
         return false;
       }
 
-      if (prevNode == null || prevNode.nodeName == '#text') {
-        return true;
+      if (prevNode == null || prevNode.type.text) return true;
+
+      let textNode = prevNode.previous();
+      if (textNode == null || !textNode.type.text) {
+        textNode = DomNode.create('text');
+        prevNode.insertBefore(textNode);
       }
-      let textNode = prevNode.previousSibling;
-      if (textNode == null || textNode.nodeName != '#text') {
-        textNode = this.createTextNode();
-        this.insertBefore(prevNode, textNode);
-      }
-      this.setCaretIndex(textNode, -1);
-    } else if (key == 'ArrowRight') {
+      textNode.caretIndex = -1;
+    } else if (key == 'arrowright') {
       let emNode;
-      if (node.nodeName == '#text' && this.caretAt(node, -1)) {
-        emNode = node.nextSibling;
-      } else if (node.nodeName == 'EM') {
-        emNode = node;
+      if (domNode.type.text && domNode.caretAt(-1)) {
+        emNode = domNode.next();
+      } else if (domNode.type.em) {
+        emNode = domNode;
       } else {
         return false;
       }
 
-      if (emNode == null || emNode.nodeName == '#text') {
-        return false;
+      if (emNode == null || emNode.type.text) return false;
+
+      let textNode = emNode.next();
+      if (textNode == null || !textNode.type.text) {
+        textNode = DomNode.create('text');
+        emNode.insertAfter(textNode);
       }
-      let textNode = emNode.nextSibling;
-      if (textNode == null || textNode.nodeName != '#text') {
-        textNode = this.createTextNode();
-        this.insertAfter(emNode, textNode);
-      }
-      this.setCaretIndex(textNode, 1);
+      textNode.caretIndex = 0;
     } else {
       return false;
     }
 
     return true;
   }
+
+////////////////////////////////////////////////////////////////////////////////
 
   insertBreak(key, node) {
     const brNode = document.createElement('br');
