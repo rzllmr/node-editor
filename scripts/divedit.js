@@ -41,7 +41,8 @@ class DomNode {
     node = DomNode.typeNode(node);
     return {
       text: node.nodeName === '#text',
-      em: node.nodeName === 'EM'
+      em: node.nodeName === 'EM',
+      br: node.nodeName === 'BR'
     };
   }
 
@@ -55,6 +56,9 @@ class DomNode {
         newNode = document.createElement('em');
         newNode.className = 'link';
         newNode.textContent = '#' + content;
+        break;
+      case 'br':
+        newNode = document.createElement('br');
         break;
     }
     return new DomNode(newNode);
@@ -239,6 +243,7 @@ class DivEdit {
         'escape': this.exitEdit,
         '#': this.insertEm,
         'arrowleft|arrowright': this.navigate
+        'enter': this.insertBreak,
       },
       'em': {
         'delete|backspace': this.removeEm,
@@ -464,29 +469,29 @@ class DivEdit {
     return true;
   }
 
-////////////////////////////////////////////////////////////////////////////////
+  insertBreak(domNode, key) {
+    const brNode = DomNode.create('br');
 
-  insertBreak(key, node) {
-    const brNode = document.createElement('br');
-
-    let targetNode = node;
-    if (this.caretAt(node, -1)) {
-      targetNode = this.createTextNode();
-      this.insertAfter(node, targetNode);
-      this.insertAfter(node, brNode);
-    } else if (this.caretAt(node, 1)) {
-      const textNode = this.createTextNode();
-      this.insertBefore(node, textNode);
-      this.insertBefore(node, brNode);
+    let targetNode = domNode;
+    if (domNode.caretAt(-1)) {
+      targetNode = DomNode.create('text');
+      domNode.insertAfter(targetNode);
+      domNode.insertAfter(brNode);
+    } else if (domNode.caretAt(0)) {
+      const textNode = DomNode.create('text');
+      domNode.insertBefore(textNode);
+      domNode.insertBefore(brNode);
     } else {
-      const caretIdx = this.getCaretIndex(node);
-      this.insertWithin(node, brNode, caretIdx);
-      targetNode = brNode.nextSibling;
+      const caretIdx = domNode.caretIndex;
+      domNode.insertWithin(brNode, caretIdx);
+      targetNode = brNode.next();
     }
-    this.setCaretIndex(targetNode, 1);
+    targetNode.caretIndex = 0;
 
     return true;
   }
+
+////////////////////////////////////////////////////////////////////////////////
 
   insertText(text) {
     let node = document.getSelection().focusNode;
