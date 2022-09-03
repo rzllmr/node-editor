@@ -122,7 +122,7 @@ class DomNode {
 
     other.destroy(div);
   }
-  
+
   get link() {
     if (this.type.em == false) {
       throw new StandardError('link only available to \'em\' nodes');
@@ -137,11 +137,11 @@ class DomNode {
     this.typeNode.dataset.path = path;
   }
 
-// content handling ////////////////////////////////////////////////////////////
+  // content handling ////////////////////////////////////////////////////////////
 
   static fixSpaces(text) {
     return text.replace(/\s\s+/g, (match) => {
-      return ''.padStart(match.length, DomNode.char.spaceNoBreak + DomNode.char.space)
+      return ''.padStart(match.length, DomNode.char.spaceNoBreak + DomNode.char.space);
     });
   }
 
@@ -285,7 +285,7 @@ class DivEdit {
       focus: () => {
         let domNode;
         if (this.div.firstChild == null) {
-          domNode = DomNode.create('text')
+          domNode = DomNode.create('text');
           this.div.appendChild(domNode.typeNode);
         } else {
           domNode = DomNode.current();
@@ -309,7 +309,7 @@ class DivEdit {
     });
     return this;
   }
-  
+
   modifiedKey(event) {
     let key = event.key;
     key = key.toLowerCase();
@@ -501,7 +501,7 @@ class DivEdit {
     return true;
   }
 
-////////////////////////////////////////////////////////////////////////////////
+  // to convert //////////////////////////////////////////////////////////////////
 
   insertText(text) {
     let node = document.getSelection().focusNode;
