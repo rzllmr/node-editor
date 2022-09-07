@@ -248,7 +248,8 @@ class DivEdit {
       },
       'em': {
         'delete|backspace': this.removeNonText,
-        'arrowleft|arrowright': this.navigate
+        'arrowleft|arrowright': this.navigate,
+        'other': (node, key) => { return true; }
       },
       'editEm': {
         'escape|enter|tab|backspace': this.finishEm
@@ -335,8 +336,12 @@ class DivEdit {
 
     console.log(mode, key);
     let handled = false;
-    if (mode in this.bindings && key in this.bindings[mode]) {
-      handled = this.bindings[mode][key].bind(this)(domNode, key);
+    if (mode in this.bindings) {
+      if (key in this.bindings[mode]) {
+        handled = this.bindings[mode][key].bind(this)(domNode, key);
+      } else if ('other' in this.bindings[mode]) {
+        handled = this.bindings[mode]['other'].bind(this)(domNode, key);
+      }
     }
     return handled;
   }
