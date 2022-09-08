@@ -52,14 +52,18 @@ class DomNode {
       case 'text':
         newNode = document.createTextNode(DomNode.char.spaceZeroWidth + content);
         break;
-      case 'em':
-        newNode = document.createElement('em');
-        newNode.className = 'link';
-        newNode.textContent = '#' + content;
-        break;
       case 'br':
         newNode = document.createElement('br');
         break;
+      case 'bold':
+      case 'italic':
+      case 'link':
+        newNode = document.createElement('em');
+        newNode.className = type;
+        newNode.textContent = content;
+        break;
+      default:
+        throw new Error(`DomNode type unknown: ${type}`);
     }
     return new DomNode(newNode);
   }
@@ -241,10 +245,10 @@ class DivEdit {
     return {
       'text': {
         'escape': this.exitEdit,
-        '#': this.insertEm,
+        '#|*|^': this.insertEm,
         'enter': this.insertBreak,
         'arrowleft|arrowright': this.navigate,
-        'delete|backspace': this.removeNonText,
+        'delete|backspace': this.removeNonText
       },
       'em': {
         'delete|backspace': this.removeNonText,
@@ -359,8 +363,9 @@ class DivEdit {
     return true;
   }
 
-  insertEm(domNode) {
-    const emNode = DomNode.create('em');
+  insertEm(domNode, key) {
+    const type = { '#': 'link', '*': 'bold', '^': 'italic' };
+    const emNode = DomNode.create(type[key], key);
 
     if (domNode.caretAt(-1)) {
       domNode.insertAfter(emNode);
@@ -377,24 +382,28 @@ class DivEdit {
   }
 
   finishEm(domNode, key) {
-    if (key == 'backspace' && domNode.content != '#') return false;
+    if (key == 'backspace' && domNode.content.length > 1) return false;
 
     this.editEm = false;
 
-    if (domNode.content == '#') {
+    if (domNode.content.length == 1) {
       this.removeNonText(domNode, key);
       return true;
     }
 
-    // remove link symbol and dir path for display
-    const path = domNode.content.trim().slice(1);
-    domNode.link = path.replace(/\/+/, '/');
-    domNode.content = path.replace(/.*\//, '');
+    if (domNode.typeNode.className == 'link') {
+      // remove link symbol and dir path for display
+      const path = domNode.content.trim().slice(1);
+      domNode.link = path.replace(/\/+/, '/');
+      domNode.content = path.replace(/.*\//, '');
 
-    // register click event for Node class
-    $(domNode.typeNode).on('click', (event) => {
-      this.emClick(event.target);
-    });
+      // register click event for Node class
+      $(domNode.typeNode).on('click', (event) => {
+        this.emClick(event.target);
+      });
+    } else {
+      domNode.content = domNode.content.trim().slice(1);
+    }
 
     let nextNode = domNode.next();
     if (nextNode == null || nextNode.type.text == false) {
