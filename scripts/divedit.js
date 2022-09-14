@@ -1,3 +1,4 @@
+const { clipboard } = require('electron');
 
 class DomNode {
   constructor(node) {
@@ -228,6 +229,11 @@ class DomNode {
     const zeroSpaceAtStart = new RegExp(`^${DomNode.char.spaceZeroWidth}`);
     return zeroSpaceAtStart.test(this._realContent);
   }
+
+  static selectedContent() {
+    let selectedText = window.getSelection().toString();
+    return selectedText;
+  }
 }
 
 class DivEdit {
@@ -257,6 +263,9 @@ class DivEdit {
       },
       'editEm': {
         'escape|enter|tab|backspace': this.finishEm
+      },
+      'all': {
+        'ctrl+c': this.copyText,
       }
     };
   }
@@ -345,6 +354,11 @@ class DivEdit {
         handled = this.bindings[mode][key].bind(this)(domNode, key);
       } else if ('other' in this.bindings[mode]) {
         handled = this.bindings[mode]['other'].bind(this)(domNode, key);
+      }
+    }
+    if ('all' in this.bindings) {
+      if (key in this.bindings['all']) {
+        handled = this.bindings['all'][key].bind(this)(domNode, key);
       }
     }
     return handled;
@@ -515,9 +529,14 @@ class DivEdit {
     return true;
   }
 
+  copyText(domNode, key) {
+    clipboard.writeText(DomNode.selectedContent());
+    return true;
+  }
+
   // to convert //////////////////////////////////////////////////////////////////
 
-  insertText(text) {
+  old_insertText(text) {
     let node = document.getSelection().focusNode;
     if (!this.multiline) text = text.replace(/\n/g, ' ');
 
@@ -539,7 +558,7 @@ class DivEdit {
     return true;
   }
 
-  insertTextAtCursor(text) {
+  old_insertTextAtCursor(text) {
     if (window.getSelection) {
       const selection = window.getSelection();
       if (selection.getRangeAt && selection.rangeCount) {
@@ -560,7 +579,7 @@ class DivEdit {
     }
   }
 
-  findDuplicate(tagType) {
+  old_findDuplicate(tagType) {
     let lastNode = null;
     for (const node of this.div.childNodes) {
       if (lastNode != null &&
@@ -571,14 +590,14 @@ class DivEdit {
     return lastNode.nextSibling;
   }
 
-  getSelected() {
+  old_getSelected() {
     let selectedText = window.getSelection().toString();
     selectedText = selectedText.replace(new RegExp(this.zeroSpace, 'g'), '');
     selectedText = selectedText.replace(new RegExp(this.space, 'g'), ' ');
     return selectedText;
   }
 
-  deleteSelected() {
+  old_deleteSelected() {
     window.getSelection().deleteFromDocument();
     let node = document.getSelection().focusNode;
     node = this.textNode(node);
