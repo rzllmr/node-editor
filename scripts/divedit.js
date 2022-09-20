@@ -230,11 +230,6 @@ class DomNode {
     const zeroSpaceAtStart = new RegExp(`^${DomNode.char.spaceZeroWidth}`);
     return zeroSpaceAtStart.test(this._realContent);
   }
-
-  static selectedContent() {
-    let selectedText = window.getSelection().toString();
-    return selectedText;
-  }
 }
 
 class DivEdit {
@@ -531,8 +526,12 @@ class DivEdit {
   }
 
   copyText(domNode, key) {
-    clipboard.writeText(DomNode.selectedContent());
+    clipboard.writeText(this.selectedContent());
     return true;
+  }
+
+  selectedContent() {
+    return window.getSelection().toString();
   }
 
   // to convert //////////////////////////////////////////////////////////////////
