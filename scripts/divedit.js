@@ -145,8 +145,9 @@ class DomNode {
   // content handling ////////////////////////////////////////////////////////////
 
   static fixSpaces(text) {
-    return text.replace(/\s\s+/g, (match) => {
-      return ''.padStart(match.length, DomNode.char.spaceNoBreak + DomNode.char.space);
+    return text.replace(/\s+/g, (match) => {
+      if (match.length == 1) return DomNode.char.space;
+      else return ''.padStart(match.length, DomNode.char.spaceNoBreak + DomNode.char.space);
     });
   }
 
