@@ -70,7 +70,11 @@ class DomNode {
   }
 
   static current() {
-    return new DomNode(document.getSelection().focusNode);
+    let focusNode = document.getSelection().focusNode;
+    if (focusNode.nodeName == 'DIV') {
+      focusNode = focusNode.firstChild;
+    }
+    return new DomNode(focusNode);
   }
 
   next() {
