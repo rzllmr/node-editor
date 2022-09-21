@@ -46,12 +46,20 @@
 }
 
 em {
-  color: var(--color-text-highlight);
   font: inherit;
+}
+em.link {
+  color: var(--color-text-highlight);
   cursor: pointer;
 }
-em:hover {
+em.link:hover {
   text-decoration: underline;
+}
+em.bold {
+  font-weight: bold;
+}
+em.italic {
+  font-style: italic;
 }
 
 .node > .head, .node > .body {
