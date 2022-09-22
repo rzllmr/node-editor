@@ -14,14 +14,6 @@ class DomNode {
     this.type = null;
   }
 
-  static get char() {
-    return {
-      spaceZeroWidth: '\u200B',
-      spaceNoBreak: '\u00A0',
-      space: '\u0020'
-    };
-  }
-
   static typeNode(node) {
     if (node.nodeName === '#text' &&
         node.parentNode != null &&
@@ -132,6 +124,16 @@ class DomNode {
     other.destroy(div);
   }
 
+  insertText(text, caretIdx = null) {
+    if (caretIdx == null) caretIdx = this.caretIndex;
+
+    const leftOfCaret = this.content.slice(0, caretIdx);
+    const rightOfCaret = this.content.slice(caretIdx);
+
+    this.content = DomNode.fixSpaces(leftOfCaret + text + rightOfCaret);
+    this.caretIndex = leftOfCaret.length + text.length;
+  }
+
   get link() {
     if (this.type.em == false) {
       throw new StandardError('link only available to \'em\' nodes');
@@ -148,11 +150,12 @@ class DomNode {
 
   // content handling ////////////////////////////////////////////////////////////
 
-  static fixSpaces(text) {
-    return text.replace(/\s+/g, (match) => {
-      if (match.length == 1) return DomNode.char.space;
-      else return ''.padStart(match.length, DomNode.char.spaceNoBreak + DomNode.char.space);
-    });
+  static get char() {
+    return {
+      spaceZeroWidth: '\u200B',
+      spaceNoBreak: '\u00A0',
+      space: '\u0020'
+    };
   }
 
   // private
@@ -236,19 +239,16 @@ class DomNode {
     }
   }
 
+  static fixSpaces(text) {
+    return text.replace(/\s+/g, (match) => {
+      if (match.length == 1) return DomNode.char.space;
+      else return ''.padStart(match.length, DomNode.char.spaceNoBreak + DomNode.char.space);
+    });
+  }
+
   hasZeroSpace() {
     const zeroSpaceAtStart = new RegExp(`^${DomNode.char.spaceZeroWidth}`);
     return zeroSpaceAtStart.test(this._realContent);
-  }
-
-  insertText(text, caretIdx = null) {
-    if (caretIdx == null) caretIdx = this.caretIndex;
-
-    const leftOfCaret = this.content.slice(0, caretIdx);
-    const rightOfCaret = this.content.slice(caretIdx);
-
-    this.content = DomNode.fixSpaces(leftOfCaret + text + rightOfCaret);
-    this.caretIndex = leftOfCaret.length + text.length;
   }
 }
 
