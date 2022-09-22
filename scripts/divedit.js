@@ -39,21 +39,23 @@ class DomNode {
     };
   }
 
-  static create(type, content = '') {
+  static create(type) {
     let newNode;
     switch (type) {
       case 'text':
-        newNode = document.createTextNode(DomNode.char.spaceZeroWidth + content);
+        newNode = document.createTextNode(DomNode.char.spaceZeroWidth);
         break;
       case 'br':
         newNode = document.createElement('br');
         break;
       case 'bold':
       case 'italic':
+      case 'underline':
+      case 'strikethrough':
       case 'link':
         newNode = document.createElement('em');
         newNode.className = type;
-        newNode.textContent = content;
+        newNode.textContent = '#';
         break;
       default:
         throw new Error(`DomNode type unknown: ${type}`);
@@ -66,7 +68,10 @@ class DomNode {
     if (focusNode.nodeName == 'DIV') {
       focusNode = focusNode.firstChild;
     }
-    return new DomNode(focusNode);
+    const currentNode = new DomNode(focusNode);
+    currentNode.fixStart();
+    currentNode.fixCaret();
+    return currentNode;
   }
 
   next() {
@@ -108,7 +113,8 @@ class DomNode {
     const leftOfCaret = this.content.slice(0, caretIdx);
     const rightOfCaret = this.content.slice(caretIdx);
     this.content = leftOfCaret;
-    const rightNode = DomNode.create('text', rightOfCaret);
+    const rightNode = DomNode.create('text');
+    rightNode.content = rightOfCaret;
     $(rightNode.typeNode).insertAfter(this.typeNode);
     $(other.typeNode).insertAfter(this.typeNode);
   }
@@ -116,10 +122,7 @@ class DomNode {
   mergeInto(other, div) {
     if (!this.type.text || !other.type.text) return;
 
-    let mergedContent = this.content;
-    mergedContent += other.content;
-    mergedContent = DomNode.fixSpaces(mergedContent);
-    this.content = mergedContent;
+    this.content = DomNode.fixSpaces(this.content + other.content);
 
     other.destroy(div);
   }
@@ -160,7 +163,7 @@ class DomNode {
 
   // private
   get _realContent() {
-    return this.textNode.textContent;
+    return this.typeNode.textContent;
   }
 
   get content() {
@@ -170,12 +173,13 @@ class DomNode {
   }
 
   set _realContent(text) {
-    this.textNode.textContent = text;
+    this.typeNode.textContent = text;
   }
 
   set content(text) {
     if (this.hasZeroSpace()) text = DomNode.char.spaceZeroWidth + text;
     this._realContent = text;
+    this.fixStart();
   }
 
   get _realCaretIndex() {
@@ -267,7 +271,7 @@ class DivEdit {
     return {
       'text': {
         'escape': this.exitEdit,
-        '#|*|^': this.insertEm,
+        'ctrl+l|ctrl+b|ctrl+i|ctrl+u|ctrl+s': this.insertEm,
         'enter': this.insertBreak,
         'arrowleft|arrowright': this.navigate,
         'delete|backspace': this.removeNonText
@@ -395,8 +399,15 @@ class DivEdit {
   }
 
   insertEm(domNode, key) {
-    const type = { '#': 'link', '*': 'bold', '^': 'italic' };
-    const emNode = DomNode.create(type[key], key);
+    const selectedContent = this.selectedContent();
+    this.deleteSelected();
+
+    key = key.replace('ctrl+', '');
+    const type = {
+      'l': 'link', 'b': 'bold', 'i': 'italic',
+      'u': 'underline', 's': 'strikethrough'
+    };
+    const emNode = DomNode.create(type[key]);
 
     if (domNode.caretAt(-1)) {
       domNode.insertAfter(emNode);
@@ -406,7 +417,8 @@ class DivEdit {
     } else {
       domNode.insertWithin(emNode, domNode.caretIndex);
     }
-    emNode.caretIndex = 1;
+    emNode.content = '#' + selectedContent;
+    emNode.caretIndex = -1;
     this.editEm = true;
 
     return true;
@@ -553,8 +565,6 @@ class DivEdit {
 
   insertText(domNode, key) {
     let currentNode = this.deleteSelected();
-    currentNode.fixStart();
-    currentNode.fixCaret();
 
     let text = clipboard.readText();
     const parts = text.split('\n');
