@@ -61,6 +61,12 @@ em.bold {
 em.italic {
   font-style: italic;
 }
+em.underline {
+  text-decoration: underline;
+}
+em.strikethrough {
+  text-decoration: line-through;
+}
 
 .node > .head, .node > .body {
   background: var(--color-node);
