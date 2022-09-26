@@ -163,7 +163,7 @@ class DomNode {
 
   // private
   get _realContent() {
-    return this.typeNode.textContent;
+    return this.textNode.textContent;
   }
 
   get content() {
@@ -173,7 +173,7 @@ class DomNode {
   }
 
   set _realContent(text) {
-    this.typeNode.textContent = text;
+    this.textNode.textContent = text;
   }
 
   set content(text) {
