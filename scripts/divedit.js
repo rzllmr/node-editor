@@ -329,10 +329,8 @@ class DivEdit {
       },
       blur: (event) => {
         if (this.editEm) {
-          const emNode = $(event.target).find('em').filter(
-              (_, em) => em.textContent.startsWith('#'))[0];
-          if (emNode == undefined) return false;
-          const handled = this.finishEm(new DomNode(emNode), 'Enter');
+          const currentNode = DomNode.current();
+          const handled = this.finishEm(currentNode, 'enter');
           this.editEm = !handled;
         }
         if (DivEdit.isEmpty(this.div)) {
@@ -417,7 +415,7 @@ class DivEdit {
     } else {
       domNode.insertWithin(emNode, domNode.caretIndex);
     }
-    emNode.content = '#' + selectedContent;
+    emNode.content += selectedContent;
     emNode.caretIndex = -1;
     this.editEm = true;
 
