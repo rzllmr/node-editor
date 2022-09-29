@@ -450,8 +450,8 @@ class Node extends Proxy {
       height: element.style.height,
       hue: element.querySelector('.divider').style.getPropertyValue('--hue'),
       minimized: this.minimized,
-      label: element.querySelector('div.label').innerHTML.replace(/<br>/g, '\n'),
-      details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n'),
+      label: element.querySelector('div.label').innerHTML,
+      details: element.querySelector('div.details').innerHTML,
       image: element.querySelector('img.image').src
     };
     return properties;
@@ -476,9 +476,9 @@ class Node extends Proxy {
       height: properties.height
     });
     node.element.find('.divider')[0].style.setProperty('--hue', properties.hue);
-    node.element.find('div.label').html(properties.label.replace(/\n/g, '<br>'));
-    node.element.find('div.details').html(properties.details.replace(/\n/g, '<br>'));
-    node.element.find('div.label em, div.details em').on('click', (event) => {
+    node.element.find('div.label').html(properties.label);
+    node.element.find('div.details').html(properties.details);
+    node.element.find('div.label em.link, div.details em.link').on('click', (event) => {
       $('#board-tree').trigger('treeview:createFromLink', [event.target]);
     });
     node.setImage(properties.image);
