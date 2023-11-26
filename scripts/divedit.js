@@ -54,8 +54,8 @@ class DomNode {
       case 'strikethrough':
       case 'link':
         newNode = document.createElement('em');
+        newNode.textContent = DomNode.char.spaceZeroWidth + type;
         newNode.className = type;
-        newNode.textContent = '#';
         break;
       default:
         throw new Error(`DomNode type unknown: ${type}`);
@@ -434,7 +434,7 @@ class DivEdit {
 
     if (domNode.typeNode.className == 'link') {
       // remove link symbol and dir path for display
-      const path = domNode.content.trim().slice(1);
+      const path = domNode.content.trim();
       domNode.link = path.replace(/\/+/, '/');
       domNode.content = path.replace(/.*\//, '');
 
@@ -443,7 +443,7 @@ class DivEdit {
         this.emClick(event.target);
       });
     } else {
-      domNode.content = domNode.content.trim().slice(1);
+      domNode.content = domNode.content.trim();
     }
 
     let nextNode = domNode.next();
@@ -564,7 +564,7 @@ class DivEdit {
   insertText(domNode, key) {
     let currentNode = this.deleteSelected();
 
-    let text = clipboard.readText();
+    const text = clipboard.readText();
     const parts = text.split('\n');
     for (const line in parts) {
       currentNode.insertText(parts[line]);
@@ -576,7 +576,7 @@ class DivEdit {
 
     return true;
   }
-  
+
   selectedContent() {
     return window.getSelection().toString();
   }
