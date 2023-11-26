@@ -151,6 +151,32 @@ class DomNode {
     this.typeNode.dataset.path = path;
   }
 
+  change(type) {
+    if (!['bold', 'italic', 'underline', 'strikethrough', 'link'].includes(type)) return;
+    this.typeNode.className = type;
+  }
+
+  get edit() {
+    return this.typeNode.className.includes('edit');
+  }
+
+  set edit(bool) {
+    const classes = new Set(this.typeNode.className.split(' '));
+    if (bool == true) classes.add('edit');
+    else classes.delete('edit');
+    this.typeNode.className = Array.from(classes).join(' ');
+  }
+
+  select(start, end) {
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+
+    const range = document.createRange();
+    range.setStart(this.textNode, this.convertIdx(start));
+    range.setEnd(this.textNode, this.convertIdx(end));
+    selection.addRange(range);
+  }
+
   // content handling ////////////////////////////////////////////////////////////
 
   static get char() {
