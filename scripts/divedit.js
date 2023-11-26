@@ -305,6 +305,7 @@ class DivEdit {
       },
       'em': {
         'escape|enter|tab|backspace': this.finishEm,
+        'ctrl+l|ctrl+b|ctrl+i|ctrl+u|ctrl+s': this.switchEm,
         'arrowleft|arrowright': this.navigate
         // 'other': (node, key) => { return true; }
       },
@@ -478,6 +479,18 @@ class DivEdit {
       nextNode.caretIndex = 0;
     }
     domNode.edit = false;
+    return true;
+  }
+
+  switchEm(domNode, key) {
+    if (domNode.type.em) {
+      key = key.replace('ctrl+', '');
+      const type = {
+        'l': 'link', 'b': 'bold', 'i': 'italic',
+        'u': 'underline', 's': 'strikethrough'
+      };
+      domNode.change(type[key]);
+    }
     return true;
   }
 
