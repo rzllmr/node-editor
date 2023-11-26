@@ -246,17 +246,19 @@ class DomNode {
   }
 
   _realCaretAt(caretIdx) {
-    if (caretIdx < 0) {
-      caretIdx += this._realContent.length + 1;
-    }
+    if (caretIdx < 0) caretIdx += this._realContent.length + 1;
     return this._realCaretIndex == caretIdx;
   }
 
   caretAt(caretIdx) {
-    if (caretIdx < 0) {
-      caretIdx += this.content.length + 1;
-    }
+    if (caretIdx < 0) caretIdx += this.content.length + 1;
     return this.caretIndex == caretIdx;
+  }
+
+  convertIdx(caretIdx) {
+    if (caretIdx < 0) caretIdx += this._realContent.length + 1;
+    else if (this.hasZeroSpace()) caretIdx++;
+    return caretIdx;
   }
 
   fixCaret() {
@@ -300,15 +302,11 @@ class DivEdit {
         'ctrl+l|ctrl+b|ctrl+i|ctrl+u|ctrl+s': this.insertEm,
         'enter': this.insertBreak,
         'arrowleft|arrowright': this.navigate,
-        'delete|backspace': this.removeNonText
       },
       'em': {
-        'delete|backspace': this.removeNonText,
-        'arrowleft|arrowright': this.navigate,
-        'other': (node, key) => { return true; }
-      },
-      'editEm': {
-        'escape|enter|tab|backspace': this.finishEm
+        'escape|enter|tab|backspace': this.finishEm,
+        'arrowleft|arrowright': this.navigate
+        // 'other': (node, key) => { return true; }
       },
       'all': {
         'ctrl+c': this.copyText,
@@ -319,7 +317,6 @@ class DivEdit {
 
   registerKeys(emClick) {
     this.emClick = emClick;
-    this.editEm = false;
 
     this.bindings = this.bindings();
 
@@ -354,10 +351,9 @@ class DivEdit {
         domNode.fixCaret();
       },
       blur: (event) => {
-        if (this.editEm) {
-          const currentNode = DomNode.current();
-          const handled = this.finishEm(currentNode, 'enter');
-          this.editEm = !handled;
+        const currentNode = DomNode.current();
+        if (currentNode.type.em) {
+          this.finishEm(currentNode, 'enter');
         }
         if (DivEdit.isEmpty(this.div)) {
           this.div.removeChild(this.div.firstChild);
@@ -382,14 +378,10 @@ class DivEdit {
     const domNode = DomNode.current();
 
     let mode = '';
-    if (this.editEm) {
-      mode = 'editEm';
+    if (domNode.type.text) {
+      mode = 'text';
     } else {
-      if (domNode.type.text) {
-        mode = 'text';
-      } else {
-        mode = 'em';
-      }
+      mode = 'em';
     }
 
     console.log(mode, key);
@@ -441,17 +433,15 @@ class DivEdit {
     } else {
       domNode.insertWithin(emNode, domNode.caretIndex);
     }
-    emNode.content += selectedContent;
-    emNode.caretIndex = -1;
-    this.editEm = true;
+    if (selectedContent.length > 0) emNode.content = selectedContent;
+    emNode.select(0, -1);
+    emNode.edit = true;
 
     return true;
   }
 
   finishEm(domNode, key) {
     if (key == 'backspace' && domNode.content.length > 1) return false;
-
-    this.editEm = false;
 
     if (domNode.content.length == 1) {
       this.removeNonText(domNode, key);
@@ -487,6 +477,7 @@ class DivEdit {
     } else {
       nextNode.caretIndex = 0;
     }
+    domNode.edit = false;
     return true;
   }
 
@@ -520,39 +511,47 @@ class DivEdit {
 
   navigate(domNode, key) {
     if (key == 'arrowleft') {
-      let nonTextNode;
-      if (domNode.type.text && domNode.caretAt(0)) {
-        nonTextNode = domNode.previous();
-        if (nonTextNode == null) return true;
-      } else if (!domNode.type.text) {
-        nonTextNode = domNode;
-      } else {
-        return false;
-      }
+      if (domNode.caretIndex > 1) return false;
 
-      let prevTextNode = nonTextNode.previous();
-      if (prevTextNode == null) {
-        prevTextNode = DomNode.create('text');
-        nonTextNode.insertBefore(prevTextNode);
+      let prevNode = domNode.previous();
+      if (domNode.type.text) { // && !prevNode.type.text
+        if (prevNode == null) {
+          if (!domNode.caretAt(0)) return false;
+        } else {
+          if (!domNode.caretAt(1)) return false;
+          prevNode.caretIndex = -1;
+          prevNode.edit = true;
+        }
+      } else {
+        if (prevNode == null) {
+          prevNode = DomNode.create('text');
+          domNode.insertBefore(prevNode);
+        }
+        if (!domNode.caretAt(0)) return false;
+        prevNode.caretIndex = -2;
+        domNode.edit = false;
       }
-      prevTextNode.caretIndex = -1;
     } else if (key == 'arrowright') {
-      let nonTextNode;
-      if (domNode.type.text && domNode.caretAt(-1)) {
-        nonTextNode = domNode.next();
-        if (nonTextNode == null) return true;
-      } else if (!domNode.type.text) {
-        nonTextNode = domNode;
-      } else {
-        return false;
-      }
+      if (!domNode.caretAt(-1) && !domNode.caretAt(-2)) return false;
 
-      let nextTextNode = nonTextNode.next();
-      if (nextTextNode == null) {
-        nextTextNode = DomNode.create('text');
-        nonTextNode.insertAfter(nextTextNode);
+      let nextNode = domNode.next();
+      if (domNode.type.text) { // && !nextNode.type.text
+        if (nextNode == null) {
+          if (!domNode.caretAt(-1)) return false;
+        } else {
+          if (!domNode.caretAt(-2)) return false;
+          nextNode.caretIndex = 0;
+          nextNode.edit = true;
+        }
+      } else {
+        if (nextNode == null) {
+          nextNode = DomNode.create('text');
+          domNode.insertBefore(nextNode);
+        }
+        if (!domNode.caretAt(-1)) return false;
+        nextNode.caretIndex = 1;
+        domNode.edit = false;
       }
-      nextTextNode.caretIndex = 0;
     } else {
       return false;
     }
