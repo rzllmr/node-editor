@@ -35,14 +35,14 @@ class Selection {
 
   register() {
     this.board.element.on('mousedown', (event) => {
-      if (event.button != 0 || event.altKey || event.ctrlKey) return;
+      if (event.button != 0 || event.altKey || event.ctrlKey || event.metaKey) return;
       // left click alone
 
       const target = $(event.target).closest('.layer, .node, .sign');
       if (target.length == 0) return;
 
       if (target[0].tagName == 'svg') {
-        if (!event.ctrlKey) this.clearSelection();
+        if (!(event.ctrlKey || event.metaKey)) this.clearSelection();
 
         // rectangleSelect
         this.rectOrigin = {
@@ -84,7 +84,7 @@ class Selection {
       } else if (this.draggingSelection) {
         this.draggingSelection = false;
       } else if (['svg', 'HTML'].includes(target[0].tagName) == false) {
-        if (event.ctrlKey) this.multiSelect(target[0].id);
+        if (event.ctrlKey || event.metaKey) this.multiSelect(target[0].id);
         else this.singleSelect(target[0].id);
       }
       $(window).off('mousemove');

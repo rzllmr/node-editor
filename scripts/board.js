@@ -74,7 +74,7 @@ class Board extends Proxy {
         this.minimap.element.trigger('window:update');
       },
       mousedown: (event) => {
-        if (!(event.button == 1 || event.button == 0 && event.ctrlKey)) return;
+        if (!(event.button == 1 || event.button == 0 && (event.ctrlKey || event.metaKey))) return;
         // middle click OR left click + ctrl
 
         if (event.shiftKey) {
