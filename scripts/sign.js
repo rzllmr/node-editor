@@ -105,8 +105,8 @@ class Sign extends Proxy {
 
   static createId(parsedId) {
     return Utils.stringFormat('{0}{1}{2}-{3}{4}{5}',
-      parsedId.sNodeId, parsedId.sAnchorSide, parsedId.sAnchorId,
-      parsedId.tNodeId, parsedId.tAnchorSide, parsedId.tAnchorId
+        parsedId.sNodeId, parsedId.sAnchorSide, parsedId.sAnchorId,
+        parsedId.tNodeId, parsedId.tAnchorSide, parsedId.tAnchorId
     );
   }
 

@@ -16,7 +16,6 @@ class Clipboard {
   get() {
     return Utils.clone(this.data);
   }
-
 }
 
 module.exports = Clipboard;

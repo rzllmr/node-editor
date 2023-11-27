@@ -1,4 +1,4 @@
-const { clipboard } = require('electron');
+const {clipboard} = require('electron');
 
 // allow for Node objects to be resolved
 // from HTML ids of .node elements
@@ -90,9 +90,15 @@ class Node extends Proxy {
     const details = this.element.find('.details');
     const image = this.element.find('.image');
     const imageX = this.element.find('.image-x');
-    
-    $(document).on('dragover', (event) => { event.preventDefault(); event.stopPropagation(); });
-    $(document).on('drop', (event) => { event.preventDefault(); event.stopPropagation(); });
+
+    $(document).on('dragover', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    $(document).on('drop', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
 
     details.on('dragenter', () => {
       details.addClass('hover');
@@ -105,7 +111,7 @@ class Node extends Proxy {
     details.on('drop', (event) => {
       details.removeClass('hover');
 
-      var file = event.originalEvent.dataTransfer.files[0];
+      const file = event.originalEvent.dataTransfer.files[0];
       if (!file.type.startsWith('image')) return;
 
       this.setImage(file.path);
@@ -125,8 +131,8 @@ class Node extends Proxy {
       }
       this.imageDim = dim;
       this.resize(
-        parseInt(this.element.css('width')),
-        parseInt(this.element.css('height'))
+          parseInt(this.element.css('width')),
+          parseInt(this.element.css('height'))
       );
     });
 
@@ -378,7 +384,7 @@ class Node extends Proxy {
         }
       }
     }
-    
+
     this.element.css('width', Math.max(width, this.minSize.x));
     if (!this.minimized || this.imageDim) {
       this.element.css('height', Math.max(height, this.minSize.y));
@@ -392,7 +398,7 @@ class Node extends Proxy {
     const headHeight = 41;
     const width = parseInt(this.element.css('width'));
     const height = width / this.imageDim.ratio + headHeight;
-    this.element.css('height', Math.max(height, this.minSize.y))
+    this.element.css('height', Math.max(height, this.minSize.y));
   }
 
   minimize(toggle) {

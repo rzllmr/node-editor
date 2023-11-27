@@ -18,7 +18,9 @@
       return false;
     });
     $(document).keydown(function(event) {
-      return keybinding.handleKey(event.key, event.ctrlKey, event.shiftKey, event.altKey, event.metaKey);
+      return keybinding.handleKey(
+          event.key, event.ctrlKey, event.shiftKey, event.altKey, event.metaKey
+      );
     });
   });
 }(window.jQuery, window, document));

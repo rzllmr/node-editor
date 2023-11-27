@@ -255,7 +255,7 @@ C${ctrl1.x},${ctrl1.y} ${ctrl2.x},${ctrl2.y} ${target.x},${target.y}`;
 
   static createId(parsedId) {
     return Utils.stringFormat('{0}{1}{2}.{3}',
-      parsedId.nodeId, parsedId.anchorSide, parsedId.anchorId, parsedId.endType
+        parsedId.nodeId, parsedId.anchorSide, parsedId.anchorId, parsedId.endType
     );
   }
 

@@ -98,7 +98,7 @@ class Selection {
       $(document).on(eventName, () => {
         if (this.board.visible()) callback();
       });
-    }
+    };
     eventCallback('hotkey:clearSelection', this.clearSelection.bind(this));
     eventCallback('hotkey:deleteSelection', this.deleteSelection.bind(this));
     eventCallback('hotkey:deleteSelection', this.deleteHoveredGraph.bind(this));
@@ -109,7 +109,7 @@ class Selection {
 
   deleteHoveredGraph() {
     const hoveredGraph = $('path.graph-area:hover')[0];
-    if (hoveredGraph == undefined) return; 
+    if (hoveredGraph == undefined) return;
 
     const graphId = hoveredGraph.id.replace('_hover', '');
     const graph = this.proxy.resolve(graphId);
@@ -190,7 +190,7 @@ class Selection {
 
     // store elements in order best for creation
     const sortedNodes = Array.from(nodes.values()).sort(
-      (a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
+        (a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
     const propertiesList = sortedNodes.concat(graphs).concat(signs);
     this.clipboard.set(propertiesList);
   }
@@ -204,17 +204,17 @@ class Selection {
     const propertiesList = this.clipboard.get();
 
     // allot new node ids
-    let nodeIds = propertiesList.
-      filter((props) => props.type == 'node').
-      map((props) => parseInt(props.id, 10)).
-      sort((a, b) => a - b);
+    const nodeIds = propertiesList.
+        filter((props) => props.type == 'node').
+        map((props) => parseInt(props.id, 10)).
+        sort((a, b) => a - b);
 
     let firstFreeId = this.board.constructor.nodeIdxMax + 1;
     const newNodeIds = new Map();
     for (const nodeId of nodeIds) {
       newNodeIds.set(nodeId.toString(), (firstFreeId++).toString());
     }
-    
+
     // calculate position correction
     const posCorrection = this.posCorrection(propertiesList);
 
@@ -226,7 +226,7 @@ class Selection {
       }
       const class_ = classes.get(properties.type);
 
-      switch(properties.type) {
+      switch (properties.type) {
         case 'node':
           properties.id = newNodeIds.get(properties.id);
           properties.posX = (parseInt(properties.posX, 10) + posCorrection.x) + 'px';
@@ -241,7 +241,7 @@ class Selection {
           properties.target = class_.createId(parsedGraphId);
           break;
         case 'sign':
-          let parsedSignId = class_.parseId(properties.graph);
+          const parsedSignId = class_.parseId(properties.graph);
           parsedSignId.sNodeId = newNodeIds.get(parsedSignId.sNodeId);
           parsedSignId.tNodeId = newNodeIds.get(parsedSignId.tNodeId);
           properties.graph = class_.createId(parsedSignId);
@@ -254,7 +254,7 @@ class Selection {
   }
 
   posCorrection(propertiesList) {
-    let outerRect = { l: 1e4, t: 1e4, r:0, b: 0 };
+    const outerRect = {l: 1e4, t: 1e4, r: 0, b: 0};
     for (const props of propertiesList) {
       if (props.type != 'node') continue;
       outerRect.l = Math.min(outerRect.l, parseInt(props.posX, 10));

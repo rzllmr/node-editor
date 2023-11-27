@@ -1,4 +1,4 @@
-const { clipboard } = require('electron');
+const {clipboard} = require('electron');
 
 class DomNode {
   constructor(node) {
