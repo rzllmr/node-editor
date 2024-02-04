@@ -65,9 +65,13 @@ class DomNode {
 
   static current() {
     let focusNode = document.getSelection().focusNode;
+    if (focusNode == null) return null;
+
     if (focusNode.nodeName == 'DIV') {
       focusNode = focusNode.firstChild;
     }
+    if (focusNode == null) return null;
+
     const currentNode = new DomNode(focusNode);
     currentNode.fixStart();
     currentNode.fixCaret();
