@@ -117,8 +117,10 @@ class Selection {
   }
 
   singleSelect(id) {
-    this.clearSelection();
     const object = this.proxy.resolve(id);
+    if (this.selection.size == 1 && this.selection.has(object)) return;
+
+    this.clearSelection();
     object.select();
     this.selection.add(object);
     if (this.selection.size == 1) this.colorPicker.setSlider(object);
