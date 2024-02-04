@@ -304,7 +304,7 @@ class DivEdit {
         'arrowleft|arrowright': this.navigate,
       },
       'em': {
-        'escape|enter|tab|backspace': this.finishEm,
+        'escape|enter|tab|backspace|delete': this.finishEm,
         'ctrl+l|ctrl+b|ctrl+i|ctrl+u|ctrl+s': this.switchEm,
         'arrowleft|arrowright': this.navigate
         // 'other': (node, key) => { return true; }
@@ -442,7 +442,7 @@ class DivEdit {
   }
 
   finishEm(domNode, key) {
-    if (key == 'backspace' && domNode.content.length > 1) return false;
+    if (['backspace', 'delete'].includes(key) && domNode.content.length > 1) return false;
 
     if (domNode.content.length == 1) {
       this.removeNonText(domNode, key);
