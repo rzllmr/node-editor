@@ -292,6 +292,7 @@ class DivEdit {
   constructor(divNode, multiline = true) {
     this.div = divNode;
     this.multiline = multiline;
+    this.lastNode = null;
 
     // nodes require content, so we use
     // the zero width space character
@@ -340,10 +341,13 @@ class DivEdit {
     // classify control events for handle()
     $(this.div).on({
       keydown: (event) => {
-        return !this.handle(this.modifiedKey(event), 'down');
+        return !this.handle(this.modifiedKey(event));
       },
-      keyup: (event) => {
-        // pass
+      keyup: () => {
+        return !this.caretChange();
+      },
+      mouseup: () => {
+        return !this.caretChange();
       },
       focus: () => {
         let domNode;
@@ -389,7 +393,6 @@ class DivEdit {
       mode = 'em';
     }
 
-    console.log(mode, key);
     let handled = false;
     if (mode in this.bindings) {
       if (key in this.bindings[mode]) {
@@ -526,6 +529,18 @@ class DivEdit {
     return true;
   }
 
+  caretChange() {
+    const domNode = DomNode.current();
+    const currentNode = domNode == null ? null : domNode.typeNode;
+    const lastNode = this.lastNode == null ? null : this.lastNode.typeNode;
+    if (currentNode != lastNode) {
+      if (lastNode != null && !this.lastNode.type.text) this.lastNode.edit = false;
+      if (domNode != null && !domNode.type.text) domNode.edit = true;
+      this.lastNode = domNode;
+    }
+    return false;
+  }
+
   navigate(domNode, key) {
     if (key == 'arrowleft') {
       if (domNode.caretIndex > 1) return false;
@@ -537,7 +552,6 @@ class DivEdit {
         } else {
           if (!domNode.caretAt(1)) return false;
           prevNode.caretIndex = -1;
-          prevNode.edit = true;
         }
       } else {
         if (prevNode == null) {
@@ -546,7 +560,6 @@ class DivEdit {
         }
         if (!domNode.caretAt(0)) return false;
         prevNode.caretIndex = -2;
-        domNode.edit = false;
       }
     } else if (key == 'arrowright') {
       if (!domNode.caretAt(-1) && !domNode.caretAt(-2)) return false;
@@ -558,7 +571,6 @@ class DivEdit {
         } else {
           if (!domNode.caretAt(-2)) return false;
           nextNode.caretIndex = 0;
-          nextNode.edit = true;
         }
       } else {
         if (nextNode == null) {
@@ -567,7 +579,6 @@ class DivEdit {
         }
         if (!domNode.caretAt(-1)) return false;
         nextNode.caretIndex = 1;
-        domNode.edit = false;
       }
     } else {
       return false;
