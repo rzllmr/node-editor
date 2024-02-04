@@ -16,6 +16,7 @@ class Node extends Proxy {
 
     this.board = board;
     this.minimap = board.find('.minimap');
+    this.nodesLayer = board.find('.layer.nodes');
     this.zoom = zoom;
     this.minSize = {x: 80, y: 70};
 
@@ -24,7 +25,7 @@ class Node extends Proxy {
     if (id !== null) {
       this.element.attr('id', this.id);
     }
-    this.element.appendTo(board.find('.layer.nodes'));
+    this.element.appendTo(this.nodesLayer);
     this.resizer = this.element.find('.resizer');
     this.registerElement();
 
@@ -333,6 +334,8 @@ class Node extends Proxy {
   }
 
   select() {
+    this.toFront();
+
     this.element.removeClass('in out same').addClass('selected');
     for (const side in this.anchors) {
       for (const i in this.anchors[side]) {
@@ -352,6 +355,11 @@ class Node extends Proxy {
   }
   get selected() {
     return this.element.hasClass('selected');
+  }
+
+  toFront() {
+    this.element.remove(this.nodesLayer);
+    this.element.appendTo(this.nodesLayer);
   }
 
   move(offsetX, offsetY, useOffset = true) {
