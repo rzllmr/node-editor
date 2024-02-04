@@ -1,4 +1,4 @@
-const { clipboard } = require('electron');
+const {clipboard} = require('electron');
 
 // allow for Node objects to be resolved
 // from HTML ids of .node elements
@@ -16,6 +16,7 @@ class Node extends Proxy {
 
     this.board = board;
     this.minimap = board.find('.minimap');
+    this.nodesLayer = board.find('.layer.nodes');
     this.zoom = zoom;
     this.minSize = {x: 80, y: 70};
 
@@ -24,7 +25,7 @@ class Node extends Proxy {
     if (id !== null) {
       this.element.attr('id', this.id);
     }
-    this.element.appendTo(board.find('.layer.nodes'));
+    this.element.appendTo(this.nodesLayer);
     this.resizer = this.element.find('.resizer');
     this.registerElement();
 
@@ -90,9 +91,15 @@ class Node extends Proxy {
     const details = this.element.find('.details');
     const image = this.element.find('.image');
     const imageX = this.element.find('.image-x');
-    
-    $(document).on('dragover', (event) => { event.preventDefault(); event.stopPropagation(); });
-    $(document).on('drop', (event) => { event.preventDefault(); event.stopPropagation(); });
+
+    $(document).on('dragover', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    $(document).on('drop', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
 
     details.on('dragenter', () => {
       details.addClass('hover');
@@ -105,7 +112,7 @@ class Node extends Proxy {
     details.on('drop', (event) => {
       details.removeClass('hover');
 
-      var file = event.originalEvent.dataTransfer.files[0];
+      const file = event.originalEvent.dataTransfer.files[0];
       if (!file.type.startsWith('image')) return;
 
       this.setImage(file.path);
@@ -125,8 +132,8 @@ class Node extends Proxy {
       }
       this.imageDim = dim;
       this.resize(
-        parseInt(this.element.css('width')),
-        parseInt(this.element.css('height'))
+          parseInt(this.element.css('width')),
+          parseInt(this.element.css('height'))
       );
     });
 
@@ -327,6 +334,8 @@ class Node extends Proxy {
   }
 
   select() {
+    this.toFront();
+
     this.element.removeClass('in out same').addClass('selected');
     for (const side in this.anchors) {
       for (const i in this.anchors[side]) {
@@ -346,6 +355,11 @@ class Node extends Proxy {
   }
   get selected() {
     return this.element.hasClass('selected');
+  }
+
+  toFront() {
+    this.element.remove(this.nodesLayer);
+    this.element.appendTo(this.nodesLayer);
   }
 
   move(offsetX, offsetY, useOffset = true) {
@@ -378,7 +392,7 @@ class Node extends Proxy {
         }
       }
     }
-    
+
     this.element.css('width', Math.max(width, this.minSize.x));
     if (!this.minimized || this.imageDim) {
       this.element.css('height', Math.max(height, this.minSize.y));
@@ -392,7 +406,7 @@ class Node extends Proxy {
     const headHeight = 41;
     const width = parseInt(this.element.css('width'));
     const height = width / this.imageDim.ratio + headHeight;
-    this.element.css('height', Math.max(height, this.minSize.y))
+    this.element.css('height', Math.max(height, this.minSize.y));
   }
 
   minimize(toggle) {
@@ -450,8 +464,8 @@ class Node extends Proxy {
       height: element.style.height,
       hue: element.querySelector('.divider').style.getPropertyValue('--hue'),
       minimized: this.minimized,
-      label: element.querySelector('div.label').innerHTML.replace(/<br>/g, '\n'),
-      details: element.querySelector('div.details').innerHTML.replace(/<br>/g, '\n'),
+      label: element.querySelector('div.label').innerHTML,
+      details: element.querySelector('div.details').innerHTML,
       image: element.querySelector('img.image').src
     };
     return properties;
@@ -476,9 +490,9 @@ class Node extends Proxy {
       height: properties.height
     });
     node.element.find('.divider')[0].style.setProperty('--hue', properties.hue);
-    node.element.find('div.label').html(properties.label.replace(/\n/g, '<br>'));
-    node.element.find('div.details').html(properties.details.replace(/\n/g, '<br>'));
-    node.element.find('div.label em, div.details em').on('click', (event) => {
+    node.element.find('div.label').html(properties.label);
+    node.element.find('div.details').html(properties.details);
+    node.element.find('div.label em.link, div.details em.link').on('click', (event) => {
       $('#board-tree').trigger('treeview:createFromLink', [event.target]);
     });
     node.setImage(properties.image);

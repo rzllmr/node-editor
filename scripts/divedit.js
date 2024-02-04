@@ -1,8 +1,298 @@
+const {clipboard} = require('electron');
+
+class DomNode {
+  constructor(node) {
+    this.typeNode = DomNode.typeNode(node);
+    this.textNode = DomNode.textNode(node);
+    this.type = DomNode.type(node);
+  }
+
+  destroy(div) {
+    div.removeChild(this.typeNode);
+    this.typeNode = null;
+    this.textNode = null;
+    this.type = null;
+  }
+
+  static typeNode(node) {
+    if (node.nodeName === '#text' &&
+        node.parentNode != null &&
+        node.parentNode.nodeName !== 'DIV') {
+      node = node.parentNode;
+    }
+    return node;
+  }
+
+  static textNode(node) {
+    if (node.nodeName !== '#text') {
+      node = node.firstChild;
+    }
+    return node;
+  }
+
+  static type(node) {
+    node = DomNode.typeNode(node);
+    return {
+      text: node.nodeName === '#text',
+      em: node.nodeName === 'EM',
+      br: node.nodeName === 'BR'
+    };
+  }
+
+  static create(type) {
+    let newNode;
+    switch (type) {
+      case 'text':
+        newNode = document.createTextNode(DomNode.char.spaceZeroWidth);
+        break;
+      case 'br':
+        newNode = document.createElement('br');
+        break;
+      case 'bold':
+      case 'italic':
+      case 'underline':
+      case 'strikethrough':
+      case 'link':
+        newNode = document.createElement('em');
+        newNode.textContent = DomNode.char.spaceZeroWidth + type;
+        newNode.className = type;
+        break;
+      default:
+        throw new Error(`DomNode type unknown: ${type}`);
+    }
+    return new DomNode(newNode);
+  }
+
+  static current() {
+    let focusNode = document.getSelection().focusNode;
+    if (focusNode == null) return null;
+
+    if (focusNode.nodeName == 'DIV') {
+      focusNode = focusNode.firstChild;
+    }
+    if (focusNode == null) return null;
+
+    const currentNode = new DomNode(focusNode);
+    currentNode.fixStart();
+    currentNode.fixCaret();
+    return currentNode;
+  }
+
+  next() {
+    const nextNode = this.typeNode.nextSibling;
+    if (nextNode == null) return null;
+
+    return new DomNode(nextNode);
+  }
+
+  previous() {
+    const nextNode = this.typeNode.previousSibling;
+    if (nextNode == null) return null;
+
+    return new DomNode(nextNode);
+  }
+
+  insertNode(other) {
+    if (this.caretAt(-1)) {
+      this.insertAfter(other);
+    } else if (this.caretAt(1)) {
+      this.insertBefore(other);
+    } else {
+      this.insertWithin(other);
+    }
+  }
+
+  insertBefore(other) {
+    $(other.typeNode).insertBefore(this.typeNode);
+  }
+
+  insertAfter(other) {
+    $(other.typeNode).insertAfter(this.typeNode);
+  }
+
+  insertWithin(other, caretIdx = null) {
+    if (!this.type.text) return;
+    if (caretIdx == null) caretIdx = this.caretIndex;
+
+    const leftOfCaret = this.content.slice(0, caretIdx);
+    const rightOfCaret = this.content.slice(caretIdx);
+    this.content = leftOfCaret;
+    const rightNode = DomNode.create('text');
+    rightNode.content = rightOfCaret;
+    $(rightNode.typeNode).insertAfter(this.typeNode);
+    $(other.typeNode).insertAfter(this.typeNode);
+  }
+
+  mergeInto(other, div) {
+    if (!this.type.text || !other.type.text) return;
+
+    this.content = DomNode.fixSpaces(this.content + other.content);
+
+    other.destroy(div);
+  }
+
+  insertText(text, caretIdx = null) {
+    if (caretIdx == null) caretIdx = this.caretIndex;
+
+    const leftOfCaret = this.content.slice(0, caretIdx);
+    const rightOfCaret = this.content.slice(caretIdx);
+
+    this.content = DomNode.fixSpaces(leftOfCaret + text + rightOfCaret);
+    this.caretIndex = leftOfCaret.length + text.length;
+  }
+
+  get link() {
+    if (this.type.em == false) {
+      throw new StandardError('link only available to \'em\' nodes');
+    }
+    return this.typeNode.dataset.path;
+  }
+
+  set link(path) {
+    if (this.type.em == false) {
+      throw new StandardError('link only available to \'em\' nodes');
+    }
+    this.typeNode.dataset.path = path;
+  }
+
+  change(type) {
+    if (!['bold', 'italic', 'underline', 'strikethrough', 'link'].includes(type)) return;
+    this.typeNode.className = type;
+  }
+
+  get edit() {
+    return this.typeNode.className.includes('edit');
+  }
+
+  set edit(bool) {
+    const classes = new Set(this.typeNode.className.split(' '));
+    if (bool == true) classes.add('edit');
+    else classes.delete('edit');
+    this.typeNode.className = Array.from(classes).join(' ');
+  }
+
+  select(start, end) {
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+
+    const range = document.createRange();
+    range.setStart(this.textNode, this.convertIdx(start));
+    range.setEnd(this.textNode, this.convertIdx(end));
+    selection.addRange(range);
+  }
+
+  // content handling ////////////////////////////////////////////////////////////
+
+  static get char() {
+    return {
+      spaceZeroWidth: '\u200B',
+      spaceNoBreak: '\u00A0',
+      space: '\u0020'
+    };
+  }
+
+  // private
+  get _realContent() {
+    return this.textNode.textContent;
+  }
+
+  get content() {
+    let content = this._realContent;
+    if (this.hasZeroSpace()) content = content.slice(1);
+    return content;
+  }
+
+  set _realContent(text) {
+    this.textNode.textContent = text;
+  }
+
+  set content(text) {
+    if (this.hasZeroSpace()) text = DomNode.char.spaceZeroWidth + text;
+    this._realContent = text;
+    this.fixStart();
+  }
+
+  get _realCaretIndex() {
+    let caretIdx = 0;
+    const selection = window.getSelection();
+    if (selection.rangeCount !== 0) {
+      const range = window.getSelection().getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(this.textNode);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      caretIdx = preCaretRange.toString().length;
+    }
+    return caretIdx;
+  }
+
+  get caretIndex() {
+    let caretIdx = this._realCaretIndex;
+    if (this.hasZeroSpace()) caretIdx--;
+    return caretIdx;
+  }
+
+  set _realCaretIndex(caretIdx) {
+    if (caretIdx < 0) {
+      caretIdx += this._realContent.length + 1;
+    }
+
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.setStart(this.textNode, caretIdx);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  set caretIndex(caretIdx) {
+    if (caretIdx >= 0 && this.hasZeroSpace()) caretIdx++;
+    this._realCaretIndex = caretIdx;
+  }
+
+  _realCaretAt(caretIdx) {
+    if (caretIdx < 0) caretIdx += this._realContent.length + 1;
+    return this._realCaretIndex == caretIdx;
+  }
+
+  caretAt(caretIdx) {
+    if (caretIdx < 0) caretIdx += this.content.length + 1;
+    return this.caretIndex == caretIdx;
+  }
+
+  convertIdx(caretIdx) {
+    if (caretIdx < 0) caretIdx += this._realContent.length + 1;
+    else if (this.hasZeroSpace()) caretIdx++;
+    return caretIdx;
+  }
+
+  fixCaret() {
+    if (this.hasZeroSpace() && this._realCaretAt(0)) this._realCaretIndex = 1;
+  }
+
+  fixStart() {
+    if (this.type.text && !this.hasZeroSpace()) {
+      this._realContent = DomNode.char.spaceZeroWidth + this._realContent;
+    }
+  }
+
+  static fixSpaces(text) {
+    return text.replace(/\s+/g, (match) => {
+      if (match.length == 1) return DomNode.char.space;
+      else return ''.padStart(match.length, DomNode.char.spaceNoBreak + DomNode.char.space);
+    });
+  }
+
+  hasZeroSpace() {
+    const zeroSpaceAtStart = new RegExp(`^${DomNode.char.spaceZeroWidth}`);
+    return zeroSpaceAtStart.test(this._realContent);
+  }
+}
 
 class DivEdit {
   constructor(divNode, multiline = true) {
     this.div = divNode;
     this.multiline = multiline;
+    this.lastNode = null;
 
     // nodes require content, so we use
     // the zero width space character
@@ -10,133 +300,69 @@ class DivEdit {
     this.space = '\u00A0';
   }
 
+  bindings() {
+    return {
+      'text': {
+        'escape': this.exitEdit,
+        'ctrl+l|ctrl+b|ctrl+i|ctrl+u|ctrl+s': this.insertEm,
+        'enter': this.insertBreak,
+        'arrowleft|arrowright': this.navigate,
+      },
+      'em': {
+        'escape|enter|tab|backspace|delete': this.finishEm,
+        'ctrl+l|ctrl+b|ctrl+i|ctrl+u|ctrl+s': this.switchEm,
+        'arrowleft|arrowright': this.navigate
+        // 'other': (node, key) => { return true; }
+      },
+      'all': {
+        'ctrl+c': this.copyText,
+        'ctrl+v': this.insertText
+      }
+    };
+  }
+
   registerKeys(emClick) {
     this.emClick = emClick;
-    this.editEm = false;
 
+    this.bindings = this.bindings();
+
+    // split key alternatives to multiple entries
+    for (const mode of Object.values(this.bindings)) {
+      for (const [keys, func] of Object.entries(mode)) {
+        if (!keys.includes('|')) continue;
+
+        for (const key of keys.split('|')) {
+          mode[key] = func;
+        }
+        delete mode[keys];
+      }
+    }
+
+    // classify control events for handle()
     $(this.div).on({
       keydown: (event) => {
-        const key = event.key;
-        let node = document.getSelection().focusNode;
-        node = this.typeNode(node);
-
-        let handled = false;
-        if (node.nodeName == 'EM') {
-          if (this.editEm) {
-            if (['Tab', 'Enter'].includes(key)) {
-              handled = this.finishEmphasis(key, node);
-              this.editEm = !handled;
-            } else if (['Escape', 'Backspace'].includes(key)) {
-              handled = this.removeEmphasis(key, node);
-              this.editEm = !handled;
-            } else if (key.startsWith('Arrow')) {
-              if (['ArrowUp', 'ArrowDown'].includes(key) ||
-                  key == 'ArrowLeft' && this.caretAt(node, 1) ||
-                  key == 'ArrowRight' && this.caretAt(node, -1)) {
-                handled = true;
-              }
-            } else if (key == '/') {
-              // prevent multiple consecutive slashes
-              const caretIdx = this.getCaretIndex(node);
-              const surroundingChars = [
-                node.textContent.charAt(caretIdx-1),
-                node.textContent.charAt(caretIdx)
-              ];
-              handled = surroundingChars.includes('/');
-            } else {
-              const ignoredKeys = ['#'];
-              handled = ignoredKeys.includes(key);
-            }
-          } else {
-            if (key.startsWith('Arrow')) {
-              handled = this.handleNavigation(key, node);
-            } else if (['Backspace', 'Delete'].includes(key)) {
-              handled = this.removeEmphasis(key, node);
-            } else {
-              handled = true;
-            }
-          }
-        } else if (node.nodeName == '#text') {
-          if (['ArrowLeft', 'ArrowRight'].includes(key)) {
-            handled = this.handleNavigation(key, node);
-          } else if (key == '#') {
-            handled = this.insertEmphasis(key, node);
-            this.editEm = handled;
-          } else if (['Backspace', 'Delete'].includes(key)) {
-            handled = this.removeEmphasis(key, node);
-          } else if (['Enter', 'Escape'].includes(key)) {
-            if (!(this.multiline && key == 'Enter' && !event.ctrlKey)) {
-              this.div.blur();
-              handled = true;
-            } else {
-              handled = this.insertBreak(key, node);
-            }
-          }
-        } else if (node.nodeName == 'DIV') {
-          if (key == '#') {
-            handled = this.insertEmphasis(key, node);
-            this.editEm = true;
-          }
-        }
-        return !handled;
+        return !this.handle(this.modifiedKey(event));
       },
-      keyup: (event) => {
-        const key = event.key;
-        let node = document.getSelection().focusNode;
-        node = this.typeNode(node);
-
-        if (['ArrowUp', 'ArrowDown'].includes(key)) {
-          if (this.caretAt(node, 0)) {
-            this.setCaretIndex(node, 1);
-          }
-        } else if (['Backspace', 'Delete'].includes(key)) {
-          if (node == this.div) {
-            let newNode;
-            if (this.div.firstChild == null) {
-              newNode = this.createTextNode();
-              this.div.appendChild(newNode);
-            } else {
-              const brNode = this.findDuplicate('BR');
-              if (brNode != null) {
-                newNode = this.createTextNode();
-                this.insertBefore(brNode, newNode);
-                if (brNode == this.div.lastChild) {
-                  this.div.removeChild(brNode);
-                }
-              }
-            }
-            this.setCaretIndex(newNode, 1);
-          } else if (this.caretAt(node, -1)) {
-            const nextNode = node.nextSibling;
-            if (nextNode != null && nextNode.nodeName == '#text') {
-              const caretIdx = this.getCaretIndex(node);
-              this.mergeInto(node, nextNode);
-              this.setCaretIndex(node, caretIdx);
-            }
-          } else if (this.caretAt(node, 0)) {
-            node.nodeValue = this.zeroSpace + node.nodeValue;
-            this.setCaretIndex(node, 1);
-          }
-        }
+      keyup: () => {
+        return !this.caretChange();
+      },
+      mouseup: () => {
+        return !this.caretChange();
       },
       focus: () => {
-        let node = document.getSelection().focusNode;
-        node = this.typeNode(node);
-
+        let domNode;
         if (this.div.firstChild == null) {
-          node = this.div.appendChild(this.createTextNode());
+          domNode = DomNode.create('text');
+          this.div.appendChild(domNode.typeNode);
+        } else {
+          domNode = DomNode.current();
         }
-        if (this.caretAt(node, 0)) {
-          this.setCaretIndex(node, 1);
-        }
+        domNode.fixCaret();
       },
       blur: (event) => {
-        if (this.editEm) {
-          const emNode = $(event.target).find('em').filter(
-              (_, em) => em.textContent.startsWith('#'))[0];
-          if (emNode == undefined) return false;
-          const handled = this.finishEmphasis('Enter', emNode);
-          this.editEm = !handled;
+        const currentNode = DomNode.current();
+        if (currentNode.type.em) {
+          this.finishEm(currentNode, 'enter');
         }
         if (DivEdit.isEmpty(this.div)) {
           this.div.removeChild(this.div.firstChild);
@@ -145,8 +371,42 @@ class DivEdit {
         this.div.scrollLeft = 0;
       }
     });
-
     return this;
+  }
+
+  modifiedKey(event) {
+    let key = event.key;
+    key = key.toLowerCase();
+    if (event.ctrlKey && key != 'control') key = 'ctrl+' + key;
+    if (event.metaKey && key != 'meta') key = 'ctrl+' + key;
+    if (event.altKey && key != 'alt') key = 'alt+' + key;
+    return key;
+  }
+
+  handle(key) {
+    const domNode = DomNode.current();
+
+    let mode = '';
+    if (domNode.type.text) {
+      mode = 'text';
+    } else {
+      mode = 'em';
+    }
+
+    let handled = false;
+    if (mode in this.bindings) {
+      if (key in this.bindings[mode]) {
+        handled = this.bindings[mode][key].bind(this)(domNode, key);
+      } else if ('other' in this.bindings[mode]) {
+        handled = this.bindings[mode]['other'].bind(this)(domNode, key);
+      }
+    }
+    if ('all' in this.bindings) {
+      if (key in this.bindings['all']) {
+        handled = this.bindings['all'][key].bind(this)(domNode, key);
+      }
+    }
+    return handled;
   }
 
   static isEmpty(div) {
@@ -157,303 +417,234 @@ class DivEdit {
     return false;
   }
 
-  handleNavigation(key, node) {
-    if (key == 'ArrowLeft') {
-      let prevNode;
-      if (node.nodeName == '#text' && this.caretAt(node, 1)) {
-        prevNode = node.previousSibling;
-      } else if (node.nodeName == 'EM') {
-        prevNode = node;
-      } else {
-        return false;
-      }
+  exitEdit(domNode) {
+    this.div.blur();
+    return true;
+  }
 
-      if (prevNode == null || prevNode.nodeName == '#text') {
-        return true;
-      }
-      let textNode = prevNode.previousSibling;
-      if (textNode == null || textNode.nodeName != '#text') {
-        textNode = this.createTextNode();
-        this.insertBefore(prevNode, textNode);
-      }
-      this.setCaretIndex(textNode, -1);
-    } else if (key == 'ArrowRight') {
-      let emNode;
-      if (node.nodeName == '#text' && this.caretAt(node, -1)) {
-        emNode = node.nextSibling;
-      } else if (node.nodeName == 'EM') {
-        emNode = node;
-      } else {
-        return false;
-      }
+  insertEm(domNode, key) {
+    const selectedContent = this.selectedContent();
+    this.deleteSelected();
 
-      if (emNode == null || emNode.nodeName == '#text') {
-        return false;
-      }
-      let textNode = emNode.nextSibling;
-      if (textNode == null || textNode.nodeName != '#text') {
-        textNode = this.createTextNode();
-        this.insertAfter(emNode, textNode);
-      }
-      this.setCaretIndex(textNode, 1);
+    key = key.replace('ctrl+', '');
+    const type = {
+      'l': 'link', 'b': 'bold', 'i': 'italic',
+      'u': 'underline', 's': 'strikethrough'
+    };
+    const emNode = DomNode.create(type[key]);
+
+    if (domNode.caretAt(-1)) {
+      domNode.insertAfter(emNode);
+    } else if (domNode.caretAt(0)) {
+      domNode.insertBefore(DomNode.create('text'));
+      domNode.insertBefore(emNode);
     } else {
-      return false;
+      domNode.insertWithin(emNode, domNode.caretIndex);
     }
+    if (selectedContent.length > 0) emNode.content = selectedContent;
+    emNode.select(0, -1);
+    emNode.edit = true;
 
     return true;
   }
 
-  insertBreak(key, node) {
-    const brNode = document.createElement('br');
+  finishEm(domNode, key) {
+    if (['backspace', 'delete'].includes(key) && domNode.content.length > 1) return false;
 
-    let targetNode = node;
-    if (this.caretAt(node, -1)) {
-      targetNode = this.createTextNode();
-      this.insertAfter(node, targetNode);
-      this.insertAfter(node, brNode);
-    } else if (this.caretAt(node, 1)) {
-      const textNode = this.createTextNode();
-      this.insertBefore(node, textNode);
-      this.insertBefore(node, brNode);
-    } else {
-      const caretIdx = this.getCaretIndex(node);
-      this.insertWithin(node, brNode, caretIdx);
-      targetNode = brNode.nextSibling;
-    }
-    this.setCaretIndex(targetNode, 1);
-
-    return true;
-  }
-
-  insertEmphasis(key, node) {
-    const emNode = document.createElement('em');
-    emNode.className = 'link';
-    emNode.textContent = '#';
-
-    if (this.caretAt(node, -1)) {
-      this.insertAfter(node, emNode);
-    } else if (this.caretAt(node, 1)) {
-      this.insertBefore(node, this.createTextNode());
-      this.insertBefore(node, emNode);
-    } else {
-      const caretIdx = this.getCaretIndex(node);
-      this.insertWithin(node, emNode, caretIdx);
-    }
-    this.setCaretIndex(emNode, 1);
-
-    return true;
-  }
-
-  insertText(text) {
-    let node = document.getSelection().focusNode;
-    if (!this.multiline) text = text.replace(/\n/g, ' ');
-
-    if (node.nodeName == '#text') {
-      const caretIdx = this.getCaretIndex(node);
-      const leftOfCaret = node.textContent.slice(0, caretIdx);
-      const rightOfCaret = node.textContent.slice(caretIdx);
-      node.nodeValue = leftOfCaret + text + rightOfCaret;
-
-      while(node.nodeValue.includes('\n')) {
-        const breakIdx = node.nodeValue.indexOf('\n');
-        this.setCaretIndex(node, breakIdx);
-        this.insertBreak('', node);
-        node = document.getSelection().focusNode;
-        node.nodeValue = node.nodeValue.replace('\n', '');
-      }
-    }
-
-    return true;
-  }
-
-  finishEmphasis(key, node) {
-    if (node.nodeValue == '#') {
-      this.removeEmphasis(node);
+    if (domNode.content.length == 1) {
+      this.removeNonText(domNode, key);
       return true;
     }
 
-    // remove link symbol and dir path for display
-    const path = node.textContent.trim().substring(1);
-    node.dataset.path = path.replace(/\/+/, '/');
-    node.textContent = path.replace(/.*\//, '');
+    if (domNode.typeNode.className == 'link') {
+      // remove link symbol and dir path for display
+      const path = domNode.content.trim();
+      domNode.link = path.replace(/\/+/, '/');
+      domNode.content = path.replace(/.*\//, '');
 
-    // register click event for Node class
-    $(node).on('click', (event) => {
-      this.emClick(event.target);
-    });
+      // register click event for Node class
+      $(domNode.typeNode).on('click', (event) => {
+        this.emClick(event.target);
+      });
+    } else {
+      domNode.content = domNode.content.trim();
+    }
 
-    let nextNode = node.nextSibling;
-    if (nextNode == null || nextNode.nodeName != '#text') {
-      const newNode = this.createTextNode();
-      this.insertAfter(node, newNode);
+    let nextNode = domNode.next();
+    if (nextNode == null || nextNode.type.text == false) {
+      const newNode = DomNode.create('text');
+      domNode.insertAfter(newNode);
       nextNode = newNode;
     }
 
-    if (key == 'Tab') {
-      if (!nextNode.textContent.startsWith(this.zeroSpace + ' ')) {
-        nextNode.textContent = this.zeroSpace + this.space + nextNode.textContent.substring(1);
+    if (key == 'tab') {
+      if (!nextNode.content.startsWith(' ')) {
+        nextNode.content = DomNode.char.spaceNoBreak + nextNode.content;
       }
-      this.setCaretIndex(nextNode, 2);
+      nextNode.caretIndex = 1;
     } else {
-      this.setCaretIndex(nextNode, 1);
+      nextNode.caretIndex = 0;
+    }
+    domNode.edit = false;
+    return true;
+  }
+
+  switchEm(domNode, key) {
+    if (domNode.type.em) {
+      key = key.replace('ctrl+', '');
+      const type = {
+        'l': 'link', 'b': 'bold', 'i': 'italic',
+        'u': 'underline', 's': 'strikethrough'
+      };
+      domNode.change(type[key]);
     }
     return true;
   }
 
-  removeEmphasis(key, node) {
-    if (node.nodeName == 'EM') {
-      if (this.editEm && key == 'Backspace' && !this.caretAt(node, 1)) {
+  removeNonText(domNode, key) {
+    if (domNode.type.text) {
+      if (key == 'delete' && domNode.caretAt(-1)) {
+        domNode = domNode.next();
+      } else if (key == 'backspace' && domNode.caretAt(0)) {
+        domNode = domNode.previous();
+      } else {
         return false;
       }
-    } else if (node.nodeName == '#text' && key == 'Backspace' && this.caretAt(node, 1)) {
-      node = node.previousSibling;
-      if (node == null || node.nodeName == '#text') {
-        return node == null;
+    }
+    if (domNode == null) return true;
+
+    const before = domNode.previous();
+    const after = domNode.next();
+    domNode.destroy(this.div);
+
+    if (before != null && after != null) {
+      const caretIdx = before.content.length;
+      before.mergeInto(after, this.div);
+      before.caretIndex = caretIdx;
+    } else if (after != null) {
+      after.caretIndex = 0;
+    } else if (before != null) {
+      before.caretIndex = -1;
+    }
+    return true;
+  }
+
+  caretChange() {
+    const domNode = DomNode.current();
+    const currentNode = domNode == null ? null : domNode.typeNode;
+    const lastNode = this.lastNode == null ? null : this.lastNode.typeNode;
+    if (currentNode != lastNode) {
+      if (lastNode != null && !this.lastNode.type.text) this.lastNode.edit = false;
+      if (domNode != null && !domNode.type.text) domNode.edit = true;
+      this.lastNode = domNode;
+    }
+    return false;
+  }
+
+  navigate(domNode, key) {
+    if (key == 'arrowleft') {
+      if (domNode.caretIndex > 1) return false;
+
+      let prevNode = domNode.previous();
+      if (domNode.type.text) { // && !prevNode.type.text
+        if (prevNode == null) {
+          if (!domNode.caretAt(0)) return false;
+        } else {
+          if (!domNode.caretAt(1)) return false;
+          prevNode.caretIndex = -1;
+        }
+      } else {
+        if (prevNode == null) {
+          prevNode = DomNode.create('text');
+          domNode.insertBefore(prevNode);
+        }
+        if (!domNode.caretAt(0)) return false;
+        prevNode.caretIndex = -2;
       }
-    } else if (node.nodeName == '#text' && key == 'Delete' && this.caretAt(node, -1)) {
-      node = node.nextSibling;
-      if (node == null || node.nodeName == '#text') {
-        return false;
+    } else if (key == 'arrowright') {
+      if (!domNode.caretAt(-1) && !domNode.caretAt(-2)) return false;
+
+      let nextNode = domNode.next();
+      if (domNode.type.text) { // && !nextNode.type.text
+        if (nextNode == null) {
+          if (!domNode.caretAt(-1)) return false;
+        } else {
+          if (!domNode.caretAt(-2)) return false;
+          nextNode.caretIndex = 0;
+        }
+      } else {
+        if (nextNode == null) {
+          nextNode = DomNode.create('text');
+          domNode.insertBefore(nextNode);
+        }
+        if (!domNode.caretAt(-1)) return false;
+        nextNode.caretIndex = 1;
       }
     } else {
       return false;
     }
 
-    const before = node.previousSibling;
-    const after = node.nextSibling;
-    this.div.removeChild(node);
-
-    if (before != null && after != null) {
-      const caretIdx = before.textContent.length;
-      this.mergeInto(before, after);
-      this.setCaretIndex(before, caretIdx);
-    } else if (after != null) {
-      this.setCaretIndex(after, 0);
-    } else if (before != null) {
-      this.setCaretIndex(before, -1);
-    }
     return true;
   }
 
-  typeNode(node) {
-    if (node.nodeName === '#text' && node.parentNode.nodeName !== 'DIV') {
-      node = node.parentNode;
-    }
-    return node;
-  }
+  insertBreak(domNode, key) {
+    const brNode = DomNode.create('br');
 
-  textNode(node) {
-    if (node.nodeName !== '#text') {
-      node = node.firstChild;
-    }
-    return node;
-  }
-
-  getCaretIndex(node) {
-    node = this.textNode(node);
-
-    let caretIdx = 0;
-    const selection = window.getSelection();
-    if (selection.rangeCount !== 0) {
-      const range = window.getSelection().getRangeAt(0);
-      const preCaretRange = range.cloneRange();
-      preCaretRange.selectNodeContents(node);
-      preCaretRange.setEnd(range.endContainer, range.endOffset);
-      caretIdx = preCaretRange.toString().length;
-    }
-    return caretIdx;
-  }
-
-  setCaretIndex(node, caretIdx) {
-    node = this.textNode(node);
-    if (caretIdx < 0) {
-      caretIdx += node.nodeValue.length + 1;
-    }
-
-    const sel = window.getSelection();
-    const range = document.createRange();
-    range.setStart(node, caretIdx);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
-  }
-
-  caretAt(node, caretIdx) {
-    node = this.textNode(node);
-    if (caretIdx < 0) {
-      caretIdx += node.nodeValue.length + 1;
-    }
-    return this.getCaretIndex(node) == caretIdx;
-  }
-
-  createTextNode(content = '') {
-    return document.createTextNode(this.zeroSpace + content);
-  }
-
-  insertBefore(node, before) {
-    return this.div.insertBefore(before, node);
-  }
-
-  insertAfter(node, after) {
-    const nextNode = node.nextSibling;
-    if (nextNode == null) {
-      return this.div.appendChild(after);
+    let targetNode = domNode;
+    if (domNode.caretAt(-1)) {
+      targetNode = DomNode.create('text');
+      domNode.insertAfter(targetNode);
+      domNode.insertAfter(brNode);
+    } else if (domNode.caretAt(0)) {
+      const textNode = DomNode.create('text');
+      domNode.insertBefore(textNode);
+      domNode.insertBefore(brNode);
     } else {
-      return this.div.insertBefore(after, nextNode);
+      const caretIdx = domNode.caretIndex;
+      domNode.insertWithin(brNode, caretIdx);
+      targetNode = brNode.next();
     }
+    targetNode.caretIndex = 0;
+
+    return true;
   }
 
-  insertWithin(node, newNode, caretIdx) {
-    if (node.nodeName != '#text') return null;
-
-    const leftOfCaret = node.textContent.slice(0, caretIdx);
-    const rightOfCaret = node.textContent.slice(caretIdx);
-    node.textContent = leftOfCaret;
-    const nextNode = this.createTextNode(rightOfCaret);
-    this.insertAfter(node, nextNode);
-    this.insertAfter(node, newNode);
-    return newNode;
+  copyText(domNode, key) {
+    clipboard.writeText(this.selectedContent());
+    return true;
   }
 
-  mergeInto(leftNode, rightNode) {
-    if (leftNode.nodeName != '#text' ||
-        rightNode.nodeName != '#text') return null;
+  insertText(domNode, key) {
+    let currentNode = this.deleteSelected();
 
-    leftNode.nodeValue = leftNode.nodeValue.replace(/\s$/, ' ');
-    leftNode.nodeValue += rightNode.nodeValue.replace(this.zeroSpace, '');
-    this.div.removeChild(rightNode);
-    return leftNode;
-  }
-
-  findDuplicate(tagType) {
-    let lastNode = null;
-    for (const node of this.div.childNodes) {
-      if (lastNode != null &&
-          lastNode.nodeName == tagType &&
-          node.nodeName == tagType) break;
-      lastNode = node;
+    const text = clipboard.readText();
+    const parts = text.split('\n');
+    for (const line in parts) {
+      currentNode.insertText(parts[line]);
+      if (line < parts.length - 1) {
+        this.insertBreak(currentNode);
+        currentNode = DomNode.current();
+      }
     }
-    return lastNode.nextSibling;
+
+    return true;
   }
 
-  getSelected() {
-    let selectedText = window.getSelection().toString();
-    selectedText = selectedText.replace(new RegExp(this.zeroSpace, 'g'), '');
-    selectedText = selectedText.replace(new RegExp(this.space, 'g'), ' ');
-    return selectedText;
+  selectedContent() {
+    return window.getSelection().toString();
   }
 
   deleteSelected() {
     window.getSelection().deleteFromDocument();
-    let node = document.getSelection().focusNode;
-    node = this.textNode(node);
-    
-    const nextNode = node.nextSibling;
-    if (this.caretAt(node, -1) && nextNode != null && nextNode.nodeName == '#text') {
-      const caretIdx = this.getCaretIndex(node);
-      this.mergeInto(node, nextNode);
-      this.setCaretIndex(node, caretIdx);
+    const currentNode = DomNode.current();
+
+    const nextNode = currentNode.next();
+    if (nextNode != null && nextNode.type.text) {
+      const caretIdx = currentNode.caretIndex;
+      currentNode.mergeInto(nextNode, this.div);
+      currentNode.caretIndex = caretIdx;
     }
+    return currentNode;
   }
 }
 

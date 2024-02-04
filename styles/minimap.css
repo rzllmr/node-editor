@@ -7,6 +7,7 @@
   height: 160px;
   background: var(--color-minimap);
   opacity: 0.5;
+  border-radius: 5px 0 0 0;
 }
 
 .mini {
@@ -33,7 +34,7 @@
 .zoominfo {
   color: var(--color-lightest);
   position: absolute;
-  right: 0;
+  right: 3px;
   bottom: 0;
   z-index: 1;
 }
